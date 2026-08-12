@@ -1,0 +1,60 @@
+{
+  "audit_execution_passed": false,
+  "audited_images": 6685,
+  "complete_split_coverage": true,
+  "exact_cross_split_duplicate_groups": [
+    {
+      "images": [
+        {
+          "image_id": "2017_65450209",
+          "split": "train2017"
+        },
+        {
+          "image_id": "2017_19452605",
+          "split": "val2017"
+        }
+      ],
+      "sha256": "15e8d93fb888a6d50aa5e1370ba0817ef27660e259f76c810c5481b01336bfc4"
+    },
+    {
+      "images": [
+        {
+          "image_id": "2017_53407410",
+          "split": "train2017"
+        },
+        {
+          "image_id": "2017_84398740",
+          "split": "test2017"
+        }
+      ],
+      "sha256": "a5e7898b42b8b2e14fcd667113217821ae7195920bca18235921a2b5c92a9d56"
+    }
+  ],
+  "fail_on_near_duplicates": true,
+  "image_pixels_or_paths_exported": false,
+  "missing_splits": [],
+  "near_cross_split_candidates": [
+    {
+      "left_image_id": "2017_22631912",
+      "left_split": "train2017",
+      "phash_hamming_distance": 0,
+      "right_image_id": "2017_96022373",
+      "right_split": "test2017"
+    },
+    {
+      "left_image_id": "2017_97441010",
+      "left_split": "train2017",
+      "phash_hamming_distance": 0,
+      "right_image_id": "2017_74919301",
+      "right_split": "test2017"
+    }
+  ],
+  "near_duplicates_require_manual_review": true,
+  "passed": false,
+  "phash_hamming_threshold": 5,
+  "records_by_split": {
+    "test2017": 2351,
+    "train2017": 3063,
+    "val2017": 1271
+  }
+}

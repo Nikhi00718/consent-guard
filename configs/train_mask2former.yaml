@@ -1,0 +1,24 @@
+experiment:
+  name: mask2former_swin_tiny_optional
+  seed: 1337
+  output_dir: artifacts/checkpoints/mask2former
+
+architecture:
+  status: optional_after_maskrcnn_baseline
+  model_name: facebook/mask2former-swin-tiny-coco-instance
+  task: instance_segmentation
+  recommended_vram_gb: 16
+  reason: stronger_comparison_not_local_4gb_default
+
+data:
+  train_records: data/processed/visual_redactions/records_train2017.jsonl
+  val_records: data/processed/visual_redactions/records_val2017.jsonl
+  class_map: data/processed/visual_redactions/class_map.json
+  image_size: 640
+
+training:
+  epochs: 30
+  batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.00005
+  amp: true

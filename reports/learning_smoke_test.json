@@ -1,0 +1,11 @@
+{
+  "model": "TinyUnionMaskNet_cpu_smoke_only",
+  "image_id": "2017_60903730",
+  "steps": 25,
+  "initial_loss": 1.2581521272659302,
+  "final_loss": 0.5727673172950745,
+  "loss_decreased": true,
+  "final_union_mask_iou": 0.17104134499914223,
+  "passed": true,
+  "note": "This validates the data/gradient path, not Mask R-CNN performance."
+}

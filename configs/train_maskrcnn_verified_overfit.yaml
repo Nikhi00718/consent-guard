@@ -1,0 +1,68 @@
+# Diagnostic gate: the same eight geometry-verified visual records are used
+# for training and evaluation. Full training must not start unless this run can
+# substantially overfit them.
+experiment:
+  name: maskrcnn_verified_visual_overfit
+  seed: 1337
+  output_dir: artifacts/checkpoints/maskrcnn_verified_overfit
+  deterministic: false
+  cudnn_benchmark: false
+
+data:
+  train_records: data/processed/visual_redactions_verified_visual/records_train2017.jsonl
+  val_records: data/processed/visual_redactions_verified_visual/records_train2017.jsonl
+  class_map: data/processed/visual_redactions_verified_visual/class_map.json
+  short_side: 384
+  max_long_side: 576
+  crop_size: null
+  crop_probability: 0.0
+  crop_context_factor: 4.0
+  min_crop_visibility: 0.25
+  horizontal_flip_probability: 0.0
+  brightness_contrast_probability: 0.0
+  num_workers: 0
+  max_train_samples: 8
+  max_val_samples: 8
+  sampling: uniform
+
+model:
+  name: maskrcnn_resnet50_fpn_v2
+  pretrained: true
+  trainable_backbone_layers: 3
+  small_object_anchors: true
+  detections_per_image: 100
+  rpn_pre_nms_top_n_train: 500
+  rpn_post_nms_top_n_train: 250
+  rpn_pre_nms_top_n_test: 250
+  rpn_post_nms_top_n_test: 100
+  box_batch_size_per_image: 128
+
+optimizer:
+  name: sgd
+  learning_rate: 0.0025
+  momentum: 0.9
+  weight_decay: 0.0005
+  gradient_clip_norm: 10.0
+  warmup_steps: 0
+  warmup_start_factor: 1.0
+
+training:
+  device: cuda
+  epochs: 40
+  batch_size: 1
+  gradient_accumulation_steps: 1
+  amp: true
+  log_every_steps: 8
+  save_every_epochs: 5
+  evaluate_every_epochs: 5
+  max_steps: 320
+  resume_from: null
+
+scheduler:
+  name: none
+
+evaluation:
+  enabled: true
+  score_threshold: 0.0
+  class_metrics: true
+  max_batches: null

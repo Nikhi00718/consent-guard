@@ -1,0 +1,67 @@
+experiment:
+  name: maskrcnn_smoke
+  seed: 7
+  output_dir: artifacts/checkpoints/smoke
+  deterministic: false
+  cudnn_benchmark: false
+
+data:
+  train_records: data/processed/visual_redactions_verified_visual/records_train2017.jsonl
+  val_records: data/processed/visual_redactions_verified_visual/records_train2017.jsonl
+  class_map: data/processed/visual_redactions_verified_visual/class_map.json
+  short_side: 128
+  max_long_side: 192
+  crop_size: 128
+  crop_probability: 1.0
+  crop_context_factor: 4.0
+  min_crop_visibility: 0.2
+  horizontal_flip_probability: 0.0
+  brightness_contrast_probability: 0.0
+  num_workers: 0
+  max_train_samples: 2
+  max_val_samples: 1
+  sampling: uniform
+
+model:
+  name: maskrcnn_resnet50_fpn_v2
+  pretrained: false
+  trainable_backbone_layers: 5
+  small_object_anchors: true
+  detections_per_image: 20
+  rpn_pre_nms_top_n_train: 100
+  rpn_post_nms_top_n_train: 50
+  rpn_pre_nms_top_n_test: 50
+  rpn_post_nms_top_n_test: 20
+  box_batch_size_per_image: 32
+
+optimizer:
+  name: sgd
+  learning_rate: 0.001
+  momentum: 0.9
+  weight_decay: 0.0005
+  gradient_clip_norm: 10.0
+  warmup_steps: 0
+  warmup_start_factor: 0.001
+
+training:
+  device: auto
+  epochs: 1
+  batch_size: 1
+  gradient_accumulation_steps: 1
+  amp: false
+  log_every_steps: 1
+  save_every_epochs: 1
+  evaluate_every_epochs: 1
+  max_steps: 1
+  resume_from: null
+
+scheduler:
+  name: step
+  step_size: 1
+  gamma: 0.1
+
+evaluation:
+  enabled: true
+  score_threshold: 0.0
+  class_metrics: false
+  max_batches: 1

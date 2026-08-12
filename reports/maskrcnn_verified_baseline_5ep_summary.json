@@ -1,0 +1,28 @@
+{
+  "experiment": "maskrcnn_verified_baseline_5ep",
+  "status": "completed",
+  "config": "configs/train_maskrcnn_verified_baseline_5ep.yaml",
+  "checkpoint": "artifacts/checkpoints/maskrcnn_verified_baseline_5ep/best.pt",
+  "train_images": 3059,
+  "validation_images": 1271,
+  "epochs": 5,
+  "optimizer_steps": 3825,
+  "primary_metric": "segm_map",
+  "segm_map": 0.18645445794331847,
+  "segm_map_50": 0.3041368464239406,
+  "segm_map_75": 0.19508550634984467,
+  "bbox_map": 0.20717123692939501,
+  "per_class_map": {
+    "a105_face_all": 0.614784014740799,
+    "a108_license_plate_all": 0.24566012868447135,
+    "a109_person_body": 0.5536987266833815,
+    "a110_nudity_all": 0.0715035144712089,
+    "a26_handwriting": 0.04428551169494684,
+    "a39_disability_physical": 0.06786143338364496,
+    "a43_medicine": 0.026923226292499252,
+    "a7_fingerprint": 0.0046570094741889305,
+    "a8_signature": 0.048716556064725546
+  },
+  "test_split_used": false,
+  "raw_data_modified": false
+}

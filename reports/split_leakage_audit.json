@@ -1,0 +1,18 @@
+{
+  "audit_execution_passed": true,
+  "audited_images": 8472,
+  "complete_split_coverage": true,
+  "exact_cross_split_duplicate_groups": [],
+  "fail_on_near_duplicates": true,
+  "image_pixels_or_paths_exported": false,
+  "missing_splits": [],
+  "near_cross_split_candidates": [],
+  "near_duplicates_require_manual_review": false,
+  "passed": true,
+  "phash_hamming_threshold": 5,
+  "records_by_split": {
+    "test2017": 2988,
+    "train2017": 3873,
+    "val2017": 1611
+  }
+}

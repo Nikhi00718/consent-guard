@@ -1,0 +1,32 @@
+project:
+  name: consentguard_poc
+  scope: still_images_only
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  manifests: data/manifests
+  splits: data/splits
+  artifacts: artifacts
+  outputs: outputs
+
+datasets:
+  core_localization: visual_redactions
+  image_source: visual_redactions_same_release
+  vpd_core_dependency: false
+
+perception:
+  baseline: maskrcnn_resnet50_fpn
+  image_size: 512
+  batch_size: 1
+  gradient_accumulation_steps: 4
+  mixed_precision: true
+
+redaction:
+  default_high_risk_method: solid_replace
+  comparison_methods: [solid_replace, crop, blur, pixelation]
+  strip_metadata: true
+
+policy:
+  actions: [ALLOW_PIXELS_UNCHANGED, ALLOW_REDACTED, HOLD_FOR_CONSENT, MANUAL_REVIEW]

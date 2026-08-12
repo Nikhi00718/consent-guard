@@ -1,0 +1,9 @@
+{
+  "policy": "Preserve validation/test evaluation references and exclude duplicate train-side records.",
+  "train2017": {
+    "2017_22631912": "pHash-distance-0 duplicate scene of test image 2017_96022373",
+    "2017_53407410": "exact duplicate of test image 2017_84398740",
+    "2017_65450209": "exact duplicate of validation image 2017_19452605",
+    "2017_97441010": "pHash-distance-0 duplicate scene of test image 2017_74919301"
+  }
+}

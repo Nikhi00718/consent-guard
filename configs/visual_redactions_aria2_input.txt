@@ -1,0 +1,6 @@
+https://datasets.d2.mpi-inf.mpg.de/orekondy18cvpr/v1/images/train2017.tar.gz
+  out=train2017.tar.gz
+https://datasets.d2.mpi-inf.mpg.de/orekondy18cvpr/v1/images/val2017.tar.gz
+  out=val2017.tar.gz
+https://datasets.d2.mpi-inf.mpg.de/orekondy18cvpr/v1/images/test2017.tar.gz
+  out=test2017.tar.gz

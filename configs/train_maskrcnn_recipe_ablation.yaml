@@ -1,0 +1,70 @@
+# Diagnostic only: mirrors the key production recipe on the same fixed eight
+# images as train_maskrcnn_overfit_debug.yaml. The scheduler/warmup are removed
+# solely because their epoch scale is not meaningful on an eight-image set.
+experiment:
+  name: maskrcnn_production_recipe_ablation
+  seed: 1337
+  output_dir: artifacts/checkpoints/maskrcnn_recipe_ablation
+  deterministic: false
+  cudnn_benchmark: false
+
+data:
+  train_records: data/processed/visual_redactions/records_train2017.jsonl
+  val_records: data/processed/visual_redactions/records_train2017.jsonl
+  class_map: data/processed/visual_redactions/class_map.json
+  short_side: 512
+  max_long_side: 768
+  crop_size: 512
+  crop_probability: 0.75
+  crop_context_factor: 4.0
+  min_crop_visibility: 0.25
+  horizontal_flip_probability: 0.0
+  brightness_contrast_probability: 0.15
+  num_workers: 0
+  max_train_samples: 8
+  max_val_samples: 8
+  sampling: class_balanced
+  class_balance_power: 0.5
+  max_class_balance_ratio: 10.0
+
+model:
+  name: maskrcnn_resnet50_fpn_v2
+  pretrained: true
+  trainable_backbone_layers: 1
+  small_object_anchors: true
+  detections_per_image: 100
+  rpn_pre_nms_top_n_train: 1000
+  rpn_post_nms_top_n_train: 500
+  rpn_pre_nms_top_n_test: 500
+  rpn_post_nms_top_n_test: 250
+  box_batch_size_per_image: 256
+
+optimizer:
+  name: sgd
+  learning_rate: 0.001
+  momentum: 0.9
+  weight_decay: 0.0005
+  gradient_clip_norm: 10.0
+  warmup_steps: 0
+  warmup_start_factor: 1.0
+
+training:
+  device: cuda
+  epochs: 40
+  batch_size: 1
+  gradient_accumulation_steps: 1
+  amp: true
+  log_every_steps: 8
+  save_every_epochs: 5
+  evaluate_every_epochs: 5
+  max_steps: 320
+  resume_from: null
+
+scheduler:
+  name: none
+
+evaluation:
+  enabled: true
+  score_threshold: 0.0
+  class_metrics: false
+  max_batches: null

@@ -1,0 +1,2 @@
+artifacts/checkpoints/maskrcnn_verified_baseline_5ep/best.pt filter=lfs diff=lfs merge=lfs -text
+artifacts/checkpoints/maskrcnn_verified_class_balanced_5ep/best.pt filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,70 @@
+{
+  "classes": 9,
+  "images": 294,
+  "images_by_class": {
+    "a105_face_all": 209,
+    "a108_license_plate_all": 22,
+    "a109_person_body": 258,
+    "a110_nudity_all": 27,
+    "a26_handwriting": 16,
+    "a39_disability_physical": 5,
+    "a43_medicine": 4,
+    "a7_fingerprint": 3,
+    "a8_signature": 4
+  },
+  "instance_counts_by_class": {
+    "a105_face_all": 411,
+    "a108_license_plate_all": 29,
+    "a109_person_body": 587,
+    "a110_nudity_all": 42,
+    "a26_handwriting": 92,
+    "a39_disability_physical": 5,
+    "a43_medicine": 14,
+    "a7_fingerprint": 6,
+    "a8_signature": 4
+  },
+  "instance_imbalance_ratio": 146.75,
+  "instance_size_distribution": {
+    "large_ge_96_squared": 988,
+    "medium_32_to_96_squared": 158,
+    "small_lt_32_squared": 44
+  },
+  "instances": 1190,
+  "instances_per_image_mean": 4.0476190476190474,
+  "least_supported_class": {
+    "class": "a8_signature",
+    "instances": 4
+  },
+  "maximum_instances_in_one_image": {
+    "count": 30,
+    "image_id": "2017_50899621"
+  },
+  "most_common_dimensions": {
+    "1024x683": 3,
+    "1024x768": 4,
+    "1280x960": 8,
+    "1600x1067": 4,
+    "2048x1536": 7,
+    "2592x1944": 6,
+    "2816x2112": 3,
+    "3072x2304": 4,
+    "3264x2448": 7,
+    "3648x2736": 8,
+    "3872x2592": 4,
+    "3888x2592": 3,
+    "4272x2848": 3,
+    "4288x2848": 7,
+    "4608x3072": 4,
+    "5184x3456": 14,
+    "5472x3648": 6,
+    "5616x3744": 4,
+    "612x612": 3,
+    "640x480": 7
+  },
+  "most_supported_class": {
+    "class": "a109_person_body",
+    "instances": 587
+  },
+  "records_path": "C:\\consentGuard\\data\\processed\\visual_redactions_verified_visual\\records_val2017.jsonl",
+  "unique_decoded_dimensions": 182
+}

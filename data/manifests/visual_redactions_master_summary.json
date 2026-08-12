@@ -1,0 +1,17 @@
+{
+  "available_images": 8473,
+  "by_available": {
+    "available": 8473
+  },
+  "by_redactions_split": {
+    "test2017": 2989,
+    "train2017": 3873,
+    "val2017": 1611
+  },
+  "duplicate_image_ids": 0,
+  "image_release": "visual_redactions_v1",
+  "manifest": "data/manifests/visual_redactions_master.jsonl",
+  "missing_images": 0,
+  "rows": 8473,
+  "same_release_only": true
+}

@@ -1,0 +1,24 @@
+{
+  "checked_instances": 26992,
+  "checked_records": 6681,
+  "duplicate_ids": [],
+  "duplicate_image_paths": [],
+  "instances_by_class_id": {
+    "1": 8870,
+    "2": 718,
+    "3": 12950,
+    "4": 901,
+    "5": 2301,
+    "6": 179,
+    "7": 425,
+    "8": 154,
+    "9": 494
+  },
+  "invalid_records": [],
+  "passed": true,
+  "records_by_split": {
+    "test2017": 2351,
+    "train2017": 3059,
+    "val2017": 1271
+  }
+}

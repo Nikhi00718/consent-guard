@@ -1,0 +1,60 @@
+experiment:
+  name: maskrcnn_r50_fpn_v2_baseline
+  seed: 1337
+  output_dir: artifacts/checkpoints/maskrcnn_baseline
+  deterministic: false
+  cudnn_benchmark: false
+
+data:
+  train_records: data/processed/visual_redactions/records_train2017.jsonl
+  val_records: data/processed/visual_redactions/records_val2017.jsonl
+  class_map: data/processed/visual_redactions/class_map.json
+  short_side: 800
+  max_long_side: 1333
+  crop_size: null
+  crop_probability: 0.0
+  horizontal_flip_probability: 0.0
+  brightness_contrast_probability: 0.15
+  num_workers: 4
+  max_train_samples: null
+  max_val_samples: null
+  sampling: uniform
+
+model:
+  name: maskrcnn_resnet50_fpn_v2
+  pretrained: true
+  trainable_backbone_layers: 3
+  small_object_anchors: false
+  detections_per_image: 200
+
+optimizer:
+  name: sgd
+  learning_rate: 0.0025
+  momentum: 0.9
+  weight_decay: 0.0005
+  gradient_clip_norm: 10.0
+  warmup_steps: 500
+  warmup_start_factor: 0.001
+
+training:
+  device: auto
+  epochs: 20
+  batch_size: 2
+  gradient_accumulation_steps: 1
+  amp: true
+  log_every_steps: 20
+  save_every_epochs: 1
+  evaluate_every_epochs: 1
+  max_steps: null
+  resume_from: null
+
+scheduler:
+  name: step
+  step_size: 6
+  gamma: 0.1
+
+evaluation:
+  enabled: true
+  score_threshold: 0.0
+  class_metrics: true
+  max_batches: null

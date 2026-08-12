@@ -1,0 +1,67 @@
+{
+  "checks": [
+    {
+      "detail": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+      "name": "python_version",
+      "passed": true
+    },
+    {
+      "detail": {
+        "device": "cuda",
+        "nms_kept": [
+          0
+        ],
+        "roi_align_shape": [
+          1,
+          1,
+          2,
+          2
+        ],
+        "torchvision": "0.28.0+cu126"
+      },
+      "name": "torchvision_detection_ops",
+      "passed": true
+    },
+    {
+      "detail": {
+        "device": "NVIDIA GeForce RTX 3050 Laptop GPU",
+        "sum": 8.0
+      },
+      "name": "cuda_tensor",
+      "passed": true
+    },
+    {
+      "detail": {
+        "pycocotools": "installed",
+        "rle_area": 72.0
+      },
+      "name": "coco_metrics",
+      "passed": true
+    },
+    {
+      "detail": {
+        "image_shape": [
+          3,
+          128,
+          128
+        ],
+        "instances": 2
+      },
+      "name": "real_dataset_sample",
+      "passed": true
+    }
+  ],
+  "environment": {
+    "cuda_available": true,
+    "cudnn": 91002,
+    "cudnn_benchmark": false,
+    "deterministic_algorithms": false,
+    "gpu_memory_bytes": 4294443008,
+    "gpu_name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "torch": "2.13.0+cu126",
+    "torch_cuda": "12.6"
+  },
+  "passed": true
+}

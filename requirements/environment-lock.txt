@@ -1,0 +1,35 @@
+# Exact environment verified on Windows, Python 3.11.9, RTX 3050 Laptop GPU.
+# Prefer scripts/setup_environment.ps1 because it downloads large artifacts
+# resumably and verifies publisher/local SHA-256 values before installation.
+absl-py==2.5.0
+colorama==0.4.6
+coverage==7.15.4
+filelock==3.32.2
+fsspec==2026.7.0
+grpcio==1.83.0
+iniconfig==2.3.0
+Jinja2==3.1.6
+Markdown==3.10.3
+MarkupSafe==3.0.3
+mpmath==1.3.0
+networkx==3.6.1
+numpy==2.4.6
+opencv-python-headless==4.14.0.94
+packaging==26.3
+pillow==12.3.0
+pluggy==1.6.0
+protobuf==7.35.1
+pycocotools==2.0.11
+Pygments==2.20.0
+pytest==9.1.1
+pytest-cov==7.1.0
+PyYAML==6.0.3
+sympy==1.14.0
+tensorboard==2.21.0
+tensorboard-data-server==0.7.2
+torch @ https://download-r2.pytorch.org/whl/cu126/torch-2.13.0%2Bcu126-cp311-cp311-win_amd64.whl#sha256=8095729db14e7fd5178a39676fdd679208eff4041407ea34e3d898336c90f5c5
+torchvision @ https://download-r2.pytorch.org/whl/cu126/torchvision-0.28.0%2Bcu126-cp311-cp311-win_amd64.whl#sha256=8a976240db376f83dda566bc71320071cbf5f0a013c87b3f34e0e81f2ca96da8
+tqdm==4.70.0
+typing_extensions==4.16.0
+Werkzeug==3.1.8
+-e .

@@ -1,0 +1,6 @@
+[submodule "external/VPD-100K-live-streaming"]
+	path = external/VPD-100K-live-streaming
+	url = https://github.com/HUuxiaobin/VPD-100K-live-streaming.git
+[submodule "external/visual_redactions"]
+	path = external/visual_redactions
+	url = https://github.com/tribhuvanesh/visual_redactions.git
