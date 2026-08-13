@@ -1,0 +1,72 @@
+{
+  "data": {
+    "brightness_contrast_probability": 0.1,
+    "class_balance_power": 0.5,
+    "class_map": "data/processed/visual_redactions_verified_visual/class_map.json",
+    "crop_context_factor": 4.0,
+    "crop_probability": 0.0,
+    "crop_size": null,
+    "horizontal_flip_probability": 0.5,
+    "max_class_balance_ratio": 5.0,
+    "max_long_side": 1024,
+    "max_train_samples": null,
+    "max_val_samples": null,
+    "min_crop_visibility": 0.25,
+    "num_workers": 2,
+    "sampling": "class_balanced",
+    "short_side": 640,
+    "train_records": "data/processed/visual_redactions_verified_visual/records_train2017.jsonl",
+    "val_records": "data/processed/visual_redactions_verified_visual/records_val2017.jsonl"
+  },
+  "evaluation": {
+    "class_metrics": true,
+    "enabled": true,
+    "max_batches": null,
+    "score_threshold": 0.0
+  },
+  "experiment": {
+    "cudnn_benchmark": false,
+    "deterministic": false,
+    "name": "maskrcnn_verified_class_balanced_5ep",
+    "output_dir": "artifacts/checkpoints/maskrcnn_verified_class_balanced_5ep",
+    "seed": 1337
+  },
+  "model": {
+    "box_batch_size_per_image": 128,
+    "detections_per_image": 100,
+    "name": "maskrcnn_resnet50_fpn_v2",
+    "pretrained": true,
+    "rpn_post_nms_top_n_test": 100,
+    "rpn_post_nms_top_n_train": 250,
+    "rpn_pre_nms_top_n_test": 250,
+    "rpn_pre_nms_top_n_train": 500,
+    "small_object_anchors": true,
+    "trainable_backbone_layers": 3
+  },
+  "optimizer": {
+    "gradient_clip_norm": 10.0,
+    "learning_rate": 0.0025,
+    "momentum": 0.9,
+    "name": "sgd",
+    "warmup_start_factor": 0.05,
+    "warmup_steps": 250,
+    "weight_decay": 0.0005
+  },
+  "scheduler": {
+    "gamma": 0.1,
+    "name": "step",
+    "step_size": 4
+  },
+  "training": {
+    "amp": true,
+    "batch_size": 1,
+    "device": "auto",
+    "epochs": 5,
+    "evaluate_every_epochs": 1,
+    "gradient_accumulation_steps": 4,
+    "log_every_steps": 10,
+    "max_steps": null,
+    "resume_from": null,
+    "save_every_epochs": 1
+  }
+}
