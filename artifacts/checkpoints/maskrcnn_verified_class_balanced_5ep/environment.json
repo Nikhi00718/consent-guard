@@ -1,0 +1,12 @@
+{
+  "cuda_available": true,
+  "cudnn": 91002,
+  "cudnn_benchmark": false,
+  "deterministic_algorithms": false,
+  "gpu_memory_bytes": 4294443008,
+  "gpu_name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "torch": "2.13.0+cu126",
+  "torch_cuda": "12.6"
+}

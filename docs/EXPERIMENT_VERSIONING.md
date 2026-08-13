@@ -34,7 +34,7 @@ usable only with the architecture and class map that produced it.
 | Version | Branch | Experiment | Status | Primary result |
 |---|---|---|---|---|
 | `v0.1.0-verified-baseline` | `main` | Uniform five-epoch Mask R-CNN | Complete | Segmentation mAP 0.1865; AP50 0.3041 |
-| `v0.2.0-class-balanced-5ep` | `agent/class-balanced-ablation` | Capped inverse-square-root image sampling | Running | To be measured on the same validation split |
+| `v0.2.0-class-balanced-5ep` | `agent/class-balanced-ablation` | Capped inverse-square-root image sampling | Complete | Segmentation mAP 0.2207; AP50 0.3575 |
 
 Never evaluate or select a model using `test2017` before the experiment and
 privacy threshold are frozen.
