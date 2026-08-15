@@ -1,0 +1,41 @@
+{
+  "experiment": "maskrcnn_verified_moderate_balance_10ep",
+  "status": "completed",
+  "config": "configs/train_maskrcnn_verified_moderate_balance_10ep.yaml",
+  "checkpoint": "artifacts/checkpoints/maskrcnn_verified_moderate_balance_10ep/best.pt",
+  "train_images": 3059,
+  "validation_images": 1271,
+  "epochs": 10,
+  "best_epoch": 5,
+  "optimizer_steps": 7650,
+  "sampling": "class_balanced_capped_inverse_fourth_root",
+  "class_balance_power": 0.25,
+  "primary_metric": "segm_map",
+  "segm_map": 0.233469261306292,
+  "segm_map_50": 0.3754733401387217,
+  "segm_map_75": 0.23810134992908843,
+  "bbox_map": 0.25764557250814807,
+  "segm_map_small": 0.07509224722978677,
+  "per_class_map": {
+    "a105_face_all": 0.6073140089904344,
+    "a108_license_plate_all": 0.2720848785428895,
+    "a109_person_body": 0.5282646511982718,
+    "a110_nudity_all": 0.08150693806452954,
+    "a26_handwriting": 0.03490553999050986,
+    "a39_disability_physical": 0.1926017260749882,
+    "a43_medicine": 0.09312112504981546,
+    "a7_fingerprint": 0.21545352279122057,
+    "a8_signature": 0.07597096105396883
+  },
+  "uniform_baseline": {
+    "segm_map": 0.18645445794331847,
+    "segm_map_50": 0.3041368464239406
+  },
+  "aggressive_balance_10ep": {
+    "segm_map": 0.22437078813107475,
+    "segm_map_50": 0.36346669972208323,
+    "bbox_map": 0.24974215008494574
+  },
+  "test_split_used": false,
+  "raw_data_modified": false
+}
