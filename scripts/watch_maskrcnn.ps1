@@ -71,6 +71,7 @@ do {
         $lastStep = $steps | Select-Object -Last 1
         $lastEpoch = $entries | Where-Object { $_.event -eq 'epoch_complete' } | Select-Object -Last 1
         $lastEvaluation = $entries | Where-Object { $_.event -eq 'evaluation' } | Select-Object -Last 1
+        $resumeEvent = $entries | Where-Object { $_.event -eq 'resumed' } | Select-Object -Last 1
 
         if ($null -eq $lastStep) {
             Write-Host 'Metrics file exists; waiting for the first optimizer step.' -ForegroundColor Yellow
@@ -85,9 +86,17 @@ do {
             Write-Host ("Latest loss: {0:N4}   LR: {1:E2}" -f [double]$lastStep.loss, [double]$lastStep.learning_rate)
 
             $firstStep = $steps | Select-Object -First 1
-            if ($null -ne $firstStep -and $step -ge 10) {
-                $elapsedSeconds = [Math]::Max(1.0, [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - [double]$firstStep.time_unix)
-                $remainingSeconds = [Math]::Max(0.0, ($totalSteps - $step) * ($elapsedSeconds / [Math]::Max(1, $step - 1)))
+            if ($null -ne $resumeEvent) {
+                $runStartStep = [int]$resumeEvent.global_step
+                $runStartUnix = [double]$resumeEvent.time_unix
+            } else {
+                $runStartStep = [Math]::Max(0, [int]$firstStep.global_step - 1)
+                $runStartUnix = [double]$firstStep.time_unix
+            }
+            $observedSteps = $step - $runStartStep
+            if ($null -ne $firstStep -and $observedSteps -ge 10) {
+                $elapsedSeconds = [Math]::Max(1.0, [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - $runStartUnix)
+                $remainingSeconds = [Math]::Max(0.0, ($totalSteps - $step) * ($elapsedSeconds / [Math]::Max(1, $observedSteps)))
                 $finish = (Get-Date).AddSeconds($remainingSeconds)
                 Write-Host ("Elapsed: {0}   Estimated remaining: {1}" -f ([TimeSpan]::FromSeconds($elapsedSeconds).ToString('g')), ([TimeSpan]::FromSeconds($remainingSeconds).ToString('g'))) -ForegroundColor Yellow
                 Write-Host ("Estimated finish: {0}" -f $finish.ToString('yyyy-MM-dd HH:mm')) -ForegroundColor Yellow
@@ -95,14 +104,17 @@ do {
                 Write-Host 'Estimated remaining: calibrating from the first 10 optimizer steps.' -ForegroundColor Yellow
             }
 
-            if ($null -ne $lastEpoch) {
-                Write-Host ("Completed epochs: {0}" -f ([int]$lastEpoch.epoch + 1))
-            }
+            $completedEpochs = if ($null -ne $lastEpoch) {
+                [int]$lastEpoch.epoch + 1
+            } elseif ($null -ne $resumeEvent) {
+                [int][Math]::Floor([int]$resumeEvent.global_step / [double]$stepsPerEpoch)
+            } else { 0 }
+            Write-Host ("Completed epochs: {0}" -f $completedEpochs)
             if ($null -ne $lastEvaluation) {
                 $metrics = $lastEvaluation.metrics
                 Write-Host ("Validation mask mAP: {0:N5}   mAP@50: {1:N5}   Recall@100: {2:N5}" -f [double]$metrics.segm_map, [double]$metrics.segm_map_50, [double]$metrics.segm_mar_100) -ForegroundColor Magenta
             } else {
-                Write-Host 'Validation: waiting for epoch 1 to complete.' -ForegroundColor DarkGray
+                Write-Host ("Validation: waiting for epoch {0} to complete." -f $activeEpoch) -ForegroundColor DarkGray
             }
         }
     }
