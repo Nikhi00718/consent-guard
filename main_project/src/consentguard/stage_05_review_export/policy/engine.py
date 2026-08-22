@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 from consentguard.stage_04_fusion_calibration.domain import (
     AssuranceReport,
     AssuranceStatus,
@@ -23,6 +26,7 @@ class ReleasePolicy:
         *,
         review_completed: bool,
         redaction_applied: bool,
+        allow_unchanged: bool = False,
     ) -> ReleaseDecision:
         reasons: list[str] = []
         if assurance.status is AssuranceStatus.FAIL:
@@ -30,10 +34,18 @@ class ReleasePolicy:
             return self._decision(ReleaseAction.REJECT_EXPORT, reasons)
         if assurance.status is not AssuranceStatus.PASS:
             reasons.append(f"ASSURANCE_{assurance.status.value}")
+            if not candidates.threshold_profile_release_ready:
+                reasons.append("THRESHOLD_PROFILE_NOT_RELEASE_READY")
+            if candidates.unavailable_providers:
+                reasons.append("REQUIRED_PROVIDER_UNAVAILABLE")
+            if candidates.requires_review and not review_completed:
+                reasons.append("MANDATORY_REVIEW_INCOMPLETE")
             return self._decision(ReleaseAction.HOLD_FOR_REVIEW, reasons)
         if consent_state in {ConsentState.UNKNOWN, ConsentState.PENDING, ConsentState.EXPIRED}:
             reasons.append(f"CONSENT_{consent_state.value}")
             return self._decision(ReleaseAction.HOLD_FOR_CONSENT, reasons)
+        if not candidates.threshold_profile_release_ready:
+            reasons.append("THRESHOLD_PROFILE_NOT_RELEASE_READY")
         if candidates.unavailable_providers:
             reasons.append("REQUIRED_PROVIDER_UNAVAILABLE")
         if candidates.requires_review and not review_completed:
@@ -44,6 +56,8 @@ class ReleasePolicy:
             reasons.append(f"CONSENT_{consent_state.value}_REQUIRES_REDACTION")
         if reasons:
             return self._decision(ReleaseAction.HOLD_FOR_REVIEW, reasons)
+        if allow_unchanged and not candidates.candidates and review_completed and not redaction_applied:
+            return self._decision(ReleaseAction.ALLOW_PIXELS_UNCHANGED, ["CONSENTED_PIXELS_UNCHANGED"])
         if not review_completed:
             return self._decision(ReleaseAction.HOLD_FOR_REVIEW, ["REVIEW_INCOMPLETE"])
         if not redaction_applied:
@@ -51,10 +65,22 @@ class ReleasePolicy:
         return self._decision(ReleaseAction.ALLOW_REDACTED, ["REVIEWED_REDACTION_ASSURED"])
 
     def _decision(self, action: ReleaseAction, reasons: list[str]) -> ReleaseDecision:
+        normalized_reasons = tuple(sorted(set(reasons)))
+        payload = {
+            "action": action.value,
+            "reason_codes": list(normalized_reasons),
+            "policy_version": self.version,
+            "review_required": action not in {ReleaseAction.ALLOW_REDACTED, ReleaseAction.ALLOW_PIXELS_UNCHANGED},
+            "export_allowed": action in {ReleaseAction.ALLOW_REDACTED, ReleaseAction.ALLOW_PIXELS_UNCHANGED},
+        }
+        digest = hashlib.sha256(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
         return ReleaseDecision(
             action=action,
-            reason_codes=tuple(sorted(set(reasons))),
+            reason_codes=normalized_reasons,
             policy_version=self.version,
-            review_required=action is not ReleaseAction.ALLOW_REDACTED,
-            export_allowed=action is ReleaseAction.ALLOW_REDACTED,
+            review_required=payload["review_required"],
+            export_allowed=payload["export_allowed"],
+            decision_digest=digest,
         )

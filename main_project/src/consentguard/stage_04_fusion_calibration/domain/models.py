@@ -36,6 +36,7 @@ class ConsentState(str, Enum):
 
 
 class ReleaseAction(str, Enum):
+    ALLOW_PIXELS_UNCHANGED = "ALLOW_PIXELS_UNCHANGED"
     ALLOW_REDACTED = "ALLOW_REDACTED"
     HOLD_FOR_REVIEW = "HOLD_FOR_REVIEW"
     HOLD_FOR_CONSENT = "HOLD_FOR_CONSENT"
@@ -188,6 +189,7 @@ class ReleaseDecision:
     policy_version: str
     review_required: bool
     export_allowed: bool
+    decision_digest: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -196,4 +198,5 @@ class ReleaseDecision:
             "policy_version": self.policy_version,
             "review_required": self.review_required,
             "export_allowed": self.export_allowed,
+            "decision_digest": self.decision_digest,
         }
