@@ -1,0 +1,101 @@
+\chapter{How to review the code stage by stage}
+
+The repository is intentionally organized around the six project stages. Focus on one stage and its tests before moving downstream.
+
+\section{Stage 1: data}
+
+\textbf{Question to answer:} Can every training/evaluation record be traced to valid geometry, the correct split, and a verified source release?
+
+Start with:
+
+\begin{itemize}[leftmargin=6mm]
+  \item \file{main\_project/src/consentguard/stage\_01\_data/dataset.py};
+  \item \file{main\_project/src/consentguard/stage\_01\_data/data\_quality.py};
+  \item preprocessing/validation scripts under the Stage 1 scripts directory; and
+  \item Stage 1 tests for empty targets, geometry, taxonomy, and same-release manifests.
+\end{itemize}
+
+Review order: record schema, image loading, positive target construction, empty target construction, resize transforms, geometry checks, manifest provenance, and split-leakage checks.
+
+\section{Stage 2: baseline model}
+
+\textbf{Question to answer:} Can a configuration deterministically construct, train, resume, and evaluate the intended model?
+
+The training code is segmented into:
+
+\begin{itemize}[leftmargin=6mm]
+  \item \file{config.py}: validated experiment settings;
+  \item \file{models.py}: model registry and custom heads;
+  \item \file{data\_loading.py}: dataset/sampler/dataloader construction;
+  \item \file{optimization.py}: optimizer and scheduler;
+  \item \file{training\_loop.py}: epochs, evaluation, checkpointing, resume;
+  \item \file{metrics.py}: COCO-style evaluation; and
+  \item \file{diagnostics.py}: coverage, leakage, over-redaction, and proposals.
+\end{itemize}
+
+Read tests before changing behavior. They define expected config validation, checkpoint compatibility, class-agnostic mask behavior, atomic artifact writes, and privacy metrics.
+
+\section{Stage 3: specialists}
+
+\textbf{Question to answer:} Does each external tool produce correct typed evidence or an explicit unavailable/error state?
+
+Review \file{common.py}, then each provider adapter, then \file{orchestrator.py}. Confirm:
+
+\begin{itemize}[leftmargin=6mm]
+  \item provider names are unique and stable;
+  \item scores are bounded and geometry clipped;
+  \item versions and source detection IDs are retained;
+  \item recognized OCR strings are not stored unnecessarily;
+  \item missing weights/dependencies raise provider-unavailable errors; and
+  \item execution order is deterministic and GPU-safe.
+\end{itemize}
+
+\section{Stage 4: fusion and calibration}
+
+\textbf{Question to answer:} Can evidence from different frameworks be compared, transformed, fused, and explained without losing origin?
+
+Review domain models, provider base contracts, geometry helpers, threshold registry, and fusion logic. Use Stage 4 tests to understand exact/fallback rules, mask RLE round-trips, overlap grouping, provenance retention, rejected evidence, and provider state.
+
+The candidate YAML is not release-ready. Do not confuse readable configuration with validated calibration.
+
+\section{Stage 5: review and export}
+
+\textbf{Question to answer:} Does the approved human decision become exactly the fresh output pixels, and does any uncertainty block export?
+
+Trace the pipeline through normalizer, manual-mask editor, prediction/oracle renderers, policy engine, and assurance service. Inspect tests covering source-overwrite refusal, fresh decode, per-class thresholds, fail-closed consent/policy, independent attackers, and manual layer union.
+
+\section{Stage 6: release}
+
+\textbf{Question to answer:} Can one machine-readable report prove every gate passed?
+
+The release-gate module already encodes baseline mAP, overall recall/leakage, negative false positives, three seeds, fail-closed assurance, domain recall, and per-class recall. The missing work is producing honest metrics from frozen target evaluations, not adding a button that says release.
+
+\section{Suggested review checklist}
+
+For every file or change, ask:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item What input schema does this code trust?
+  \item What output or state does it promise?
+  \item How does it fail, and is failure distinguishable from an empty result?
+  \item Which coordinate system or class ontology is active?
+  \item Which configuration and version affect behavior?
+  \item What test proves the important contract?
+  \item Could a stale artifact or hidden default change the result?
+  \item Does the code reveal or unnecessarily retain sensitive information?
+\end{enumerate}
+
+\section{Commands to understand, not memorize}
+
+Use the project environment and the Stage-specific scripts. Before any long run, execute a data validation, environment preflight, loader smoke test, and one-batch learning smoke test. Verify the resolved config and output directory before starting Kaggle.
+
+The exact commands may evolve; the invariant is the sequence:
+
+\begin{lstlisting}[language={}]
+validate data -> preflight environment -> loader smoke test
+-> learning smoke test -> full train/resume -> evaluate
+-> diagnostics -> compare against frozen baseline
+\end{lstlisting}
+
+Never run the locked test command during development.
+

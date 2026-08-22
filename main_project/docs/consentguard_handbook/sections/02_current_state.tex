@@ -1,0 +1,121 @@
+\chapter{Where the project stands today}
+
+\section{Stage status}
+
+\begin{longtable}{@{}L{28mm}L{32mm}L{78mm}@{}}
+\toprule
+\textbf{Stage} & \textbf{State} & \textbf{Evidence and remaining exit condition} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Stage} & \textbf{State} & \textbf{Evidence and remaining exit condition} \\
+\midrule
+\endhead
+01 - Data & \statuspill{CGGreen}{IMPLEMENTED} & V2 contains 8,266 validated records and 26,992 instances. Training contains 3,785 images, including 726 profile-negative images. \\
+02 - Baseline & \statuspill{CGGreen}{IMPLEMENTED} & \file{baseline-v0.1} is frozen and verified. The negative-inclusive training configuration is ready, but that new run has not occurred. \\
+03 - Specialists & \statuspill{CGSaffron!80!black}{SCAFFOLDED} & Adapters exist for YuNet, plate Faster R-CNN, PaddleOCR, and ZXing. Required weights, optional environments, licensed plate data, and provider evaluation remain external gates. \\
+04 - Fusion & \statuspill{CGTide}{UNCALIBRATED} & Evidence types, geometry conversion, provenance, thresholds, fusion, unavailable-provider states, and tests exist. Threshold values are candidates, not release-calibrated rules. \\
+05 - Review/export & \statuspill{CGTide}{PROTOTYPE} & Normalization, manual masks, rendering, policy, and assurance paths exist. The complete reviewer workflow and independent attack suite require integration testing. \\
+06 - Release & \statuspill{CGRose}{BLOCKED} & Target-domain data, trained specialists, frozen threshold profiles, three-seed results, robustness tests, and locked-test evidence are missing. \\
+\bottomrule
+\end{longtable}
+
+\section{Verified baseline metrics}
+
+The comparator is Mask R-CNN ResNet-50 FPN v2 with custom heads for nine selected Visual Redactions classes. Its best checkpoint occurred at epoch 5 of a 10-epoch moderate-balancing run. The Visual Redactions test split has not been used.
+
+\begin{table}[htbp]
+\centering
+\caption{Frozen comparator metrics on the verified validation records.}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Metric} & \textbf{Value} & \textbf{Interpretation} \\
+\midrule
+Mask mAP & 0.2335 & Primary COCO-style segmentation score \\
+Mask AP50 & 0.3755 & Performance at 0.50 IoU \\
+Mask AP75 & 0.2381 & Stricter boundary/localization requirement \\
+Box mAP & 0.2576 & Bounding-box score \\
+Small-object mask mAP & 0.0751 & Major weakness for distant/small private content \\
+Sensitive-pixel recall at 0.5 & 0.7639 & Fraction of labelled sensitive pixels covered \\
+Sensitive-pixel leakage at 0.5 & 0.2361 & Fraction of labelled sensitive pixels left visible \\
+Over-redaction fraction at 0.5 & 0.0279 & Non-sensitive image fraction covered by predictions \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar,bar width=8pt,width=\textwidth,height=66mm,
+  ymin=0,ymax=1.05,
+  ylabel={Sensitive-pixel recall},
+  symbolic x coords={Face,Plate,Body,Nudity,Handwriting,Disability,Medicine,Fingerprint,Signature},
+  xtick=data,x tick label style={rotate=42,anchor=east,font=\scriptsize},
+  ymajorgrids=true,grid style={CGInk!10},
+  axis line style={CGInk!35},tick style={CGInk!35},
+  nodes near coords,nodes near coords style={font=\tiny,rotate=90,anchor=west},
+  every axis plot/.append style={fill=CGTide,draw=CGTide}
+]
+\addplot coordinates {(Face,0.9380) (Plate,0.1357) (Body,0.8771) (Nudity,0.8823) (Handwriting,0.0268) (Disability,0.7191) (Medicine,0.1539) (Fingerprint,0.5927) (Signature,0.2892)};
+\addplot[draw=CGRose,sharp plot,update limits=false,line width=1.1pt] coordinates {(Face,0.90) (Signature,0.90)};
+\end{axis}
+\end{tikzpicture}
+\caption{Privacy recall varies sharply by class at the original 0.5 score threshold. The rose line marks the proposed minimum for a supported class.}
+\end{figure}
+
+\section{Why aggregate performance hides risk}
+
+The validation set contains 2,442 person-body instances and 1,671 face instances, but only 11 fingerprint instances and 21 disability instances. Large and common classes contribute more stable evidence. Rare classes produce high uncertainty and wide confidence intervals. The training profile has an approximately 80:1 instance imbalance between the most and least represented selected classes.
+
+The region proposal network also struggles as objects become smaller. Proposal recall at IoU 0.50 is approximately 94.1\% for large objects, 80.7\% for medium objects, and 62.5\% for small objects. This is one reason distant plates, text, medicine, and signatures need specialists and target-domain examples.
+
+\section{Ablations that should be preserved, not promoted}
+
+\begin{tabularx}{\textwidth}{@{}L{43mm}L{24mm}Y@{}}
+\toprule
+\textbf{Experiment} & \textbf{Best mask mAP} & \textbf{Decision} \\
+\midrule
+Moderate-balanced baseline & 0.2335 & Preserve as \file{baseline-v0.1}; current best comparable checkpoint. \\
+Aggressive class balance & 0.2244 & Useful diagnostic, but lower aggregate mAP and no safe-class resolution. \\
+Object-crop training & 0.2137 & Negative result; crop context did not replace full-image training. \\
+Class-agnostic masks & 0.2068 & Technically valid ablation, but weaker overall and extremely poor handwriting/signature coverage. \\
+Uniform baseline & 0.1865 & Historical reference showing the value of moderate balancing. \\
+\bottomrule
+\end{tabularx}
+
+These runs are valuable because they narrow the search space. They show that repeating broad Mask R-CNN tricks has lower expected value than fixing the data distribution and adding specialists.
+
+\section{The negative-inclusive V2 data correction}
+
+The old records discarded images with zero selected instances. That deprived the model of ordinary background images and made false-positive measurement harder. V2 keeps valid empty targets.
+
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Split} & \textbf{Records} & \textbf{Negative records} & \textbf{Use} \\
+\midrule
+Train & 3,785 & 726 & Model fitting and hard-negative learning \\
+Validation & 1,576 & 305 & Threshold calibration and model selection \\
+Test & 2,905 & 554 & Locked until the system is frozen \\
+\midrule
+Total & 8,266 & 1,585 & Same-release verified records \\
+\bottomrule
+\end{tabular}
+
+The training record SHA-256 is recorded as \texttt{a906755a...b60648e9}. Full hashes should accompany every final run so an evaluator can prove which records were used.
+
+\section{Unseen-image sanity checks}
+
+Three public-domain images outside training exposed important behavior:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item \textbf{Parked cars:} visible plates were missed at 0.5. Lowering the plate threshold to 0.25 recovered two regions but did not create dependable coverage.
+  \item \textbf{Crowd:} the model proposed many people but left some faces visible while hiding roughly 45\% of the image.
+  \item \textbf{Handwritten note:} at 0.5 it covered one small region. At 0.25 it found three regions, called them signatures, and left most handwriting visible.
+\end{enumerate}
+
+These checks are not a benchmark, and they must never be trained on. Their role is permanent qualitative regression testing: after each release candidate, run the same images and compare the visible failure pattern.
+
+\begin{warningbox}[Current operating status]
+There is no Kaggle job running and no V2 training run in progress. The Kaggle bundle is prepared only. Specialist providers must report themselves as unavailable when their dependencies or weights are missing; an unavailable provider must never be mistaken for ``no sensitive content found.''
+\end{warningbox}

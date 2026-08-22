@@ -1,0 +1,24 @@
+Metadata-Version: 2.4
+Name: consentguard-research
+Version: 0.1.0
+Summary: Consent-state-aware visual privacy redaction research prototype
+Requires-Python: <3.14,>=3.11
+Requires-Dist: numpy<3,>=2.0
+Requires-Dist: opencv-python-headless<5,>=4.10
+Requires-Dist: Pillow<13,>=11
+Requires-Dist: PyYAML<7,>=6
+Requires-Dist: tqdm<5,>=4.66
+Requires-Dist: tensorboard<3,>=2.18
+Requires-Dist: pycocotools<3,>=2.0.7
+Provides-Extra: dev
+Requires-Dist: pytest<10,>=8; extra == "dev"
+Requires-Dist: pytest-cov<8,>=5; extra == "dev"
+Provides-Extra: mask2former
+Requires-Dist: transformers<6,>=5.1; extra == "mask2former"
+Requires-Dist: accelerate<2,>=1.1; extra == "mask2former"
+Requires-Dist: safetensors<1,>=0.5; extra == "mask2former"
+Provides-Extra: app
+Requires-Dist: gradio<7,>=5; extra == "app"
+Provides-Extra: specialists
+Requires-Dist: zxing-cpp<3,>=2.2; extra == "specialists"
+Requires-Dist: paddleocr<4,>=3; extra == "specialists"

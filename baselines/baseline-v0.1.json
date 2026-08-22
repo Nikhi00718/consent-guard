@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "baseline_id": "baseline-v0.1",
+  "status": "frozen_comparator_not_release_model",
+  "model_family": "maskrcnn_resnet50_fpn_v2",
+  "best_epoch": 5,
+  "test_split_used": false,
+  "metrics": {
+    "segm_map": 0.233469261306292,
+    "segm_map_50": 0.3754733401387217,
+    "bbox_map": 0.25764557250814807,
+    "sensitive_pixel_recall_at_0_5": 0.763926,
+    "sensitive_pixel_leakage_at_0_5": 0.236074
+  },
+  "artifacts": [
+    {
+      "role": "checkpoint",
+      "path": "artifacts/checkpoints/maskrcnn_verified_moderate_balance_10ep/best.pt",
+      "bytes": 366962711,
+      "sha256": "f03329d758ca8643cef1fac423413c3bbbaf73cc88eea8ee49d2ba90424740a0"
+    },
+    {
+      "role": "training_config",
+      "path": "main_project/configs/stage_02_baseline_model/train_maskrcnn_verified_moderate_balance_10ep.yaml",
+      "bytes": 1966,
+      "sha256": "61d234a27c2ec2fc4a39b72c8035bf4988e23ce7eda7ee09912c8902adaaf2ee"
+    },
+    {
+      "role": "class_map",
+      "path": "data/processed/visual_redactions_verified_visual/class_map.json",
+      "bytes": 257,
+      "sha256": "dc33f22287fd534ab7b8740f59b0347154f75ee341178f730737509b89d8d773"
+    },
+    {
+      "role": "validation_records",
+      "path": "data/processed/visual_redactions_verified_visual/records_val2017.jsonl",
+      "bytes": 4805720,
+      "sha256": "8b377d439e12ceabdedf8278d5dd29805556f8e4a6932d26cc4571a53fb4ab29"
+    }
+  ],
+  "limitations": [
+    "Training and validation records contain no profile-negative images.",
+    "A single global inference threshold was used by the original CLI.",
+    "This checkpoint is an evidence provider, not a complete release system."
+  ]
+}

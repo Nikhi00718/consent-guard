@@ -1,5 +1,6 @@
 .venv/
 .venv.setup.lock
+.tools/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -31,6 +32,7 @@ reports/*.png
 reports/same_release_alignment_audit.json
 reports/visual_redactions_alignment_audit.json
 artifacts/logs/
+tmp/
 
 *.pt
 *.pth

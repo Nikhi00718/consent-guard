@@ -1,0 +1,179 @@
+\documentclass[11pt,a4paper,oneside]{scrreprt}
+
+\usepackage[T1]{fontenc}
+\usepackage{newpxtext}
+\usepackage{newpxmath}
+\usepackage[scaled=0.92]{sourcesanspro}
+\usepackage[scaled=0.86]{inconsolata}
+
+\usepackage[a4paper,top=24mm,bottom=25mm,left=22mm,right=22mm,headheight=15pt]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\definecolor{CGInk}{HTML}{132A2E}
+\definecolor{CGTide}{HTML}{0B7A75}
+\definecolor{CGSaffron}{HTML}{F2A541}
+\definecolor{CGRose}{HTML}{D94E67}
+\definecolor{CGMist}{HTML}{E8F1EE}
+\definecolor{CGSlate}{HTML}{52646A}
+\definecolor{CGPaper}{HTML}{FAFCFB}
+\definecolor{CGGreen}{HTML}{2E8B72}
+
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,backgrounds,calc,fit,matrix,positioning,shapes.geometric,shadows.blur}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{natbib}
+\usepackage{scrlayer-scrpage}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=CGTide,
+  citecolor=CGTide,
+  urlcolor=CGRose,
+  pdftitle={ConsentGuard: End-to-End Multi-Model Privacy Review System},
+  pdfauthor={ConsentGuard Project},
+  pdfsubject={Architecture, learning guide, datasets, training plan, evaluation, and release gates},
+  pdfkeywords={privacy, computer vision, Mask R-CNN, OCR, face detection, licence plate detection, human review}
+}
+
+\clearpairofpagestyles
+\ihead{\sffamily\small\color{CGSlate}ConsentGuard Project Handbook}
+\ohead{\sffamily\small\color{CGSlate}\headmark}
+\cfoot{\sffamily\small\color{CGTide}\pagemark}
+\automark[section]{chapter}
+\setkomafont{chapter}{\sffamily\bfseries\color{CGInk}}
+\setkomafont{section}{\sffamily\bfseries\color{CGTide}}
+\setkomafont{subsection}{\sffamily\bfseries\color{CGInk}}
+\setkomafont{caption}{\sffamily\small\color{CGSlate}}
+\setkomafont{captionlabel}{\sffamily\bfseries\color{CGTide}}
+\setkomafont{disposition}{\sffamily\bfseries}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.58em}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}
+\renewcommand{\arraystretch}{1.18}
+
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+\newtcolorbox{truthbox}[1][]{
+  enhanced,breakable,colback=CGMist,colframe=CGTide,boxrule=0.8pt,
+  arc=2mm,left=4mm,right=4mm,top=3mm,bottom=3mm,
+  fonttitle=\sffamily\bfseries,title={#1}
+}
+\newtcolorbox{warningbox}[1][]{
+  enhanced,breakable,colback=CGRose!5,colframe=CGRose,boxrule=0.8pt,
+  arc=2mm,left=4mm,right=4mm,top=3mm,bottom=3mm,
+  fonttitle=\sffamily\bfseries,title={#1}
+}
+\newtcolorbox{actionbox}[1][]{
+  enhanced,breakable,colback=CGSaffron!10,colframe=CGSaffron!85!black,boxrule=0.8pt,
+  arc=2mm,left=4mm,right=4mm,top=3mm,bottom=3mm,
+  fonttitle=\sffamily\bfseries,title={#1}
+}
+\newtcolorbox{conceptbox}[1][]{
+  enhanced,breakable,colback=CGPaper,colframe=CGInk!35,boxrule=0.6pt,
+  arc=2mm,left=4mm,right=4mm,top=3mm,bottom=3mm,
+  fonttitle=\sffamily\bfseries\color{CGInk},title={#1}
+}
+
+\lstdefinestyle{cgcode}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{CGInk!4},
+  frame=single,
+  rulecolor=\color{CGInk!20},
+  breaklines=true,
+  columns=fullflexible,
+  showstringspaces=false,
+  keywordstyle=\color{CGTide}\bfseries,
+  commentstyle=\color{CGSlate},
+  stringstyle=\color{CGRose},
+  xleftmargin=2mm,xrightmargin=2mm,aboveskip=2mm,belowskip=2mm
+}
+\lstset{style=cgcode}
+
+\newcommand{\statuspill}[2]{%
+  \tikz[baseline=(n.base)]\node[rounded corners=2pt,fill=#1!14,text=#1,inner xsep=5pt,inner ysep=2pt,font=\sffamily\scriptsize\bfseries] (n) {#2};}
+\newcommand{\metric}[2]{\textcolor{CGTide}{\sffamily\bfseries #1}\hspace{0.35em}{\small #2}}
+\newcommand{\file}[1]{\texttt{#1}}
+
+\begin{document}
+
+\begin{titlepage}
+\pagecolor{CGPaper}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[CGInk] (current page.north west) rectangle ([yshift=-110mm]current page.north east);
+  \fill[CGTide] ([xshift=-33mm]current page.north east) rectangle (current page.south east);
+  \fill[CGSaffron] ([xshift=-33mm,yshift=-63mm]current page.north east) rectangle ([xshift=-22mm,yshift=-52mm]current page.north east);
+  \fill[CGRose] ([xshift=-22mm,yshift=-63mm]current page.north east) rectangle ([xshift=-11mm,yshift=-52mm]current page.north east);
+  \draw[CGMist!55,line width=0.8pt] ([xshift=18mm,yshift=-118mm]current page.north west) -- ([xshift=-48mm,yshift=-118mm]current page.north east);
+\end{tikzpicture}
+
+\vspace*{22mm}
+{\sffamily\bfseries\fontsize{13}{16}\selectfont\color{CGSaffron} PROJECT HANDBOOK \& ENGINEERING BLUEPRINT\par}
+\vspace{10mm}
+{\sffamily\bfseries\fontsize{34}{40}\selectfont\color{white} ConsentGuard\par}
+\vspace{2mm}
+{\sffamily\fontsize{20}{25}\selectfont\color{CGMist} End-to-End Multi-Model\par Privacy Review System\par}
+
+\vspace{40mm}
+\begin{minipage}{0.72\textwidth}
+{\sffamily\Large\bfseries\color{CGInk}What we have, what we are building, and what must be learned to finish it safely.\par}
+\vspace{7mm}
+{\large\color{CGSlate}Architecture, models, data strategy, training, calibration, human review, assurance, release gates, and a practical learning path.\par}
+\vspace{13mm}
+\begin{tabular}{@{}ll@{}}
+\textbf{Status date} & 20 August 2026 \\
+\textbf{Current comparator} & \file{baseline-v0.1} \\
+\textbf{Deployment target} & Local-first still-image review assistant \\
+\textbf{Safety posture} & Human review required; fail closed \\
+\end{tabular}
+\end{minipage}
+
+\vfill
+{\sffamily\small\color{CGSlate}Prepared from the current repository, frozen metrics, validation reports, and primary-source dataset research.\par}
+\end{titlepage}
+\nopagecolor
+
+\pagenumbering{roman}
+\input{sections/00_reader_guide}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/01_executive_verdict}
+\input{sections/02_current_state}
+\input{sections/03_learning_path}
+\input{sections/04_architecture}
+\input{sections/05_model_bundle}
+\input{sections/06_data_strategy}
+\input{sections/07_custom_dataset}
+\input{sections/08_training_program}
+\input{sections/09_calibration_fusion}
+\input{sections/10_review_export}
+\input{sections/11_evaluation_release}
+\input{sections/12_delivery_roadmap}
+\input{sections/13_code_navigation}
+\input{sections/14_risks_glossary}
+
+\appendix
+\input{sections/15_appendices}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

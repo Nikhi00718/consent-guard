@@ -1,0 +1,40 @@
+\chapter*{How to use this handbook}
+\addcontentsline{toc}{chapter}{How to use this handbook}
+
+This handbook has two jobs. First, it explains ConsentGuard in plain language so that a developer can understand the whole project without pretending to know every computer-vision term already. Second, it fixes an engineering direction that can be implemented and tested without leaving major design decisions open.
+
+\begin{truthbox}[Read this first]
+ConsentGuard is not currently a finished privacy filter. It is a working research foundation with a frozen Mask R-CNN comparator, corrected data records, specialist-provider interfaces, evidence fusion code, and a prototype review/export path. The next outcome is a reviewed multi-model system, not a higher number on a single checkpoint.
+\end{truthbox}
+
+\section*{Recommended reading routes}
+
+\begin{tabularx}{\textwidth}{@{}L{32mm}YY@{}}
+\toprule
+\textbf{Reader} & \textbf{Read first} & \textbf{Then do} \\
+\midrule
+Beginner developer & Chapters 1, 3, and 4 & Follow the learning exercises and inspect Stage 1 before training code. \\
+Model developer & Chapters 2, 5, 8, 9, and 11 & Reproduce the baseline, then work on one specialist at a time. \\
+Reviewer or supervisor & Chapters 1, 2, 6, 11, and 12 & Verify the evidence, gates, dataset rights, and completion definition. \\
+Product or privacy reviewer & Chapters 1, 4, 10, and 14 & Focus on human review, policy boundaries, assurance, and failure modes. \\
+\bottomrule
+\end{tabularx}
+
+\section*{How claims are labelled}
+
+\begin{itemize}[leftmargin=6mm]
+  \item \statuspill{CGGreen}{IMPLEMENTED} means code or data exists and has a passing verification path.
+  \item \statuspill{CGSaffron!80!black}{READY} means the configuration or scaffold is prepared, but the important run has not happened.
+  \item \statuspill{CGTide}{PROTOTYPE} means the path is usable for development but not release-qualified.
+  \item \statuspill{CGRose}{BLOCKED} means external data, weights, calibration, or evidence is still required.
+  \item \statuspill{CGSlate}{PROPOSED} means this handbook recommends the decision for the next phase.
+\end{itemize}
+
+Metric values in the current-state chapters come from repository artifacts, not estimates. Dataset sizes and properties are cited to their primary project pages or papers. Licences must still be checked at image level before any dataset is admitted to training.
+
+\section*{What this handbook deliberately does not claim}
+
+It does not claim legal compliance, perfect privacy, consent inference, identity recognition, automatic safe release, or production readiness. It also does not hide weak classes inside aggregate mAP. These exclusions are design constraints, not missing marketing language.
+
+\clearpage
+

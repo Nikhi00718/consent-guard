@@ -1,0 +1,115 @@
+\chapter{Dataset strategy}
+
+\section{The rule: change data to solve a target problem, not to chase a larger number}
+
+A new dataset may improve a class or deployment domain, but its score is not directly comparable with the existing Visual Redactions score. Dataset size, ontology, image distribution, annotation policy, and metric implementation all change the meaning of the number.
+
+Visual Redactions remains the frozen comparator because it connects the new work to the original privacy-localization problem \citep{orekondy2018visual}. The target-domain collection answers a different question: whether the complete bundle works on general and India-first mobile/social photographs.
+
+\begin{truthbox}[Dataset admission rule]
+No dataset enters training without a source URL, licence or use-right record, checksum, ontology mapping, source/contributor group, duplicate audit, and documented split policy. If the licence cannot be confirmed, the pixels stay outside the training repository.
+\end{truthbox}
+
+\section{Dataset portfolio}
+
+\begin{longtable}{@{}L{31mm}L{28mm}L{47mm}L{41mm}@{}}
+\toprule
+\textbf{Dataset} & \textbf{Role} & \textbf{Strength} & \textbf{Important limitation} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Dataset} & \textbf{Role} & \textbf{Strength} & \textbf{Important limitation} \\
+\midrule
+\endhead
+Visual Redactions & Frozen comparator and global baseline training & Existing nine-class mapping and comparable validation & Original metric/reporting differs from current COCO mask mAP; rare-class imbalance \\
+V2 negative-inclusive records & Revised global candidate training & Same release and split with 1,585 valid negatives retained & Training result does not exist yet \\
+WIDER FACE & Face robustness research & Scale, pose, occlusion, crowds, and hard subsets & Face boxes only; rights and distribution terms must be followed \\
+TextOCR & Scene-text detection pretraining & Large arbitrary-shaped text polygon collection & Mostly scene text; underlying Open Images licences must be verified \\
+Open Images V7 & Selected objects, general plates, hard negatives & Broad real-world diversity and rich annotations & Google disclaims guarantees about every image licence; verify each image \citep{openimagesv7} \\
+IAM & English handwriting pretraining & Mature word/line/page benchmark & Scanned English domain; not mobile India validation \\
+IIIT-INDIC-HW-WORDS & Indic handwriting pretraining & Ten major scripts and large word-level data & Word crops do not reproduce cluttered phone photographs \\
+Indian LPR in the Wild & India-specific plate training & Indian plate layouts and conditions & Confirm usage and redistribution terms before acquisition \\
+CCPD & Optional plate pretraining & Large plate corpus and established benchmarks & China-specific; never use as Indian validation \\
+BIV-Priv-Seg & External generalization evaluation & 1,028 images, 16 private categories, masks, and negative-image challenge & Different population and ontology; reserve before any adaptation \citep{tseng2025biv} \\
+ConsentGuard Target-2K & Primary deployment validation and selective fine-tuning & General + India-first mobile/social domain under one protocol & Must be collected, licensed, annotated, deduplicated, and hidden correctly \\
+\bottomrule
+\end{longtable}
+
+\section{Recommended use by specialist}
+
+\subsection{Face}
+
+Use pretrained YuNet first. Evaluate on WIDER FACE hard conditions and Target-2K. Fine-tune or replace only if target-domain recall cannot reach the gate. Avoid face-recognition datasets because identity recognition is outside scope and introduces unnecessary biometric risk.
+
+\subsection{Plate}
+
+Use the Indian plate dataset for India-specific training after rights verification. Add licensed general examples from Open Images. CCPD may initialize plate features, but its Chinese plate distribution cannot measure Indian performance. Construct hard negatives from vehicle fronts/backs without visible plates, headlights, grilles, stickers, signs, and rectangular objects.
+
+\subsection{Printed text}
+
+Benchmark PaddleOCR on TextOCR-style scene images and Target-2K. Use TextOCR polygons for pretraining or fine-tuning if the provider misses small/rotated text. Track original Open Images IDs and licence metadata. Add target examples for posters, screens, receipts, IDs, packages, street signs, and mixed Indic/Latin scripts.
+
+\subsection{Handwriting}
+
+Use IAM and IIIT data for representation and recognition pretraining, then fine-tune localization on camera-captured target images. Word crops alone are insufficient because the deployment problem includes finding writing inside a full scene. Synthesize phone-like pages through perspective warp, shadows, blur, glare, compression, clutter, and partial crops, but always validate on real staged/consented images.
+
+\subsection{Other private objects}
+
+Reserve BIV-Priv-Seg as an external generalization benchmark first. It specifically exposes small, non-salient private objects and difficulty recognizing negative images. Do not merge it immediately into training; otherwise its value as independent evidence disappears.
+
+\section{Ontology mapping}
+
+Different sources name and annotate concepts differently. The manifest stores the original label and a mapping to the ConsentGuard ontology. Mapping must never pretend that unlike annotations are identical.
+
+\begin{tabularx}{\textwidth}{@{}L{35mm}L{44mm}Y@{}}
+\toprule
+\textbf{ConsentGuard class} & \textbf{Possible source labels} & \textbf{Mapping note} \\
+\midrule
+\file{face} & Face, human face, head & Face boxes may cover different amounts of hair/chin; expansion is policy, not annotation rewriting. \\
+\file{license\_plate} & Vehicle registration plate, plate polygon & Convert quadrilateral to polygon/box while retaining original corners. \\
+\file{printed\_text} & Word, text line, scene text & Keep word/line granularity and source polygon; fusion may create review regions. \\
+\file{handwriting} & Handwritten word, line, page, signature & Signature can contribute to both handwriting and signature evidence; provenance resolves overlap. \\
+\file{barcode} & QR code, barcode & Retain symbology and decode state when available. \\
+\file{document} & ID card, passport, prescription, bill & Document presence and embedded text are separate evidence sources. \\
+\bottomrule
+\end{tabularx}
+
+\section{Licensing and privacy ledger}
+
+For each source asset, record:
+
+\begin{itemize}[leftmargin=6mm]
+  \item canonical source URL and retrieval date;
+  \item author/contributor when available;
+  \item licence identifier and a local copy/hash of the licence text;
+  \item allowed research, commercial, modification, and redistribution uses;
+  \item whether the image itself and annotation have different licences;
+  \item consent/release record for directly collected images;
+  \item original file SHA-256 and normalized pixel SHA-256;
+  \item takedown or withdrawal procedure; and
+  \item allowed storage location and access roles.
+\end{itemize}
+
+Open Images includes image URLs, authors, rotation, and licence information, but its own documentation warns that individual licence status should be verified \citep{openimagesv7}. Treat that warning as an engineering requirement, not a footnote.
+
+\section{Duplicate control}
+
+Run duplicate checks before splitting:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item exact byte hashes;
+  \item normalized pixel hashes;
+  \item perceptual hashes at several distances;
+  \item embedding-based nearest-neighbor review for resized/cropped/recompressed copies;
+  \item shared source URLs and contributor IDs; and
+  \item burst or capture-sequence identifiers.
+\end{enumerate}
+
+All members of a duplicate/source group enter the same split. When two public datasets share Open Images sources, cross-dataset duplicate checks are required.
+
+\section{What should not be collected}
+
+Do not scrape real private IDs, medical prescriptions, addresses, signatures, or phone screenshots merely because they are technically visible online. Use staged or fictional content wherever possible. When realistic private content is necessary, obtain explicit participant consent, minimize retention, restrict access, and support withdrawal.
+
+The project should demonstrate privacy engineering through its own data behavior.
+

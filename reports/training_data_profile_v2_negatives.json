@@ -1,0 +1,74 @@
+{
+  "classes": 9,
+  "generated_at_utc": "2026-08-19T18:00:54.706857+00:00",
+  "images": 3785,
+  "images_by_class": {
+    "a105_face_all": 2081,
+    "a108_license_plate_all": 211,
+    "a109_person_body": 2654,
+    "a110_nudity_all": 230,
+    "a26_handwriting": 250,
+    "a39_disability_physical": 41,
+    "a43_medicine": 32,
+    "a7_fingerprint": 22,
+    "a8_signature": 153
+  },
+  "instance_counts_by_class": {
+    "a105_face_all": 3992,
+    "a108_license_plate_all": 370,
+    "a109_person_body": 5852,
+    "a110_nudity_all": 316,
+    "a26_handwriting": 1040,
+    "a39_disability_physical": 73,
+    "a43_medicine": 116,
+    "a7_fingerprint": 78,
+    "a8_signature": 238
+  },
+  "instance_imbalance_ratio": 80.16438356164383,
+  "instance_size_distribution": {
+    "large_ge_96_squared": 9545,
+    "medium_32_to_96_squared": 2014,
+    "small_lt_32_squared": 516
+  },
+  "instances": 12075,
+  "instances_per_image_mean": 3.190224570673712,
+  "least_supported_class": {
+    "class": "a39_disability_physical",
+    "instances": 73
+  },
+  "maximum_instances_in_one_image": {
+    "count": 37,
+    "image_id": "2017_71021553"
+  },
+  "most_common_dimensions": {
+    "1024x768": 47,
+    "1280x960": 38,
+    "1600x1200": 82,
+    "2048x1536": 71,
+    "2592x1944": 49,
+    "2816x2112": 23,
+    "3008x2000": 32,
+    "3072x2304": 33,
+    "3264x2448": 87,
+    "3648x2736": 50,
+    "3872x2592": 47,
+    "3888x2592": 36,
+    "4000x3000": 46,
+    "4288x2848": 46,
+    "4928x3264": 25,
+    "5184x3456": 78,
+    "612x612": 59,
+    "640x480": 57,
+    "640x640": 68,
+    "800x600": 37
+  },
+  "most_supported_class": {
+    "class": "a109_person_body",
+    "instances": 5852
+  },
+  "negative_image_fraction": 0.19180977542932628,
+  "negative_images": 726,
+  "records_path": "C:\\consentGuard\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\records_train2017.jsonl",
+  "records_sha256": "a906755a0e77c7a81ffaead3d00aa107e26121bd477fcbfd20531e49b60648e9",
+  "unique_decoded_dimensions": 1852
+}

@@ -1,0 +1,117 @@
+\chapter{The model bundle}
+
+\section{Responsibility map}
+
+\begin{longtable}{@{}L{31mm}L{43mm}L{35mm}L{35mm}@{}}
+\toprule
+\textbf{Provider} & \textbf{Primary responsibility} & \textbf{Geometry} & \textbf{V1 decision} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Provider} & \textbf{Primary responsibility} & \textbf{Geometry} & \textbf{V1 decision} \\
+\midrule
+\endhead
+Mask R-CNN R50-FPN v2 & Person body, nudity, disability evidence, medicine, fingerprint, signature, broad context & Instance masks and boxes & Preserve baseline; retrain candidate with negatives \\
+OpenCV YuNet & Faces under scale, pose, and moderate occlusion & Face boxes & Pretrained detection only; no recognition \\
+Plate Faster R-CNN & Indian and non-Indian licence plates & Plate boxes & Train separate one-class detector \\
+PaddleOCR detector & Printed and general scene text & Quadrilateral polygons & Benchmark pretrained provider first \\
+Handwriting detector & Handwritten notes, forms, prescriptions, signatures as writing regions & Polygons or masks & Separate detector and weights \\
+ZXing-C++ & QR and common one-/two-dimensional barcodes & Barcode quadrilaterals & Deterministic provider and assurance attacker \\
+Pillow + ExifTool & EXIF, GPS, device, timestamps, thumbnails, orientation & Metadata findings & Inspect before and independently after export \\
+\bottomrule
+\end{longtable}
+
+\section{Global Mask R-CNN provider}
+
+The global provider remains important even after specialists are added. It supplies broad scene understanding and irregular masks for classes that do not have enough data to justify a dedicated detector. The frozen model family is Mask R-CNN ResNet-50 FPN v2.
+
+The next global candidate uses the same recipe on the V2 negative-inclusive records. This preserves comparability while testing whether ordinary background images reduce false positives. It must not regress more than 0.01 mask mAP from 0.2335 on the same frozen validation split.
+
+The global provider is not trusted alone for plates or handwriting. It may contribute evidence to those classes, but the release bundle requires the corresponding specialist availability and review rule.
+
+\section{Face safety provider}
+
+YuNet is a lightweight face detector exposed through OpenCV's \file{FaceDetectorYN}. It returns boxes and a detection score, making it practical for local inference. The target is localization only; the system does not store face embeddings or compare identities. WIDER FACE contains 393,703 labelled faces in 32,203 images with scale, pose, occlusion, and event diversity, making it appropriate for robustness evaluation \citep{yang2016wider}.
+
+Safety behavior:
+
+\begin{itemize}[leftmargin=6mm]
+  \item keep a low backend threshold so raw candidates are not discarded too early;
+  \item calibrate the system threshold on target-domain validation data;
+  \item expand accepted boxes around forehead, chin, and side profile;
+  \item test crowds, tiny faces, masks, sunglasses, profiles, blur, and posters; and
+  \item route an unavailable face provider to review rather than export.
+\end{itemize}
+
+\section{Licence-plate provider}
+
+The plate provider uses TorchVision Faster R-CNN ResNet-50 FPN v2 with a one-class prediction head \citep{torchvisionfasterrcnn}. A feature pyramid is valuable because plates are frequently small. The detector should train on both general plates and India-specific plate data.
+
+The Indian Licence Plate Dataset in the Wild paper reports 16,192 images and 21,683 annotated plates with quadrilateral and character annotations \citep{agarwal2021indianlpr}. Usage and redistribution rights must be recorded before any pixels enter the manifest.
+
+Plate redaction prefers coverage over perfect boundaries. A calibrated expansion fraction should cover mounting frames, tilted corners, and text near the box edge. Recognition is unnecessary for the safety decision; the assurance phase may use OCR only to test whether characters remain readable.
+
+\section{Printed-text provider}
+
+PaddleOCR provides text detection and recognition components across many languages \citep{paddleocr2026}. ConsentGuard's current adapter discards recognized strings and preserves geometry, limiting unnecessary sensitive-content handling.
+
+The V1 text provider should detect all visible text candidates, not only strings that match a PII regular expression. A semantic layer may label likely phone numbers, addresses, e-mail addresses, dates, account numbers, or IDs, but low semantic confidence must not erase the underlying text evidence.
+
+TextOCR offers arbitrary-shaped scene-text polygons at large scale \citep{singh2021textocr}. Its annotations are published under CC BY 4.0, while underlying images originate from Open Images and require per-image licence tracking. It is useful for scene-text localization, but not sufficient for mobile Indic handwriting.
+
+\section{Dedicated handwriting provider}
+
+Handwriting should be separate from printed text in the ontology, provider version, threshold profile, and evaluation report. It may share an architecture family with the text detector, but it uses handwriting-tuned weights.
+
+The recommended first candidate is a differentiable-binarization-style text detector fine-tuned to output handwriting polygons. Training proceeds in three layers:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item English word/line/page pretraining from IAM;
+  \item Indic word recognition/localization pretraining from IIIT-INDIC-HW-WORDS; and
+  \item target-domain fine-tuning using consented or staged phone photographs of notes, prescriptions, forms, envelopes, whiteboards, receipts, and signatures.
+\end{enumerate}
+
+IAM provides 1,539 pages, 13,353 lines, and 115,320 words, but its scanned English domain cannot certify mobile performance \citep{dutta2018iam}. IIIT-INDIC-HW-WORDS adds 872,000 handwritten instances from eight newly introduced scripts, plus earlier Devanagari and Telugu datasets, covering ten prominent Indic scripts \citep{gongidi2021indic}.
+
+Recognition is optional. A recognizer can help label a candidate or estimate PII type, but redaction safety depends on localization. If recognition returns an empty string, the handwriting polygon still remains a candidate.
+
+\section{Barcode provider}
+
+ZXing-C++ supports QR codes and common one- and two-dimensional barcode formats \citep{zxingcpp}. The same library can operate as a provider before review and an attacker after export, but the assurance configuration should use a different preprocessing path or an additional scanner when practical.
+
+Barcode geometry is expanded slightly because finder patterns and quiet zones matter. A code that fails to decode before export may still contain private information; visually barcode-like regions from other providers remain review candidates.
+
+\section{Metadata provider}
+
+Metadata is not a visual model. Pillow reads common image metadata during ingest, while ExifTool independently inspects the produced asset \citep{exiftool}. Required checks include GPS, timestamp, device/camera details, software tags, comments, XMP/IPTC records, ICC/profile behavior, orientation, and embedded thumbnails.
+
+The renderer must not copy source metadata wholesale. The assurance service verifies the fresh output rather than trusting the writer configuration.
+
+\section{Model-bundle manifest}
+
+The release bundle records the following:
+
+\begin{lstlisting}[language={},caption={Conceptual release-bundle manifest.}]
+bundle_id: consentguard-rc-v1
+ontology_version: privacy-ontology-v1
+providers:
+  - name: maskrcnn
+    version: baseline-or-negative-v2
+    weights_sha256: ...
+  - name: yunet
+    version: ...
+    weights_sha256: ...
+  - name: plate_fasterrcnn
+    version: ...
+    weights_sha256: ...
+  - name: paddleocr_printed
+    version: ...
+  - name: handwriting_db
+    version: ...
+threshold_profile: threshold-profile-v1
+fusion_version: evidence-fusion-v1
+policy_version: release-policy-v1
+assurance_profile: assurance-profile-v1
+\end{lstlisting}
+
+No component may quietly download or replace weights during release inference. All files are acquired beforehand, hashed, and referenced from the manifest.

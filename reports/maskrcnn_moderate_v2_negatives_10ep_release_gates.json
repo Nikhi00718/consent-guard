@@ -1,0 +1,77 @@
+{
+  "gates": [
+    {
+      "name": "baseline_map",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.223469"
+    },
+    {
+      "name": "overall_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.95"
+    },
+    {
+      "name": "overall_pixel_leakage",
+      "observed": 2.0,
+      "passed": false,
+      "requirement": "<= 0.05"
+    },
+    {
+      "name": "negative_false_positive_rate",
+      "observed": 2.0,
+      "passed": false,
+      "requirement": "<= 0.15"
+    },
+    {
+      "name": "three_seeds",
+      "observed": 0,
+      "passed": false,
+      "requirement": ">= 3"
+    },
+    {
+      "name": "assurance_fail_closed",
+      "observed": false,
+      "passed": false,
+      "requirement": "true"
+    },
+    {
+      "name": "general_face_recall",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.95"
+    },
+    {
+      "name": "general_license_plate_recall",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.95"
+    },
+    {
+      "name": "general_text_recall",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.95"
+    },
+    {
+      "name": "india_face_recall",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.95"
+    },
+    {
+      "name": "india_license_plate_recall",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.95"
+    },
+    {
+      "name": "india_text_recall",
+      "observed": -1.0,
+      "passed": false,
+      "requirement": ">= 0.95"
+    }
+  ],
+  "release_candidate": false
+}

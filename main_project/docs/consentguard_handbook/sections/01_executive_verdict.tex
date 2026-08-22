@@ -1,0 +1,68 @@
+\chapter{The honest verdict}
+
+\section{Is the project worth the effort?}
+
+Yes, if the goal is a serious privacy-review assistant and an end-to-end computer-vision research project. No, if the goal is to claim that a single model can automatically make any photograph safe to share.
+
+The project is technically worthwhile because it combines several real problems: instance segmentation, small-object detection, OCR, handwriting localization, dataset engineering, calibration, human-computer interaction, privacy-preserving export, and assurance. It is also useful because ordinary content-moderation scores do not directly answer the privacy question: \emph{what sensitive pixels were left visible?}
+
+\begin{truthbox}[One-sentence outcome]
+ConsentGuard V1 should examine a still image locally, collect high-recall evidence from specialist detectors, show every uncertain region to a human, destructively redact the approved regions, remove metadata, attack-test the result, and block export whenever a required check is missing or uncertain.
+\end{truthbox}
+
+\section{Why the current score is both useful and insufficient}
+
+The frozen comparator has COCO-style mask mAP of \textbf{0.2335}. That is a respectable research baseline for nine heavily imbalanced privacy classes and a 4 GB training environment. It proves that the data loader, model, evaluation code, checkpointing, and main segmentation idea work.
+
+It does not prove privacy safety. At the original score threshold of 0.5, the model covers \textbf{76.39\%} of labelled sensitive pixels, leaving \textbf{23.61\%} uncovered. The aggregate is dominated by large, common classes such as people. Handwriting recall is only \textbf{2.68\%}, licence-plate recall \textbf{13.57\%}, medicine recall \textbf{15.39\%}, and signature recall \textbf{28.92\%} at the same operating point.
+
+\begin{warningbox}[The main lesson]
+A model can improve mAP while still being unsafe for privacy. Conversely, lowering thresholds can recover sensitive regions while making the image unusable through over-redaction. V1 therefore needs class-specific thresholds, specialist models, human review, and leakage metrics.
+\end{warningbox}
+
+\section{The product boundary}
+
+\begin{tabularx}{\textwidth}{@{}YY@{}}
+\toprule
+\textbf{Inside V1} & \textbf{Outside V1} \\
+\midrule
+Still images; local-first analysis; high-recall proposals; human correction; versioned audit; destructive redaction; metadata cleaning; independent assurance. & Video; biometric recognition; identity matching; pixel-based consent inference; automatic no-review release; legal-compliance guarantees; a promise of zero privacy risk. \\
+\bottomrule
+\end{tabularx}
+
+The project should be described as a \textbf{review-assisted privacy system}. The output of the current Mask R-CNN is evidence supplied to that system, not the final product.
+
+\section{What ``final model'' should mean}
+
+There should be no single file named ``the final model.'' The release unit is a bundle:
+
+\begin{itemize}[leftmargin=6mm]
+  \item provider names and exact versions;
+  \item trained checkpoint hashes;
+  \item class ontology and geometry conventions;
+  \item frozen threshold profile;
+  \item evidence-fusion version;
+  \item release-policy version;
+  \item assurance configuration; and
+  \item validation and locked-test reports.
+\end{itemize}
+
+The bundle becomes \file{release-candidate-v1} only after every gate in Chapter 11 passes. The complete reviewed system may then be tagged \file{ConsentGuard v1.0}. Until then, \file{baseline-v0.1} remains exactly what its name says: the comparator.
+
+\section{Practical effort and likely payoff}
+
+The realistic effort is 8--12 focused full-time weeks or 12--18 part-time weeks. The greatest expected gains come from data correctness, negative examples, specialist detectors, calibration, and a reliable review/export flow. A larger backbone or a fashionable new segmentation architecture is not the highest-value next step.
+
+The likely payoff is not a spectacular single mAP number. It is a defensible demonstration that can answer:
+
+\enlargethispage{4\baselineskip}
+\begin{enumerate}[leftmargin=7mm]
+  \item What sensitive content was proposed and by which provider?
+  \item What did the reviewer change?
+  \item How much labelled sensitive content remained visible?
+  \item What ordinary content was unnecessarily hidden?
+  \item Did independent detectors, OCR, barcode scanning, metadata inspection, and fresh decoding find a release problem?
+  \item Can the exact result be reproduced from versioned components?
+\end{enumerate}
+
+That is a stronger final project than ``we trained Mask R-CNN and obtained 0.23 mAP.''

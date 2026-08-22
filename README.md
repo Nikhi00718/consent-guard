@@ -6,6 +6,10 @@ redactions. The verified training baseline is Mask R-CNN ResNet-50 FPN v2 for
 the nine official **visual** Visual Redactions attributes plus background.
 Textual and multimodal attributes require separate OCR/document branches.
 
+The executable codebase is organized for stage-by-stage review under
+[`main_project/`](main_project/README.md). Source modules, scripts, configs,
+and tests are physically grouped into six numbered stages there.
+
 This repository does **not** infer consent, intent, legality, or identity from
 pixels. The current milestone is the perception/localization model required by
 the broader consent-state-aware release policy in
@@ -46,13 +50,13 @@ them.
 
 ```powershell
 Set-Location C:\consentGuard
-powershell -ExecutionPolicy Bypass -File scripts\setup_environment.ps1
+powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1
 ```
 
 CPU-only setup is available for data/test development:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\setup_environment.ps1 -CpuOnly
+powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1 -CpuOnly
 ```
 
 Official references: [PyTorch installation](https://pytorch.org/get-started/locally/),
@@ -68,13 +72,13 @@ mismatch is accepted only when annotation and decoded image aspect ratios agree
 within 1%; crops, stitches, and rotations are quarantined.
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\finalize_vispr_data.py --split val --extract --rebuild-records
-.\.venv\Scripts\python.exe scripts\audit_visual_redactions_alignment.py
-.\.venv\Scripts\python.exe scripts\preprocess_visual_redactions_verified.py --profile visual
-.\.venv\Scripts\python.exe scripts\validate_processed_records.py `
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\finalize_vispr_data.py --split val --extract --rebuild-records
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\audit_visual_redactions_alignment.py
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\preprocess_visual_redactions_verified.py --profile visual
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\validate_processed_records.py `
   --data data\processed\visual_redactions_verified_visual `
   --report reports\processed_records_verified_visual_validation.json
-.\.venv\Scripts\python.exe scripts\audit_split_leakage.py
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\audit_split_leakage.py
 ```
 
 `data/processed/visual_redactions/` and the v1/v2 configs are retained only to
@@ -87,8 +91,8 @@ split remains locked until the final experiment.
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe scripts\preflight_environment.py
-.\.venv\Scripts\python.exe scripts\train_maskrcnn.py --config configs\train_smoke.yaml
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\preflight_environment.py
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_smoke.yaml
 ```
 
 The smoke run performs a real Mask R-CNN forward pass, backward pass, optimizer
@@ -100,20 +104,20 @@ real processed VISPR data.
 Laptop RTX 3050 (4 GB):
 
 ```powershell
-.\scripts\start_maskrcnn_verified_visual.ps1
+.\main_project\scripts\stage_02_baseline_model\start_maskrcnn_verified_visual.ps1
 ```
 
 Controlled 12–16 GB GPU baseline:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\train_maskrcnn.py --config configs\train_maskrcnn_baseline.yaml
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_maskrcnn_baseline.yaml
 ```
 
 Resume without losing optimizer, scheduler, scaler, epoch, loader/sampler RNG,
 or CUDA RNG state:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\train_maskrcnn.py --config configs\train_maskrcnn_4gb.yaml --resume artifacts\checkpoints\maskrcnn_4gb\last.pt
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml --resume artifacts\checkpoints\maskrcnn_4gb\last.pt
 ```
 
 Each run writes the resolved configuration, environment details, JSONL metrics,
@@ -124,12 +128,12 @@ available, avoiding repeated copies of the same large checkpoint.
 ## Evaluate and redact
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\evaluate_maskrcnn.py `
-  --config configs\train_maskrcnn_4gb.yaml `
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\evaluate_maskrcnn.py `
+  --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml `
   --checkpoint artifacts\checkpoints\maskrcnn_4gb\best.pt
 
-.\.venv\Scripts\python.exe scripts\infer_maskrcnn.py `
-  --config configs\train_maskrcnn_4gb.yaml `
+.\.venv\Scripts\python.exe main_project\scripts\stage_05_review_export\infer_maskrcnn.py `
+  --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml `
   --checkpoint artifacts\checkpoints\maskrcnn_4gb\best.pt `
   --input path\to\input.jpg `
   --output outputs\redacted\result.jpg

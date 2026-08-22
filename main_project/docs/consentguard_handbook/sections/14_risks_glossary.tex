@@ -1,0 +1,101 @@
+\chapter{Risks, boundaries, and glossary}
+
+\section{Technical risks}
+
+\begin{longtable}{@{}L{39mm}L{56mm}L{51mm}@{}}
+\toprule
+\textbf{Risk} & \textbf{Consequence} & \textbf{Control} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Risk} & \textbf{Consequence} & \textbf{Control} \\
+\midrule
+\endhead
+Small-object misses & Distant plates/faces/text remain visible & Specialists, high-resolution tiling if measured necessary, size-slice gates \\
+Class imbalance & Aggregate improvement hides rare classes & Per-class gates, targeted data, experimental labels \\
+Domain shift & Good benchmark, poor phone/India behavior & Target-2K, domain reporting, difficult slices \\
+Bad calibration & Too many misses or unusable over-redaction & Per-provider/class sweeps and frozen profiles \\
+Coordinate error & Correct detection masks wrong pixels & Shared normalized coordinates and transformation tests \\
+Provider dependency failure & Missing protection interpreted as empty scene & Explicit unavailable/error state and fail-closed policy \\
+Metadata leakage & GPS/device/private thumbnail survives & Fresh encode plus independent ExifTool inspection \\
+OCR/barcode reversibility & Visually hidden content remains machine-readable & Solid masking and post-export attackers \\
+Test contamination & Reported result becomes optimistic & Access-separated locked test and one-time protocol \\
+GPU/session interruption & Lost run or inconsistent resume & Atomic per-epoch checkpoints and portable manifests \\
+\bottomrule
+\end{longtable}
+
+\section{Ethical and product risks}
+
+\textbf{False confidence} is the largest product risk. A polished redaction overlay can make users believe the system guarantees privacy. The interface and model card should consistently say that human review is required and unsupported content may remain.
+
+\textbf{Biometric expansion} is another risk. A face detector can be quietly extended into recognition or tracking. ConsentGuard explicitly prohibits embeddings, identity matching, demographic inference, and consent inference in V1.
+
+\textbf{Sensitive training data} creates its own privacy problem. The collection process must prefer staged/fictional content, minimize access and retention, and support withdrawal. Dataset licences do not substitute for participant ethics.
+
+\textbf{Over-redaction} can remove context, expression, evidence, accessibility information, or utility. Review burden and retained-image utility must be reported alongside leakage.
+
+\section{Claims language}
+
+Use:
+
+\begin{itemize}[leftmargin=6mm]
+  \item ``proposes privacy-sensitive regions for human review'';
+  \item ``supports the listed classes under the documented evaluation'';
+  \item ``removes configured metadata and independently inspects output''; and
+  \item ``passed the published release gates on the frozen evaluation sets.''
+\end{itemize}
+
+Avoid:
+
+\begin{itemize}[leftmargin=6mm]
+  \item ``guarantees privacy'';
+  \item ``detects all personal information'';
+  \item ``automatically determines consent'';
+  \item ``legally compliant'' without jurisdiction-specific legal review; and
+  \item ``production safe'' based only on mAP or demo images.
+\end{itemize}
+
+\section{Glossary}
+
+\begin{description}[leftmargin=40mm,labelwidth=36mm,style=multiline]
+  \item[Annotation] Human-created class and geometry treated as evaluation/training ground truth under a defined guide.
+  \item[AP / mAP] Average precision for one class / mean across classes and usually IoU thresholds.
+  \item[Assurance] Independent checks performed on the newly rendered output before release.
+  \item[Calibration] Relating model scores to observed correctness on validation data.
+  \item[Candidate] Fused region proposed for reviewer action.
+  \item[Checkpoint] Saved model and training state that can be evaluated or resumed.
+  \item[Confidence interval] Range expressing uncertainty in a measured metric.
+  \item[Domain shift] Difference between training data and real deployment images.
+  \item[Evidence] Provider output containing class, geometry, confidence, provenance, and uncertainty.
+  \item[Fail closed] Deny/hold export when a required check is missing, failed, or uncertain.
+  \item[False negative] Supported sensitive object that is present but not proposed.
+  \item[False positive] Proposed region that is not the claimed supported object.
+  \item[Fine-tuning] Continuing training from pretrained weights on task-specific data.
+  \item[FPN] Feature Pyramid Network, which combines multi-scale features for objects of different sizes.
+  \item[Fusion] Deterministic combination of accepted evidence geometry while retaining provenance.
+  \item[Hard negative] Non-sensitive example that resembles a target and frequently triggers a false positive.
+  \item[Instance recall] Fraction of labelled object instances found under the match rule.
+  \item[IoU] Intersection over union, a geometry-overlap measure.
+  \item[Leakage] Fraction of labelled sensitive pixels left uncovered by candidates/redaction.
+  \item[Manifest] Versioned record of data or model components, paths, hashes, and provenance.
+  \item[Mask] Pixel-level region associated with an object instance.
+  \item[Negative image] Image reviewed and confirmed to contain none of the supported ontology classes.
+  \item[NMS] Non-maximum suppression, a method for removing duplicate overlapping predictions.
+  \item[OCR] Optical character recognition; commonly split into text detection and recognition.
+  \item[Ontology] Versioned set of privacy classes and their definitions/relationships.
+  \item[Over-redaction] Non-sensitive portion of the image unnecessarily covered.
+  \item[Provider] Versioned component that analyses a normalized image and returns evidence.
+  \item[Provenance] Information explaining where data, weights, or evidence came from.
+  \item[Recall] Fraction of relevant labelled items that were found.
+  \item[Redaction] Destructive replacement of approved pixels in a newly encoded asset.
+  \item[Seed] Randomization control used to measure training variability.
+  \item[Specialist] Provider focused on one task such as faces, plates, or handwriting.
+  \item[Threshold profile] Versioned provider/class rules for scores, size, expansion, dilation, and review.
+\end{description}
+
+\section{Final perspective}
+
+The baseline has already done its job: it proved the foundation and revealed where one model fails. The next professional step is not to rename it final. It is to turn the project into a measurable, review-assisted system with specialists for the exact weak classes, a target-domain dataset, calibrated fusion, destructive export, and independent assurance.
+
+If ConsentGuard reaches that point and publishes its limits honestly, it is a strong final project even if the global Mask R-CNN remains near 0.23 mAP.
+
