@@ -38,7 +38,7 @@
         "tracked_in_git": false
       }
     },
-    "code_commit": "d99d2683fd7b2f95422b101f136d02c976676e00",
+    "code_commit": "6d693a2296d814d81b64f622d1c66ea66c57c796",
     "configs": [
       {
         "bytes": 1823,
@@ -413,9 +413,9 @@
   "release_candidate": false,
   "repository": {
     "branch": "agent/object-centric-crops",
-    "commit": "d99d2683fd7b2f95422b101f136d02c976676e00",
+    "commit": "6d693a2296d814d81b64f622d1c66ea66c57c796",
     "root": "C:\\consentGuard",
-    "worktree_status": "M main_project/STATUS.md\n M main_project/scripts/stage_05_review_export/run_analysis_pipeline.py\n M main_project/scripts/stage_06_evaluation_release/full_data_model_audit.py\n M main_project/src/consentguard/stage_05_review_export/assurance/service.py\n M main_project/src/consentguard/stage_05_review_export/pipeline.py\n M main_project/src/consentguard/stage_06_evaluation_release/release_gates.py\n M main_project/stage_05_review_export/README.md\n M main_project/stage_06_evaluation_release/README.md\n M main_project/tests/stage_05_review_export/test_policy_assurance.py\n M main_project/tests/stage_06_evaluation_release/test_release_gates.py\n M reports/training_environment_preflight.json\n?? main_project/schemas/release-metrics-v1.schema.json\n?? main_project/scripts/stage_06_evaluation_release/build_release_bundle.py\n?? main_project/scripts/stage_06_evaluation_release/evaluate_fused_validation.py\n?? main_project/stage_06_evaluation_release/DATA_SHEET.md\n?? main_project/stage_06_evaluation_release/MODEL_CARD.md\n?? reports/fused_validation_v2_1_baseline.json\n?? reports/release_bundle_manifest.json\n?? reports/release_gates_v1_blocked.json\n?? reports/release_metrics_v1_incomplete.json"
+    "worktree_status": ""
   },
   "schema_version": "consentguard-release-bundle-v1",
   "test_split_used": false
