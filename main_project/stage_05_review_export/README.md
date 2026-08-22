@@ -6,11 +6,11 @@ Give the reviewer final control and prevent unchecked downloads.
 
 ## Workflow
 
-1. Normalize a supported still image and apply orientation.
+1. Normalize a supported still image and apply orientation inside an isolated session.
 2. Analyze it with all configured evidence providers.
 3. Display fused candidates and uncertainty.
 4. Let the reviewer add, erase, or expand masks.
-5. Record review completion and policy reasons.
+5. Resolve explicit, scope-bound consent and record review completion with policy reasons.
 6. Render solid redaction into a new RGB buffer.
 7. Encode a fresh JPEG, PNG, or WebP without source metadata.
 8. Independently inspect the output.
