@@ -1,0 +1,45 @@
+{
+  "bbox_map": 0.10158793447539313,
+  "bbox_map_50": 0.14129029496747722,
+  "bbox_map_75": 0.13120535538282116,
+  "bbox_map_large": 0.018181818181818174,
+  "bbox_map_medium": 0.40297791317593296,
+  "bbox_map_small": 0.04972947294729473,
+  "bbox_mar_1": 0.2028571428571428,
+  "bbox_mar_10": 0.21714285714285714,
+  "bbox_mar_100": 0.21714285714285714,
+  "bbox_mar_large": 0.6,
+  "bbox_mar_medium": 0.6857142857142857,
+  "bbox_mar_small": 0.08148148148148147,
+  "classes": [
+    1
+  ],
+  "evaluated_batches": 300,
+  "evaluated_images": 300,
+  "ground_truth_instances": 35,
+  "mask_storage": "coco_compressed_rle",
+  "max_detections_per_image": 100,
+  "per_class": {
+    "a108_license_plate_all": {
+      "class_id": 1,
+      "map": 0.09980746469430765,
+      "mar_100": 0.23714285714285716
+    }
+  },
+  "primary_map": 0.09980746469430765,
+  "primary_metric": "segm_map",
+  "retained_predictions": 12637,
+  "score_threshold": 0.0,
+  "segm_map": 0.09980746469430765,
+  "segm_map_50": 0.14160725955727888,
+  "segm_map_75": 0.12853208805608848,
+  "segm_map_large": 0.018181818181818177,
+  "segm_map_medium": 0.3905940594059406,
+  "segm_map_small": 0.049391142848034364,
+  "segm_mar_1": 0.19999999999999998,
+  "segm_mar_10": 0.23714285714285716,
+  "segm_mar_100": 0.23714285714285716,
+  "segm_mar_large": 0.4,
+  "segm_mar_medium": 0.7,
+  "segm_mar_small": 0.11111111111111112
+}

@@ -19,5 +19,8 @@ rules:
   - {provider: paddleocr, privacy_class: printed_text, score_threshold: 0.20, min_area_pixels: 8, expansion_fraction: 0.05, dilation_pixels: 3, mandatory_review: true}
   - {provider: paddleocr, privacy_class: handwriting, score_threshold: 0.20, min_area_pixels: 8, expansion_fraction: 0.05, dilation_pixels: 3, mandatory_review: true}
   - {provider: paddleocr_onnx, privacy_class: printed_text, score_threshold: 0.20, min_area_pixels: 8, expansion_fraction: 0.05, dilation_pixels: 3, mandatory_review: true, experimental: true}
+  - {provider: face_maskrcnn, privacy_class: a105_face_all, score_threshold: 0.25, min_area_pixels: 16, expansion_fraction: 0.08, dilation_pixels: 4, mandatory_review: true, experimental: true}
+  - {provider: plate_maskrcnn, privacy_class: a108_license_plate_all, score_threshold: 0.15, min_area_pixels: 12, expansion_fraction: 0.12, dilation_pixels: 4, mandatory_review: true, experimental: true}
+  - {provider: handwriting_maskrcnn, privacy_class: a26_handwriting, score_threshold: 0.10, min_area_pixels: 8, expansion_fraction: 0.05, dilation_pixels: 4, mandatory_review: true, experimental: true}
   - {provider: zxingcpp, privacy_class: barcode, score_threshold: 0.00, min_area_pixels: 8, expansion_fraction: 0.08, dilation_pixels: 3, mandatory_review: true}
   - {provider: '*', privacy_class: '*', score_threshold: 0.50, min_area_pixels: 16, dilation_pixels: 3, mandatory_review: true, experimental: true}

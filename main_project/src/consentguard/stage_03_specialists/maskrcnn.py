@@ -57,6 +57,7 @@ class MaskRCNNEvidenceProvider:
         *,
         class_map: Mapping[str, int],
         version: str,
+        provider_name: str = "maskrcnn",
         short_side: int = 640,
         max_long_side: int = 1024,
         mask_threshold: float = 0.5,
@@ -71,6 +72,7 @@ class MaskRCNNEvidenceProvider:
         self.model = model.to(device).eval()
         self.device = device
         self.id_to_name = id_to_name
+        self.name = str(provider_name)
         self.version = str(version)
         self.short_side = int(short_side)
         self.max_long_side = int(max_long_side)

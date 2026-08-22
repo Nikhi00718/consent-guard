@@ -36,7 +36,13 @@ def _load_mask(path: Path, *, width: int, height: int) -> np.ndarray:
     return mask
 
 
-def _build_provider(config, checkpoint_path: Path, device: torch.device) -> MaskRCNNEvidenceProvider:
+def _build_provider(
+    config,
+    checkpoint_path: Path,
+    device: torch.device,
+    *,
+    provider_name: str = "maskrcnn",
+) -> MaskRCNNEvidenceProvider:
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
     validate_checkpoint_inference_compatibility(checkpoint, config)
     model_config = copy.deepcopy(config.section("model"))
@@ -57,6 +63,7 @@ def _build_provider(config, checkpoint_path: Path, device: torch.device) -> Mask
         device,
         class_map=config.class_map,
         version=version,
+        provider_name=provider_name,
         short_side=int(data["short_side"]),
         max_long_side=int(data["max_long_side"]),
     )
@@ -66,6 +73,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True)
     parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--face-checkpoint", type=Path, help="Optional fine-tuned one-class face checkpoint.")
+    parser.add_argument(
+        "--face-config",
+        default="main_project/configs/stage_03_specialists/train_face_maskrcnn_5ep.yaml",
+    )
+    parser.add_argument("--plate-checkpoint", type=Path, help="Optional fine-tuned one-class plate checkpoint.")
+    parser.add_argument(
+        "--plate-config",
+        default="main_project/configs/stage_03_specialists/train_plate_maskrcnn_5ep.yaml",
+    )
+    parser.add_argument(
+        "--handwriting-checkpoint",
+        type=Path,
+        help="Optional fine-tuned one-class handwriting checkpoint.",
+    )
+    parser.add_argument(
+        "--handwriting-config",
+        default="main_project/configs/stage_03_specialists/train_handwriting_maskrcnn_5ep.yaml",
+    )
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--approved-mask", type=Path)
@@ -99,6 +125,21 @@ def main() -> None:
         else None
     )
     providers: list[object] = [provider]
+    for checkpoint_arg, config_arg, provider_name in (
+        (args.face_checkpoint, args.face_config, "face_maskrcnn"),
+        (args.plate_checkpoint, args.plate_config, "plate_maskrcnn"),
+        (args.handwriting_checkpoint, args.handwriting_config, "handwriting_maskrcnn"),
+    ):
+        if checkpoint_arg:
+            specialist_config = load_training_config(config_arg, require_validation_data=False)
+            providers.append(
+                _build_provider(
+                    specialist_config,
+                    project_path(checkpoint_arg),
+                    device,
+                    provider_name=provider_name,
+                )
+            )
     if args.yunet_model:
         yunet_path = project_path(args.yunet_model)
         providers.append(

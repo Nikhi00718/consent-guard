@@ -1,0 +1,45 @@
+{
+  "bbox_map": 0.05665549290211385,
+  "bbox_map_50": 0.09409517090705564,
+  "bbox_map_75": 0.05101257933707994,
+  "bbox_map_large": 0.08478017306476723,
+  "bbox_map_medium": 0.04759532188536993,
+  "bbox_map_small": 0.027722772277227723,
+  "bbox_mar_1": 0.06847826086956522,
+  "bbox_mar_10": 0.16304347826086957,
+  "bbox_mar_100": 0.20869565217391303,
+  "bbox_mar_large": 0.30270270270270266,
+  "bbox_mar_medium": 0.1738095238095238,
+  "bbox_mar_small": 0.05,
+  "classes": [
+    1
+  ],
+  "evaluated_batches": 300,
+  "evaluated_images": 300,
+  "ground_truth_instances": 92,
+  "mask_storage": "coco_compressed_rle",
+  "max_detections_per_image": 100,
+  "per_class": {
+    "a26_handwriting": {
+      "class_id": 1,
+      "map": 0.05263321344820326,
+      "mar_100": 0.17934782608695654
+    }
+  },
+  "primary_map": 0.05263321344820326,
+  "primary_metric": "segm_map",
+  "retained_predictions": 11559,
+  "score_threshold": 0.0,
+  "segm_map": 0.05263321344820326,
+  "segm_map_50": 0.09478479669593813,
+  "segm_map_75": 0.039341964555686525,
+  "segm_map_large": 0.0810223982372854,
+  "segm_map_medium": 0.039085392122738684,
+  "segm_map_small": 0.03172827044092696,
+  "segm_mar_1": 0.057608695652173914,
+  "segm_mar_10": 0.14565217391304347,
+  "segm_mar_100": 0.17934782608695654,
+  "segm_mar_large": 0.21891891891891896,
+  "segm_mar_medium": 0.1738095238095238,
+  "segm_mar_small": 0.07857142857142857
+}
