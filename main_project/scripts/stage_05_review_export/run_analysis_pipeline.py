@@ -16,6 +16,11 @@ from consentguard.shared.runtime import atomic_json_dump, select_device
 from consentguard.stage_02_baseline_model.config import load_training_config, validate_checkpoint_inference_compatibility
 from consentguard.stage_02_baseline_model.models import build_instance_segmentation_model
 from consentguard.stage_03_specialists.maskrcnn import MaskRCNNEvidenceProvider
+from consentguard.stage_03_specialists.face_yunet import YuNetFaceProvider
+from consentguard.stage_03_specialists.plate_yunet import LPDYuNetPlateProvider
+from consentguard.stage_03_specialists.text_paddleocr import PaddleOCRTextProvider
+from consentguard.stage_03_specialists.barcode_zxing import ZXingBarcodeProvider
+from consentguard.stage_03_specialists.ppocr_onnx import PPOCRTextGeometryProvider
 from consentguard.stage_04_fusion_calibration.domain import AssuranceStatus, ConsentState
 from consentguard.stage_04_fusion_calibration.evidence import ThresholdRegistry
 from consentguard.stage_05_review_export.pipeline import ReviewExportService
@@ -66,6 +71,11 @@ def main() -> None:
     parser.add_argument("--approved-mask", type=Path)
     parser.add_argument("--report", type=Path)
     parser.add_argument("--threshold-profile", default="main_project/configs/stage_04_fusion_calibration/threshold_profile_candidate_v1.yaml")
+    parser.add_argument("--yunet-model", type=Path, help="Optional MIT YuNet face model; provider is omitted when unset.")
+    parser.add_argument("--plate-yunet-model", type=Path, help="Optional Apache-2.0 LPD-YuNet model; provider is omitted when unset.")
+    parser.add_argument("--ppocr-model", type=Path, help="Optional Apache-2.0 PP-OCRv3 ONNX text detector.")
+    parser.add_argument("--with-ocr", action="store_true", help="Enable PaddleOCR provider; missing runtime stays explicit.")
+    parser.add_argument("--with-barcode", action="store_true", help="Enable ZXing-C++ provider; missing runtime stays explicit.")
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--consent-state", choices=[state.value for state in ConsentState], default=ConsentState.UNKNOWN.value)
     parser.add_argument("--review-completed", action="store_true")
@@ -88,7 +98,36 @@ def main() -> None:
         if args.approved_mask
         else None
     )
-    service = ReviewExportService((provider,), thresholds)
+    providers: list[object] = [provider]
+    if args.yunet_model:
+        yunet_path = project_path(args.yunet_model)
+        providers.append(
+            YuNetFaceProvider(
+                yunet_path,
+                version=f"{yunet_path.name}:{hashlib.sha256(yunet_path.read_bytes()).hexdigest()[:16]}",
+            )
+        )
+    if args.plate_yunet_model:
+        plate_path = project_path(args.plate_yunet_model)
+        providers.append(
+            LPDYuNetPlateProvider(
+                plate_path,
+                version=f"{plate_path.name}:{hashlib.sha256(plate_path.read_bytes()).hexdigest()[:16]}",
+            )
+        )
+    if args.ppocr_model:
+        ppocr_path = project_path(args.ppocr_model)
+        providers.append(
+            PPOCRTextGeometryProvider(
+                ppocr_path,
+                version=f"{ppocr_path.name}:{hashlib.sha256(ppocr_path.read_bytes()).hexdigest()[:16]}",
+            )
+        )
+    if args.with_ocr:
+        providers.append(PaddleOCRTextProvider())
+    if args.with_barcode:
+        providers.append(ZXingBarcodeProvider())
+    service = ReviewExportService(tuple(providers), thresholds)
     result = service.run(
         input_path,
         consent_state=ConsentState(args.consent_state),

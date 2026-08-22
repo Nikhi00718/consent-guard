@@ -78,6 +78,14 @@ rules:
   expansion_fraction: 0.12
   dilation_pixels: 4
   mandatory_review: true
+- provider: plate_yunet
+  privacy_class: license_plate
+  score_threshold: 0.8
+  min_area_pixels: 12
+  expansion_fraction: 0.12
+  dilation_pixels: 4
+  mandatory_review: true
+  experimental: true
 - provider: paddleocr
   privacy_class: printed_text
   score_threshold: 0.2
@@ -92,6 +100,14 @@ rules:
   expansion_fraction: 0.05
   dilation_pixels: 3
   mandatory_review: true
+- provider: paddleocr_onnx
+  privacy_class: printed_text
+  score_threshold: 0.2
+  min_area_pixels: 8
+  expansion_fraction: 0.05
+  dilation_pixels: 3
+  mandatory_review: true
+  experimental: true
 - provider: zxingcpp
   privacy_class: barcode
   score_threshold: 0.0

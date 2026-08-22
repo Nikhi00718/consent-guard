@@ -1,4 +1,5 @@
 .venv/
+.venv-specialists/
 .venv.setup.lock
 .tools/
 __pycache__/
