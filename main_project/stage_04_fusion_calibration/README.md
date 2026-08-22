@@ -15,5 +15,8 @@ source of every detection.
   cases as mandatory review.
 - Record every manual threshold override in the output audit report.
 
-The first checked-in profile is a candidate profile.  It cannot be marked
-`release_ready` until the frozen general and India validation sets pass.
+The candidate profile has now been calibrated on all 1,576 V2 validation
+images. `threshold_profile_v2_validation_calibrated.yaml` remains
+`release_ready: false` because the rare privacy classes do not meet the
+configured recall/precision floors, and the separate general/India target
+validation sets and independent assurance gates are still outstanding.
