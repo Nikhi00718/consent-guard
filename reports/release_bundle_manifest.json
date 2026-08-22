@@ -1,0 +1,422 @@
+{
+  "artifacts": {
+    "checkpoints": {
+      "face_maskrcnn": {
+        "bytes": 366614551,
+        "path": "C:\\consentGuard\\artifacts\\checkpoints\\specialist_face_maskrcnn_5ep\\last.pt",
+        "present": true,
+        "required": true,
+        "sha256": "0b4084480cee3efd6034ab03a4bc0b15c94cbb83cbfa60d6ecf61ab29d92a929",
+        "storage_note": "local ignored artifact; hash is recorded for reproducibility",
+        "tracked_in_git": false
+      },
+      "global_maskrcnn": {
+        "bytes": 366961239,
+        "path": "C:\\consentGuard\\artifacts\\checkpoints\\maskrcnn_moderate_v2_negatives_10ep\\last.pt",
+        "present": true,
+        "required": true,
+        "sha256": "f3a47cd3bcbc52bcbaddd9094fb0fae8171d0753d70220ddc83dfa515f5411d8",
+        "storage_note": "local ignored artifact; hash is recorded for reproducibility",
+        "tracked_in_git": false
+      },
+      "handwriting_maskrcnn": {
+        "bytes": 366614551,
+        "path": "C:\\consentGuard\\artifacts\\checkpoints\\specialist_handwriting_maskrcnn_5ep\\last.pt",
+        "present": true,
+        "required": true,
+        "sha256": "1614534292bdc7fe2771defba4fe9e1994bbb0a3d40b509402f42ef1447d2f0b",
+        "storage_note": "local ignored artifact; hash is recorded for reproducibility",
+        "tracked_in_git": false
+      },
+      "plate_maskrcnn": {
+        "bytes": 366614551,
+        "path": "C:\\consentGuard\\artifacts\\checkpoints\\specialist_plate_maskrcnn_5ep\\last.pt",
+        "present": true,
+        "required": true,
+        "sha256": "1c1e74aeafc7130ab7b34739f7c96bfbdb531d3e55ea2a27155d235759271246",
+        "storage_note": "local ignored artifact; hash is recorded for reproducibility",
+        "tracked_in_git": false
+      }
+    },
+    "code_commit": "d99d2683fd7b2f95422b101f136d02c976676e00",
+    "configs": [
+      {
+        "bytes": 1823,
+        "path": "C:\\consentGuard\\main_project\\configs\\stage_02_baseline_model\\train_maskrcnn_moderate_v2_negatives_10ep.yaml",
+        "present": true,
+        "required": true,
+        "sha256": "250edd641ab77b85d17a19232c91f70889d67a5aec7a679a00403aee4c1ddea5"
+      },
+      {
+        "bytes": 3797,
+        "path": "C:\\consentGuard\\main_project\\configs\\stage_04_fusion_calibration\\threshold_profile_v2_validation_calibrated.yaml",
+        "present": true,
+        "required": true,
+        "sha256": "822b21c04ac2e694f9b6c72d18e05866e8910f03195a74db72e1830cbe97205a"
+      },
+      {
+        "bytes": 1704,
+        "path": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_face_maskrcnn_5ep.yaml",
+        "present": true,
+        "required": true,
+        "sha256": "1ce598e318170771a8d1fd72def780c0d2cc2276d094950875ceec9ba0cf49a3"
+      },
+      {
+        "bytes": 1639,
+        "path": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_plate_maskrcnn_5ep.yaml",
+        "present": true,
+        "required": true,
+        "sha256": "9252266088dd6b3e33789ca1c9d7c6fa5ca922a42b357ce03e3ba3186e419cae"
+      },
+      {
+        "bytes": 1682,
+        "path": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_handwriting_maskrcnn_5ep.yaml",
+        "present": true,
+        "required": true,
+        "sha256": "17618a05c27501782f1028cdc6999b6b5ac4093661602d3f3ec471774663dbde"
+      }
+    ],
+    "data": [
+      {
+        "bytes": 1660215,
+        "path": "C:\\consentGuard\\reports\\visual_redactions_release_validation.json",
+        "present": true,
+        "required": true,
+        "sha256": "adee63d1a55edd3f74162e12729db35f2cf6e7ddad7333008875077833de3440"
+      },
+      {
+        "bytes": 438,
+        "path": "C:\\consentGuard\\reports\\processed_records_v2_negatives_validation.json",
+        "present": true,
+        "required": true,
+        "sha256": "857c6a0b728a171bbeb88295b0e089be0776498ece13376c59b4f32f9518ec57"
+      },
+      {
+        "bytes": 493,
+        "path": "C:\\consentGuard\\reports\\same_release_split_leakage_audit_clean.json",
+        "present": true,
+        "required": true,
+        "sha256": "03bdc6fef69597d2beb3ebccfac3a4ccbbe85d1b4a2e7d694245910f3773d290"
+      },
+      {
+        "bytes": 257,
+        "path": "C:\\consentGuard\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\class_map.json",
+        "present": true,
+        "required": true,
+        "sha256": "dc33f22287fd534ab7b8740f59b0347154f75ee341178f730737509b89d8d773"
+      },
+      {
+        "bytes": 11738489,
+        "path": "C:\\consentGuard\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\records_train2017.jsonl",
+        "present": true,
+        "required": true,
+        "sha256": "a906755a0e77c7a81ffaead3d00aa107e26121bd477fcbfd20531e49b60648e9"
+      },
+      {
+        "bytes": 4982001,
+        "path": "C:\\consentGuard\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\records_val2017.jsonl",
+        "present": true,
+        "required": true,
+        "sha256": "08094dadabf693b0efad47faac93d76a4d1576db5733460663f4f7fef4cd3c0d"
+      }
+    ],
+    "provider_assets": [
+      {
+        "bytes": 1716,
+        "path": "C:\\consentGuard\\artifacts\\specialists\\opencv_zoo\\MANIFEST.json",
+        "present": true,
+        "required": true,
+        "sha256": "1327d714b329a21237367de7a206617d01806c1b1c355007962610e379fac950"
+      }
+    ],
+    "reports": [
+      {
+        "bytes": 2542,
+        "path": "C:\\consentGuard\\reports\\maskrcnn_moderate_v2_negatives_10ep_last_eval.json",
+        "present": true,
+        "required": true,
+        "sha256": "5af91555f66e704dc5b1436ff87828baad8574d277053a2ba0b57a133ce2bf2a"
+      },
+      {
+        "bytes": 50244,
+        "path": "C:\\consentGuard\\reports\\maskrcnn_moderate_v2_negatives_10ep_threshold_calibration.json",
+        "present": true,
+        "required": true,
+        "sha256": "3da67e059ec0b5b67500b7ac7176068e31459305d99ae31c6b4752591aab5d3b"
+      },
+      {
+        "bytes": 73220,
+        "path": "C:\\consentGuard\\reports\\specialist_finetune_summary.json",
+        "present": true,
+        "required": true,
+        "sha256": "544f824f4790a9ff6e431df2c442de2a0d7998f02c0476364e7a225735c08ee8"
+      },
+      {
+        "bytes": 1898,
+        "path": "C:\\consentGuard\\reports\\fused_validation_v2_1_baseline.json",
+        "present": true,
+        "required": false,
+        "sha256": "e1db33188a3168c2fec97e59653275dd6e548d816d9c6741d9c86fb605532842"
+      },
+      {
+        "bytes": 58101,
+        "path": "C:\\consentGuard\\reports\\maskrcnn_moderate_v2_negatives_10ep_finetuned_specialists_smoke.json",
+        "present": true,
+        "required": true,
+        "sha256": "a0a076535cde20ff469cf315333ef5de66895371992e653bc961b00eabab6d63"
+      }
+    ]
+  },
+  "blockers": [
+    "No licensed Target-2K general/India manifest, pixels, and annotations are admitted.",
+    "Only one trained seed is present for the current bundle; the release contract requires at least three.",
+    "The global V2 validation segmentation mAP is below the preservation gate.",
+    "Fused validation does not yet contain general/India domain recall or full-bundle leakage/FPR confidence bounds.",
+    "Independent OCR, barcode, face, and plate residual-content attacks are not implemented as passing checks.",
+    "The threshold profile is explicitly release_ready: false; plate and handwriting specialists remain experimental."
+  ],
+  "bundle_status": "VALIDATION_ONLY_BLOCKED",
+  "gate_input": {
+    "assurance_fail_closed": false,
+    "baseline_mask_map": 0.2083981845491433,
+    "confidence_level": 0.95,
+    "schema_version": "release-metrics-v1",
+    "seed_count": 1,
+    "supported_classes": [
+      "face",
+      "license_plate",
+      "person_body",
+      "nudity",
+      "handwriting",
+      "disability",
+      "medicine",
+      "fingerprint",
+      "signature"
+    ]
+  },
+  "gate_input_path": "C:\\consentGuard\\reports\\release_metrics_v1_incomplete.json",
+  "gate_result": {
+    "gates": [
+      {
+        "name": "metrics_schema",
+        "observed": false,
+        "passed": false,
+        "point_estimate": null,
+        "requirement": "valid release-metrics-v1"
+      },
+      {
+        "name": "baseline_map",
+        "observed": 0.2083981845491433,
+        "passed": false,
+        "point_estimate": null,
+        "requirement": ">= 0.223469"
+      },
+      {
+        "name": "overall_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.95"
+      },
+      {
+        "name": "overall_pixel_leakage",
+        "observed": 2.0,
+        "passed": false,
+        "point_estimate": 2.0,
+        "requirement": "95% upper bound <= 0.05"
+      },
+      {
+        "name": "negative_false_positive_rate",
+        "observed": 2.0,
+        "passed": false,
+        "point_estimate": 2.0,
+        "requirement": "95% upper bound <= 0.15"
+      },
+      {
+        "name": "three_seeds",
+        "observed": 1,
+        "passed": false,
+        "point_estimate": null,
+        "requirement": ">= 3"
+      },
+      {
+        "name": "assurance_fail_closed",
+        "observed": false,
+        "passed": false,
+        "point_estimate": null,
+        "requirement": "true"
+      },
+      {
+        "name": "general_face_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.95"
+      },
+      {
+        "name": "general_license_plate_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.95"
+      },
+      {
+        "name": "general_text_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.95"
+      },
+      {
+        "name": "india_face_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.95"
+      },
+      {
+        "name": "india_license_plate_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.95"
+      },
+      {
+        "name": "india_text_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.95"
+      },
+      {
+        "name": "class_disability_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_face_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_fingerprint_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_handwriting_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_license_plate_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_medicine_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_nudity_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_person_body_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      },
+      {
+        "name": "class_signature_pixel_recall",
+        "observed": -1.0,
+        "passed": false,
+        "point_estimate": -1.0,
+        "requirement": "95% lower bound >= 0.90"
+      }
+    ],
+    "release_candidate": false,
+    "schema_valid": false,
+    "schema_version": "release-metrics-v1",
+    "validation_errors": [
+      "sensitive_pixel_recall must be a finite number in [0, 1]",
+      "sensitive_pixel_leakage must be a finite number in [0, 1]",
+      "negative_image_false_positive_rate must be a finite number in [0, 1]",
+      "domain_instance_recall must be an object",
+      "domain_instance_recall.general must be an object",
+      "domain_instance_recall.general.face must be a finite number in [0, 1]",
+      "domain_instance_recall.general.license_plate must be a finite number in [0, 1]",
+      "domain_instance_recall.general.text must be a finite number in [0, 1]",
+      "domain_instance_recall.india must be an object",
+      "domain_instance_recall.india.face must be a finite number in [0, 1]",
+      "domain_instance_recall.india.license_plate must be a finite number in [0, 1]",
+      "domain_instance_recall.india.text must be a finite number in [0, 1]",
+      "class_sensitive_pixel_recall must be an object",
+      "class_sensitive_pixel_recall.face is required",
+      "class_sensitive_pixel_recall.license_plate is required",
+      "class_sensitive_pixel_recall.person_body is required",
+      "class_sensitive_pixel_recall.nudity is required",
+      "class_sensitive_pixel_recall.handwriting is required",
+      "class_sensitive_pixel_recall.disability is required",
+      "class_sensitive_pixel_recall.medicine is required",
+      "class_sensitive_pixel_recall.fingerprint is required",
+      "class_sensitive_pixel_recall.signature is required",
+      "confidence_bounds must be an object",
+      "confidence_bounds.sensitive_pixel_recall must contain lower and upper confidence bounds",
+      "confidence_bounds.sensitive_pixel_leakage must contain lower and upper confidence bounds",
+      "confidence_bounds.negative_image_false_positive_rate must contain lower and upper confidence bounds",
+      "confidence_bounds.domain_instance_recall must be an object",
+      "confidence_bounds.domain_instance_recall.general must be an object",
+      "confidence_bounds.domain_instance_recall.general.face must contain lower and upper confidence bounds",
+      "confidence_bounds.domain_instance_recall.general.license_plate must contain lower and upper confidence bounds",
+      "confidence_bounds.domain_instance_recall.general.text must contain lower and upper confidence bounds",
+      "confidence_bounds.domain_instance_recall.india must be an object",
+      "confidence_bounds.domain_instance_recall.india.face must contain lower and upper confidence bounds",
+      "confidence_bounds.domain_instance_recall.india.license_plate must contain lower and upper confidence bounds",
+      "confidence_bounds.domain_instance_recall.india.text must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall must be an object",
+      "confidence_bounds.class_sensitive_pixel_recall.face must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.license_plate must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.person_body must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.nudity must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.handwriting must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.disability must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.medicine must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.fingerprint must contain lower and upper confidence bounds",
+      "confidence_bounds.class_sensitive_pixel_recall.signature must contain lower and upper confidence bounds"
+    ]
+  },
+  "gate_result_path": "C:\\consentGuard\\reports\\release_gates_v1_blocked.json",
+  "next_safe_actions": [
+    "Acquire and admit only licensed Target-2K data with image-level rights and a frozen manifest.",
+    "Run the fused evaluator on the full V2 validation split and target-domain splits.",
+    "Train and evaluate three controlled seeds per release candidate.",
+    "Implement independent output attackers and archive their reports before opening the locked test once."
+  ],
+  "release_candidate": false,
+  "repository": {
+    "branch": "agent/object-centric-crops",
+    "commit": "d99d2683fd7b2f95422b101f136d02c976676e00",
+    "root": "C:\\consentGuard",
+    "worktree_status": "M main_project/STATUS.md\n M main_project/scripts/stage_05_review_export/run_analysis_pipeline.py\n M main_project/scripts/stage_06_evaluation_release/full_data_model_audit.py\n M main_project/src/consentguard/stage_05_review_export/assurance/service.py\n M main_project/src/consentguard/stage_05_review_export/pipeline.py\n M main_project/src/consentguard/stage_06_evaluation_release/release_gates.py\n M main_project/stage_05_review_export/README.md\n M main_project/stage_06_evaluation_release/README.md\n M main_project/tests/stage_05_review_export/test_policy_assurance.py\n M main_project/tests/stage_06_evaluation_release/test_release_gates.py\n M reports/training_environment_preflight.json\n?? main_project/schemas/release-metrics-v1.schema.json\n?? main_project/scripts/stage_06_evaluation_release/build_release_bundle.py\n?? main_project/scripts/stage_06_evaluation_release/evaluate_fused_validation.py\n?? main_project/stage_06_evaluation_release/DATA_SHEET.md\n?? main_project/stage_06_evaluation_release/MODEL_CARD.md\n?? reports/fused_validation_v2_1_baseline.json\n?? reports/release_bundle_manifest.json\n?? reports/release_gates_v1_blocked.json\n?? reports/release_metrics_v1_incomplete.json"
+  },
+  "schema_version": "consentguard-release-bundle-v1",
+  "test_split_used": false
+}

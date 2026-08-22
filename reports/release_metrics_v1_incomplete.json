@@ -1,0 +1,18 @@
+{
+  "assurance_fail_closed": false,
+  "baseline_mask_map": 0.2083981845491433,
+  "confidence_level": 0.95,
+  "schema_version": "release-metrics-v1",
+  "seed_count": 1,
+  "supported_classes": [
+    "face",
+    "license_plate",
+    "person_body",
+    "nudity",
+    "handwriting",
+    "disability",
+    "medicine",
+    "fingerprint",
+    "signature"
+  ]
+}

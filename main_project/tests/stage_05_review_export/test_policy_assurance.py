@@ -103,3 +103,28 @@ def test_assurance_passes_when_all_independent_attackers_pass(tmp_path: Path) ->
         RenderedAsset(output, 18, 12, report, attack_checks=passed)
     )
     assert assurance.status is AssuranceStatus.PASS
+
+
+def test_attack_runner_marks_findings_failed_and_missing_attacks_uncertain(tmp_path: Path) -> None:
+    source = tmp_path / "source.jpg"
+    assert cv2.imwrite(str(source), np.full((12, 18, 3), 90, dtype=np.uint8))
+    output = tmp_path / "output.png"
+    image = cv2.cvtColor(cv2.imread(str(source)), cv2.COLOR_BGR2RGB)
+    write_metadata_free_redaction(source, output, image, np.ones((12, 18), dtype=np.uint8))
+
+    class FakeProvider:
+        def __init__(self, name: str, findings: list[object]) -> None:
+            self.name = name
+            self.findings = findings
+
+        def analyze(self, _image):
+            return self.findings
+
+    results = AssuranceService().run_attack_checks(
+        output,
+        (FakeProvider("yunet", []), FakeProvider("zxingcpp", [object()])),
+    )
+    assert results["face"] is AssuranceStatus.PASS
+    assert results["barcode"] is AssuranceStatus.FAIL
+    assert results["ocr"] is AssuranceStatus.UNCERTAIN
+    assert results["plate"] is AssuranceStatus.UNCERTAIN

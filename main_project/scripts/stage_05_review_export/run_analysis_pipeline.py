@@ -102,6 +102,11 @@ def main() -> None:
     parser.add_argument("--ppocr-model", type=Path, help="Optional Apache-2.0 PP-OCRv3 ONNX text detector.")
     parser.add_argument("--with-ocr", action="store_true", help="Enable PaddleOCR provider; missing runtime stays explicit.")
     parser.add_argument("--with-barcode", action="store_true", help="Enable ZXing-C++ provider; missing runtime stays explicit.")
+    parser.add_argument(
+        "--with-output-attacks",
+        action="store_true",
+        help="Run configured residual-content detectors on a newly encoded output; missing attacks stay uncertain.",
+    )
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--consent-state", choices=[state.value for state in ConsentState], default=ConsentState.UNKNOWN.value)
     parser.add_argument("--review-completed", action="store_true")
@@ -168,7 +173,13 @@ def main() -> None:
         providers.append(PaddleOCRTextProvider())
     if args.with_barcode:
         providers.append(ZXingBarcodeProvider())
-    service = ReviewExportService(tuple(providers), thresholds)
+    if args.with_output_attacks and not args.output:
+        parser.error("--with-output-attacks requires --output so an encoded asset can be inspected")
+    service = ReviewExportService(
+        tuple(providers),
+        thresholds,
+        attack_providers=tuple(providers) if args.with_output_attacks else (),
+    )
     result = service.run(
         input_path,
         consent_state=ConsentState(args.consent_state),

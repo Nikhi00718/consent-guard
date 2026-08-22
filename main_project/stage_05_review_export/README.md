@@ -29,3 +29,9 @@ The framework-independent command is
 and review candidates without exporting, or accept a reviewer-approved mask for
 a newly encoded output. Missing specialist providers remain explicit and keep
 the decision fail-closed.
+
+When an output path is supplied, `--with-output-attacks` runs the configured
+face, plate, OCR, and barcode detectors against the freshly encoded asset.
+Residual findings fail assurance; missing attack providers become
+`UNCERTAIN`, never a pass. These local detector attacks improve the prototype
+but do not replace independent release-qualified attacker implementations.

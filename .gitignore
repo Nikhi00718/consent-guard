@@ -26,6 +26,7 @@ runs/
 src/consentguard_research.egg-info/
 output/
 reports/full_audit/
+reports/full_audit_v2/
 reports/data_alignment_probe/
 reports/*.jpg
 reports/*.jpeg

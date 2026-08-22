@@ -1,0 +1,208 @@
+{
+  "gates": [
+    {
+      "name": "metrics_schema",
+      "observed": false,
+      "passed": false,
+      "point_estimate": null,
+      "requirement": "valid release-metrics-v1"
+    },
+    {
+      "name": "baseline_map",
+      "observed": 0.2083981845491433,
+      "passed": false,
+      "point_estimate": null,
+      "requirement": ">= 0.223469"
+    },
+    {
+      "name": "overall_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.95"
+    },
+    {
+      "name": "overall_pixel_leakage",
+      "observed": 2.0,
+      "passed": false,
+      "point_estimate": 2.0,
+      "requirement": "95% upper bound <= 0.05"
+    },
+    {
+      "name": "negative_false_positive_rate",
+      "observed": 2.0,
+      "passed": false,
+      "point_estimate": 2.0,
+      "requirement": "95% upper bound <= 0.15"
+    },
+    {
+      "name": "three_seeds",
+      "observed": 1,
+      "passed": false,
+      "point_estimate": null,
+      "requirement": ">= 3"
+    },
+    {
+      "name": "assurance_fail_closed",
+      "observed": false,
+      "passed": false,
+      "point_estimate": null,
+      "requirement": "true"
+    },
+    {
+      "name": "general_face_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.95"
+    },
+    {
+      "name": "general_license_plate_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.95"
+    },
+    {
+      "name": "general_text_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.95"
+    },
+    {
+      "name": "india_face_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.95"
+    },
+    {
+      "name": "india_license_plate_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.95"
+    },
+    {
+      "name": "india_text_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.95"
+    },
+    {
+      "name": "class_disability_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_face_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_fingerprint_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_handwriting_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_license_plate_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_medicine_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_nudity_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_person_body_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    },
+    {
+      "name": "class_signature_pixel_recall",
+      "observed": -1.0,
+      "passed": false,
+      "point_estimate": -1.0,
+      "requirement": "95% lower bound >= 0.90"
+    }
+  ],
+  "release_candidate": false,
+  "schema_valid": false,
+  "schema_version": "release-metrics-v1",
+  "validation_errors": [
+    "sensitive_pixel_recall must be a finite number in [0, 1]",
+    "sensitive_pixel_leakage must be a finite number in [0, 1]",
+    "negative_image_false_positive_rate must be a finite number in [0, 1]",
+    "domain_instance_recall must be an object",
+    "domain_instance_recall.general must be an object",
+    "domain_instance_recall.general.face must be a finite number in [0, 1]",
+    "domain_instance_recall.general.license_plate must be a finite number in [0, 1]",
+    "domain_instance_recall.general.text must be a finite number in [0, 1]",
+    "domain_instance_recall.india must be an object",
+    "domain_instance_recall.india.face must be a finite number in [0, 1]",
+    "domain_instance_recall.india.license_plate must be a finite number in [0, 1]",
+    "domain_instance_recall.india.text must be a finite number in [0, 1]",
+    "class_sensitive_pixel_recall must be an object",
+    "class_sensitive_pixel_recall.face is required",
+    "class_sensitive_pixel_recall.license_plate is required",
+    "class_sensitive_pixel_recall.person_body is required",
+    "class_sensitive_pixel_recall.nudity is required",
+    "class_sensitive_pixel_recall.handwriting is required",
+    "class_sensitive_pixel_recall.disability is required",
+    "class_sensitive_pixel_recall.medicine is required",
+    "class_sensitive_pixel_recall.fingerprint is required",
+    "class_sensitive_pixel_recall.signature is required",
+    "confidence_bounds must be an object",
+    "confidence_bounds.sensitive_pixel_recall must contain lower and upper confidence bounds",
+    "confidence_bounds.sensitive_pixel_leakage must contain lower and upper confidence bounds",
+    "confidence_bounds.negative_image_false_positive_rate must contain lower and upper confidence bounds",
+    "confidence_bounds.domain_instance_recall must be an object",
+    "confidence_bounds.domain_instance_recall.general must be an object",
+    "confidence_bounds.domain_instance_recall.general.face must contain lower and upper confidence bounds",
+    "confidence_bounds.domain_instance_recall.general.license_plate must contain lower and upper confidence bounds",
+    "confidence_bounds.domain_instance_recall.general.text must contain lower and upper confidence bounds",
+    "confidence_bounds.domain_instance_recall.india must be an object",
+    "confidence_bounds.domain_instance_recall.india.face must contain lower and upper confidence bounds",
+    "confidence_bounds.domain_instance_recall.india.license_plate must contain lower and upper confidence bounds",
+    "confidence_bounds.domain_instance_recall.india.text must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall must be an object",
+    "confidence_bounds.class_sensitive_pixel_recall.face must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.license_plate must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.person_body must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.nudity must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.handwriting must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.disability must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.medicine must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.fingerprint must contain lower and upper confidence bounds",
+    "confidence_bounds.class_sensitive_pixel_recall.signature must contain lower and upper confidence bounds"
+  ]
+}

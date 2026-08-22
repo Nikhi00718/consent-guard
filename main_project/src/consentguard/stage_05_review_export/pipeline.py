@@ -46,11 +46,13 @@ class ReviewExportService:
         *,
         assurance: AssuranceService | None = None,
         policy: ReleasePolicy | None = None,
+        attack_providers: tuple[object, ...] = (),
     ) -> None:
         self.orchestrator = AnalysisOrchestrator(providers)  # type: ignore[arg-type]
         self.fusion = EvidenceFusion(thresholds)
         self.assurance = assurance or AssuranceService()
         self.policy = policy or ReleasePolicy()
+        self.attack_providers = tuple(attack_providers)
 
     def run(
         self,
@@ -100,13 +102,16 @@ class ReviewExportService:
                 image.pixels_rgb,
                 approved_mask,
             )
+            resolved_attack_checks = attack_checks
+            if resolved_attack_checks is None and self.attack_providers:
+                resolved_attack_checks = self.assurance.run_attack_checks(destination, self.attack_providers)
             assurance_report = self.assurance.inspect(
                 RenderedAsset(
                     destination,
                     image.width,
                     image.height,
                     rendered,
-                    attack_checks=attack_checks or {},
+                    attack_checks=resolved_attack_checks or {},
                 )
             )
 

@@ -9,6 +9,8 @@ from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 
 from consentguard.stage_04_fusion_calibration.domain import AssuranceCheck, AssuranceReport, AssuranceStatus
+from consentguard.stage_04_fusion_calibration.evidence.base import ProviderUnavailableError
+from consentguard.stage_05_review_export.ingest import normalize_image
 
 
 @dataclass(frozen=True)
@@ -28,6 +30,44 @@ class AssuranceService:
         required_attack_checks: tuple[str, ...] = ("ocr", "barcode", "face", "plate"),
     ) -> None:
         self.required_attack_checks = required_attack_checks
+
+    def run_attack_checks(
+        self,
+        asset_path: str | Path,
+        providers: tuple[object, ...],
+    ) -> dict[str, AssuranceStatus]:
+        """Run configured residual-content detectors on the freshly encoded asset.
+
+        A detector finding is a failed residual-content attack.  A missing
+        provider or runtime error is uncertain, never a pass.  Provider names
+        are mapped to the four assurance categories without storing OCR text.
+        This is a practical local attack harness; independent attack models
+        should still be supplied before a production release.
+        """
+
+        image = normalize_image(asset_path)
+        aliases = {
+            "ocr": {"paddleocr", "paddleocr_onnx"},
+            "barcode": {"zxingcpp"},
+            "face": {"face_maskrcnn", "yunet"},
+            "plate": {"plate_maskrcnn", "plate_yunet"},
+        }
+        by_name = {str(getattr(provider, "name", "")): provider for provider in providers}
+        results: dict[str, AssuranceStatus] = {}
+        for attack_name in self.required_attack_checks:
+            provider = next((by_name[name] for name in aliases.get(attack_name, set()) if name in by_name), None)
+            if provider is None:
+                results[attack_name] = AssuranceStatus.UNCERTAIN
+                continue
+            try:
+                findings = provider.analyze(image)
+            except ProviderUnavailableError:
+                results[attack_name] = AssuranceStatus.UNCERTAIN
+            except Exception:
+                results[attack_name] = AssuranceStatus.FAIL
+            else:
+                results[attack_name] = AssuranceStatus.FAIL if findings else AssuranceStatus.PASS
+        return results
 
     def inspect(self, asset: RenderedAsset) -> AssuranceReport:
         checks = [self._decode_check(asset), self._hash_check(asset), self._metadata_check(asset)]

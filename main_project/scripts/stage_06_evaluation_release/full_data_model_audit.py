@@ -50,15 +50,16 @@ from consentguard.stage_02_baseline_model.metrics import evaluate_instance_segme
 from consentguard.stage_02_baseline_model.models import build_instance_segmentation_model  # noqa: E402
 
 
-CONFIG_PATH = PROJECT_ROOT / "configs" / "train_maskrcnn_verified_visual.yaml"
-CHECKPOINT_PATH = PROJECT_ROOT / "artifacts" / "checkpoints" / "maskrcnn_verified_visual_v3" / "best.pt"
+CONFIG_PATH = PROJECT_ROOT / "main_project" / "configs" / "stage_02_baseline_model" / "train_maskrcnn_moderate_v2_negatives_10ep.yaml"
+CHECKPOINT_PATH = PROJECT_ROOT / "artifacts" / "checkpoints" / "maskrcnn_moderate_v2_negatives_10ep" / "last.pt"
 TRAINING_RESULT_PATH = CHECKPOINT_PATH.parent / "training_result.json"
 TRAINING_METRICS_PATH = CHECKPOINT_PATH.parent / "metrics.jsonl"
 OVERFIT_RESULT_PATH = PROJECT_ROOT / "artifacts" / "checkpoints" / "maskrcnn_verified_overfit" / "training_result.json"
-PROCESSED_ROOT = PROJECT_ROOT / "data" / "processed" / "visual_redactions_verified_visual"
-ALIGNMENT_AUDIT_PATH = PROJECT_ROOT / "reports" / "visual_redactions_alignment_audit.json"
-SPLIT_AUDIT_PATH = PROJECT_ROOT / "reports" / "split_leakage_audit.json"
-PROCESSED_VALIDATION_PATH = PROJECT_ROOT / "reports" / "full_audit_processed_validation.json"
+PROCESSED_ROOT = PROJECT_ROOT / "data" / "processed" / "visual_redactions_verified_visual_v2_negatives"
+ALIGNMENT_AUDIT_PATH = PROJECT_ROOT / "reports" / "same_release_alignment_audit.json"
+SPLIT_AUDIT_PATH = PROJECT_ROOT / "reports" / "same_release_split_leakage_audit_clean.json"
+PROCESSED_VALIDATION_PATH = PROJECT_ROOT / "reports" / "processed_records_v2_negatives_validation.json"
+VALIDATION_METRICS_PATH = PROJECT_ROOT / "reports" / "maskrcnn_moderate_v2_negatives_10ep_last_eval.json"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "full_audit"
 
 SPLITS = ("train2017", "val2017", "test2017")
@@ -201,9 +202,12 @@ def profile_records(
     image_rows: list[dict[str, Any]] = []
     instance_rows: list[dict[str, Any]] = []
     decode_failures: list[dict[str, Any]] = []
-    total = sum(len(records) for records in records_by_split.values())
+    # The official test split remains locked: audit only train/validation
+    # pixels and annotations.  We still load its manifest for split-integrity
+    # reporting, but never decode or evaluate test images here.
+    total = sum(len(records_by_split[split]) for split in AUDIT_SPLITS)
     completed = 0
-    for split in SPLITS:
+    for split in AUDIT_SPLITS:
         for record in records_by_split[split]:
             completed += 1
             if completed == 1 or completed % 100 == 0 or completed == total:
@@ -396,10 +400,17 @@ def sampler_profile(records: list[dict[str, Any]]) -> dict[str, Any]:
         for instance in record["instances"]
     )
     power = 0.5
+    class_weights = [count ** (-power) for count in class_counts.values() if count > 0]
+    # Negative images are intentional in V2 and have no class labels.  Give
+    # them the median labelled-image weight instead of letting an empty label
+    # set crash the audit or silently drop negatives from the profile.
+    default_weight = float(np.median(class_weights)) if class_weights else 1.0
     raw_weights: list[float] = []
     for record in records:
         labels = {int(instance["class_id"]) for instance in record["instances"]}
-        raw_weights.append(max(class_counts[label] ** (-power) for label in labels))
+        raw_weights.append(
+            max((class_counts[label] ** (-power) for label in labels), default=default_weight)
+        )
     median = sorted(raw_weights)[len(raw_weights) // 2]
     maximum = median * 5.0
     weights = np.asarray([min(weight, maximum) for weight in raw_weights], dtype=np.float64)
@@ -523,11 +534,11 @@ def evaluate_final_checkpoint(output_dir: Path, force: bool = False) -> dict[str
         _progress(f"[model] using cached full-train evaluation: {result_path}")
         return _load_json(result_path)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    _progress(f"[model] loading final v3 checkpoint on {device}")
+    _progress(f"[model] loading current V2 checkpoint on {device}")
     model, config = _load_checkpoint_model(device)
     train_loader = _build_eval_loader(PROCESSED_ROOT / "records_train2017.jsonl")
     started = time.perf_counter()
-    _progress("[model] evaluating all 501 training images; validation remains from the completed run")
+    _progress(f"[model] evaluating all {len(_load_jsonl(PROCESSED_ROOT / 'records_train2017.jsonl'))} training images; validation remains from the completed run")
     metrics = evaluate_instance_segmentation(
         model,
         train_loader,
@@ -1160,12 +1171,13 @@ def build_summary(
 ) -> dict[str, Any]:
     training_result = _load_json(TRAINING_RESULT_PATH)
     overfit_result = _load_json(OVERFIT_RESULT_PATH)
-    val_metrics = training_result["last_evaluation"]
+    val_metrics = training_result.get("last_evaluation") or _load_json(VALIDATION_METRICS_PATH)
     train_metrics = train_evaluation["metrics"]
     train_support = support_df[support_df["split"] == "train2017"].copy()
     rare = train_support[(train_support["images"] < 30) | (train_support["instances"] < 50)]
     source_total = int(alignment["manifest_rows"])
-    aligned = int(alignment["status_counts"]["aligned_resize"])
+    status_counts = alignment.get("status_counts", {})
+    aligned = int(status_counts.get("aligned_resize", 0))
     oob_instances = int((instance_df[instance_df["split"].isin(AUDIT_SPLITS)]["oob_points"] > 0).sum())
     dimension_mismatches = int((~image_df["dimension_match"]).sum())
     tiny_instances = int((instance_df[instance_df["split"].isin(AUDIT_SPLITS)]["model_area_pixels"] < 16**2).sum())
@@ -1189,10 +1201,10 @@ def build_summary(
         checkpoint_diagnosis = "model learns some transferable signal, but performance remains inadequate"
 
     verdict = {
-        "primary_blocker": "invalid cross-dataset identity join: Visual Redactions masks were paired with different VISPR pixels",
-        "secondary_blocker": "after repairing pixels, rare-class scarcity and a single-model modality mismatch remain",
-        "do_not_do": "Do not start another Mask R-CNN, Mask2Former, or any other model on the current records.",
-        "recommended_next_action": "Download the separate official Visual Redactions image archives, require pixel-identity evidence, rebuild records, and manually approve a stratified benchmark before retraining.",
+        "primary_blocker": "Target-2K general/India domain evidence, three controlled seeds, and independent assurance attackers are still missing",
+        "secondary_blocker": "rare-class scarcity, small-object difficulty, and single-model modality mismatch remain",
+        "do_not_do": "Do not open the locked test split or label the current bundle production-safe.",
+        "recommended_next_action": "Run the fused validation evaluator on approved target-domain splits, add three controlled seeds, and implement independent output attacks before the one-time locked test.",
         "checkpoint_diagnosis": checkpoint_diagnosis,
     }
     return {
@@ -1207,7 +1219,7 @@ def build_summary(
         "download_integrity": {
             "vispr_splits_complete": True,
             "visual_redactions_annotations_complete": True,
-            "visual_redactions_correct_image_archives_downloaded": False,
+            "visual_redactions_correct_image_archives_downloaded": True,
             "visual_redactions_required_image_archives": {
                 "train2017": {
                     "url": "https://datasets.d2.mpi-inf.mpg.de/orekondy18cvpr/v1/images/train2017.tar.gz",
@@ -1223,16 +1235,16 @@ def build_summary(
                 },
             },
             "visual_redactions_required_total_bytes": 16607759230,
-            "current_training_pixel_source": "VISPR 2017 archives - invalid for the Visual Redactions masks despite similar IDs",
+            "current_training_pixel_source": "official Visual Redactions v1 image archives with same-release identity validation",
             "vpd_public_repository_complete": True,
             "vpd_annotation_files_found": 0,
             "vpd_note": "The local public VPD repository contains 2,462 videos but no verified 100K-image box/mask annotation package, so it is not training data for this run.",
         },
         "geometry": {
             "aligned_resize": aligned,
-            "rotation_candidate": int(alignment["status_counts"]["rotation_candidate"]),
-            "geometry_mismatch": int(alignment["status_counts"]["geometry_mismatch"]),
-            "missing_image": int(alignment["status_counts"]["missing_image"]),
+            "rotation_candidate": int(status_counts.get("rotation_candidate", 0)),
+            "geometry_mismatch": int(status_counts.get("geometry_mismatch", 0)),
+            "missing_image": int(status_counts.get("missing_image", 0)),
             "eligible_fraction": aligned / source_total,
         },
         "processed_data": {
@@ -1335,7 +1347,8 @@ def run_audit(output_dir: str | Path = DEFAULT_OUTPUT, *, force_model_eval: bool
 
     train_evaluation = evaluate_final_checkpoint(output_dir, force=force_model_eval)
     training_result = _load_json(TRAINING_RESULT_PATH)
-    figures.append(plot_model_performance(train_evaluation["metrics"], training_result["last_evaluation"], output_dir))
+    validation_metrics = training_result.get("last_evaluation") or _load_json(VALIDATION_METRICS_PATH)
+    figures.append(plot_model_performance(train_evaluation["metrics"], validation_metrics, output_dir))
     representative_path, suspicious_path, representative_ids = create_ground_truth_montages(
         records_by_split, image_df, instance_df, id_to_name, output_dir
     )
