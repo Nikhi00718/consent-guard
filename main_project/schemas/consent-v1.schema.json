@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://consentguard.local/schemas/consent-v1.schema.json",
+  "title": "ConsentGuard consent scope",
+  "type": "object",
+  "required": ["media_version_digest", "share_context_digest", "operation", "audience", "purpose"],
+  "additionalProperties": false,
+  "properties": {
+    "media_version_digest": {"type": "string", "minLength": 1},
+    "share_context_digest": {"type": "string", "minLength": 1},
+    "operation": {"type": "string", "minLength": 1},
+    "audience": {"type": "string", "minLength": 1},
+    "purpose": {"type": "string", "minLength": 1},
+    "state": {"enum": ["UNKNOWN", "PENDING", "GRANTED", "DENIED", "REVOKED", "EXPIRED"]},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "revoked_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}
