@@ -54,6 +54,62 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def _select_records(
+    records: list[dict[str, Any]],
+    *,
+    max_images: int | None,
+    seed: int,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Select a deterministic class/negative-stratified validation sample."""
+
+    if max_images is None or max_images >= len(records):
+        return records, {
+            "strategy": "full_records",
+            "seed": seed,
+            "requested": max_images,
+            "selected": len(records),
+        }
+    if max_images < 1:
+        raise ValueError("max_images must be positive")
+
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    for record in records:
+        labels = sorted({str(instance.get("class_id")) for instance in record.get("instances", [])})
+        key = "negative" if not labels else "classes:" + ",".join(labels)
+        buckets.setdefault(key, []).append(record)
+    rng = random.Random(seed)
+    for bucket in buckets.values():
+        rng.shuffle(bucket)
+
+    keys = sorted(buckets)
+    selected: list[dict[str, Any]] = []
+    # Give each represented bucket one image before distributing the remainder.
+    for key in keys:
+        if len(selected) >= max_images:
+            break
+        selected.append(buckets[key].pop())
+    while len(selected) < max_images:
+        available = [key for key in keys if buckets[key]]
+        if not available:
+            break
+        for key in available:
+            if len(selected) >= max_images:
+                break
+            selected.append(buckets[key].pop())
+    rng.shuffle(selected)
+    selected_bucket_counts: Counter[str] = Counter()
+    for record in selected:
+        labels = sorted({str(instance.get("class_id")) for instance in record.get("instances", [])})
+        selected_bucket_counts["negative" if not labels else "classes:" + ",".join(labels)] += 1
+    return selected, {
+        "strategy": "stratified_ground_truth_class_and_negative",
+        "seed": seed,
+        "requested": max_images,
+        "selected": len(selected),
+        "bucket_counts": dict(sorted(selected_bucket_counts.items())),
+    }
+
+
 def _polygon_mask(instance: dict[str, Any], *, width: int, height: int) -> np.ndarray:
     mask = np.zeros((height, width), dtype=np.uint8)
     for polygon in instance.get("polygons", []):
@@ -116,8 +172,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     if "test" in records_path.name.lower() or "test2017" in str(records_path).lower():
         raise ValueError("The fused evaluator refuses test-split records")
     records = _read_jsonl(records_path)
-    if args.max_images is not None:
-        records = records[: args.max_images]
+    records, sampling = _select_records(records, max_images=args.max_images, seed=args.seed)
     if not records:
         raise ValueError("No validation records found")
 
@@ -212,6 +267,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "records_path": str(records_path),
         "records_sha256": _sha256(records_path),
         "evaluated_images": processed,
+        "sampling": sampling,
         "device": str(device),
         "threshold_profile": {
             "path": str(thresholds.profile.source_path),

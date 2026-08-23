@@ -35,3 +35,6 @@ per-class recall, pixel leakage, negative-image FPR, bootstrap intervals, and
 provider availability. A one-image baseline smoke report is checked in at
 `reports/fused_validation_v2_1_baseline.json`; a full release report still
 requires the approved target-domain manifests and specialist evidence.
+When `--max-images` is used, records are selected deterministically across
+ground-truth class combinations and negative images, and the sampling seed and
+bucket counts are written into the report.
