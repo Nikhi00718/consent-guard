@@ -18,3 +18,9 @@ Stage 06 gates pass.
 The current validation-only bundle is recorded in
 `reports/release_bundle_manifest.json`; the model card and data sheet live in
 `stage_06_evaluation_release/`.
+
+Kaggle execution is prepared but not submitted from this workspace: the
+train/validation data packer and checkpointed multi-component runner live in
+`scripts/stage_02_baseline_model/`, with the runbook in
+`stage_06_evaluation_release/KAGGLE_TRAINING.md`. Kaggle account credentials are
+intentionally not stored in the repository.
