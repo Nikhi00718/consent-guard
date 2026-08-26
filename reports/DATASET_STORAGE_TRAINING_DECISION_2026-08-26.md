@@ -40,7 +40,7 @@ Free space increased from 83.51 GiB to 105.34 GiB after checkpoint cleanup.
 | Global privacy localizer | Mask R-CNN ResNet-50 FPN v2 | Visual Redactions V2, about 8,266 project records; 34.08 GiB local source tree | Small/old research domain, restricted rights, class imbalance, weak India/mobile coverage | Preserve as comparator. Use BIV support only after protocol review; keep all 1,056 BIV query images untouched for external evaluation. Later add a rights-audited Open Images subset and Target-2K. | Yes, after the new training manifest is frozen |
 | Face primary specialist | Faster R-CNN ResNet-50 FPN v2 | WIDER FACE Kaggle run: 12,880 train images/156,985 boxes and 3,226 validation images/39,111 boxes | Almost no negative training images; research-restricted license; benchmark-to-phone domain gap; current mAP 0.2947 | Add staged hard negatives and Target-2K face slices. Do not add identity-recognition corpora. | Yes, retrain/fine-tune after hard negatives exist |
 | Face safety net | OpenCV YuNet | Provider checkpoint originally trained outside this repository, using WIDER FACE lineage | It is a generic face localizer and is not India/mobile release evidence | Keep as an independent lightweight recall safety net. Calibrate threshold and box expansion on ConsentGuard validation. | No. We are not training YuNet in this repository |
-| Plate primary specialist | Faster R-CNN ResNet-50 FPN v2 | Current Kaggle source: 1,617 train images/1,728 boxes and 404 validation images/440 boxes; no negative images; final mAP 0.7702 | Small corpus, weak/pseudo-label provenance, no negatives, not sufficient release evidence | Pretrain/fine-tune with official CCPD and INDO-ALPR, then validate on rights-controlled Indian Target-2K. Add vehicle/no-plate hard negatives. | Yes; this is the highest-value retraining target |
+| Plate primary specialist | Faster R-CNN ResNet-50 FPN v2 | Current Kaggle source: 1,617 train images/1,728 boxes and 404 validation images/440 boxes; no negative images; final mAP 0.7702 | Small corpus, weak/pseudo-label provenance, no negatives, not sufficient release evidence | Pretrain/fine-tune with official CCPD, then validate on rights-controlled Indian Target-2K. Add vehicle/no-plate hard negatives. INDO-ALPR is excluded from direct detector training because its portal assets are predominantly plate crops without localization boxes. | Yes; this is the highest-value retraining target |
 | Plate safety net | LPD-YuNet/provider checkpoint | Fixed provider weights; upstream training volume is not pinned in this repository | Chinese-domain bias and unclear direct India evidence | Keep only as an independent proposal source until target validation. | Not now; train the Faster R-CNN branch instead |
 | Handwriting specialist | Mask R-CNN ResNet-50 FPN v2 | HierText: 8,281 train scenes/34,200 handwritten regions and 1,724 validation scenes/6,667 regions; current mask mAP 0.1577 | Small/thin text regions, many negative scenes, limited Indic representation | Keep HierText for scene localization. Add IIIT Indic word crops for representation/synthetic scene generation, then Target-2K phone scenes. | Yes, after Indic data and scene synthesis are prepared |
 | Printed-text safety net | PP-OCRv3 DB detector | Fixed ONNX provider checkpoint | Upstream training corpus/version is not fully pinned; may miss tiny, rotated, blurred, or Indic text | Evaluate first. Download TextOCR only if geometry tests show a real deficit; preserve Open Images rights metadata. | Do not retrain yet |
@@ -54,7 +54,7 @@ Free space increased from 83.51 GiB to 105.34 GiB after checkpoint cleanup.
 | BIV-Priv-Seg | 1,072 images total; 932 annotated private instances | Installed and SHA-256 verified; 0.944 GiB compressed locally | Support set is candidate training data; query set is external evaluation only |
 | CCPD2020 | 11,776 images; 907,711,344 bytes (0.85 GiB archive) | Installed, official MD5 verified, and extracted; 5,769 train + 1,001 validation records converted | Plate pretraining and difficult-condition robustness; never Indian validation |
 | CCPD2019 | 13,164,924,944 bytes (12.26 GiB archive) | Download compressed and verify; do not extract all until a subset is selected | Large plate pretraining pool (>300,000 images across CCPD releases) |
-| INDO-ALPR | 6,174 images | Official Mendeley download; exact archive size must be read from the repository | Rights-clear additional plate domain |
+| INDO-ALPR | Landing page says 6,174 images; official API exposes 1,000 original train + 1,000 original test files | 197.51 MiB canonical originals installed and 2,000/2,000 SHA-256 verified. The 7,631,061,443-byte full ZIP was rejected because it is dominated by pre-generated augmentations. | Quarantined plate-crop representation/synthetic source; not direct localization training |
 | IIIT-INDIC-HW-WORDS | Roughly 1.09 million word crops across 10 scripts | Devanagari installed first: 69,853 measured train images + 1,000 validation images; 1.475 GiB compressed and 1.49 GiB extracted | Indic representation and synthetic-scene source, not full-scene validation |
 | TextOCR | 28,134 images and 903,069 word annotations | 7,072,297,970-byte (6.59 GiB) image archive; conditional, not immediate | Printed-text retraining only if PP-OCR evaluation fails |
 | HierText images | 11,639 scenes total | 3.65 GiB compressed for train/validation/test; avoid duplicating locally unless a new run needs it | Existing handwriting scene training/reference |
@@ -67,7 +67,9 @@ Free space increased from 83.51 GiB to 105.34 GiB after checkpoint cleanup.
 2. Download and validate CCPD2020, then extract it for converter tests.
 3. Download CCPD2019 as a compressed, resumable archive; select a 25k-50k
    sample before extraction/training.
-4. Acquire INDO-ALPR from its DOI record and audit its native annotations.
+4. Acquire only canonical INDO-ALPR originals from its DOI record and audit
+   their geometry before admitting them. The audit found predominantly plate
+   crops and no localization boxes, so the set remains outside detector data.
 5. Acquire the most relevant IIIT Indic script first instead of all scripts at
    once. Expand only if the first representation experiment helps.
 6. Do not duplicate WIDER FACE or HierText locally just because the Kaggle run
@@ -79,7 +81,8 @@ Free space increased from 83.51 GiB to 105.34 GiB after checkpoint cleanup.
 ## Training sequence
 
 1. Run data converters and 10-50-image laptop overfit tests.
-2. Train the plate Faster R-CNN on a controlled CCPD/INDO pretraining mix.
+2. Train the plate Faster R-CNN on CCPD2020; do not mix INDO plate crops into
+   detection training without a separately reviewed compositing protocol.
 3. Fine-tune and validate the plate branch on rights-controlled Indian data.
 4. Retrain the face Faster R-CNN only after negative/hard-case data is ready;
    retain YuNet as a separate fallback.

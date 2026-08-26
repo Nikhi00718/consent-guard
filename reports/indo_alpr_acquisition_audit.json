@@ -1,0 +1,35 @@
+{
+  "schema_version": "consentguard-dataset-acquisition-audit-v1",
+  "dataset": "INDO-ALPR",
+  "version": 1,
+  "doi": "10.17632/j3256db3fz.1",
+  "canonical_source": "https://data.mendeley.com/datasets/j3256db3fz/1",
+  "license": "CC-BY-4.0",
+  "landing_page_published_images": 6174,
+  "full_zip": {
+    "bytes": 7631061443,
+    "sha256": "e425ec0d449d1d21e178633c42a16d32bd5a03126e0acdf332721db78a467fe3",
+    "downloaded": false,
+    "reason_excluded": "Dominated by portal-supplied augmentation folders; canonical originals were acquired individually instead."
+  },
+  "canonical_originals": {
+    "train_files": 1000,
+    "test_files": 1000,
+    "total_files": 2000,
+    "total_mib": 197.51,
+    "per_file_sha256_checked": 2000,
+    "sha256_mismatches": 0,
+    "minimum_width": 34,
+    "maximum_width": 4032,
+    "minimum_height": 12,
+    "maximum_height": 3024,
+    "plate_crop_like_aspect_ratio_ge_2": 1734,
+    "full_scene_like_width_ge_640_height_ge_360": 54
+  },
+  "admission_decision": {
+    "detector_training_allowed": false,
+    "test_split_used_for_training": false,
+    "status": "quarantined",
+    "reason": "The official assets are predominantly plate crops and expose no localization boxes. They cannot directly supervise Faster R-CNN localization."
+  }
+}

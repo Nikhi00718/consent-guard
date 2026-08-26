@@ -56,17 +56,20 @@ sources:
 
   plate_augment_indo_alpr:
     dataset: INDO-ALPR
-    purpose: tropical plate-domain augmentation
+    purpose: plate-crop representation or audited synthetic-compositing research
     access: official_mendeley_download
     canonical_record: https://data.mendeley.com/datasets/j3256db3fz/1
     doi: 10.17632/j3256db3fz.1
     download_url: https://data.mendeley.com/public-api/zip/j3256db3fz/download/1
-    published_download_size: 7.11 GB
+    full_zip_bytes: 7631061443
+    full_zip_sha256: e425ec0d449d1d21e178633c42a16d32bd5a03126e0acdf332721db78a467fe3
     published_images: 6174
     license: CC-BY-4.0
-    production_eligible: true
-    caveat: preserve native annotations and audit them before conversion
-    test_usage: none
+    production_eligible: false
+    caveat: portal originals are predominantly plate crops and expose no localization boxes; never feed them directly to the detector
+    local_acquisition: 1000 original train files and 1000 original test files, all SHA-256 verified
+    excluded_download: 7.11 GiB full bundle dominated by pre-generated augmentation folders
+    test_usage: excluded
 
   handwriting:
     dataset: HierText
