@@ -182,7 +182,11 @@ def load_training_config(path: str | Path, *, require_validation_data: bool = Tr
     if require_validation_data and evaluation_enabled and val_path.stat().st_size == 0:
         raise ConfigError(f"Validation records file is empty: {val_path}")
 
-    if values["model"]["name"] not in {"maskrcnn_resnet50_fpn_v2", "maskrcnn_resnet50_fpn"}:
+    if values["model"]["name"] not in {
+        "fasterrcnn_resnet50_fpn_v2",
+        "maskrcnn_resnet50_fpn_v2",
+        "maskrcnn_resnet50_fpn",
+    }:
         raise ConfigError(f"Unsupported model.name: {values['model']['name']}")
     for section, field in (
         ("training", "epochs"),

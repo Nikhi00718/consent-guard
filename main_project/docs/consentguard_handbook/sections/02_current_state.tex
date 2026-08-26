@@ -12,8 +12,8 @@
 \midrule
 \endhead
 01 - Data & \statuspill{CGGreen}{IMPLEMENTED} & V2 contains 8,266 validated records and 26,992 instances. Training contains 3,785 images, including 726 profile-negative images. \\
-02 - Baseline & \statuspill{CGGreen}{IMPLEMENTED} & \file{baseline-v0.1} is frozen and verified. The negative-inclusive training configuration is ready, but that new run has not occurred. \\
-03 - Specialists & \statuspill{CGSaffron!80!black}{SCAFFOLDED} & Adapters exist for YuNet, plate Faster R-CNN, PaddleOCR, and ZXing. Required weights, optional environments, licensed plate data, and provider evaluation remain external gates. \\
+02 - Baseline & \statuspill{CGGreen}{IMPLEMENTED} & \file{baseline-v0.1} is frozen and verified. V2 negative-inclusive transport was repaired with a 48-file private patch dataset; Baseline Kaggle version 3 is running and remains a candidate until its logs and metrics are complete. \\
+03 - Specialists & \statuspill{CGSaffron!80!black}{BASELINES TRAINED} & Face, plate, and handwriting specialist checkpoints completed on Kaggle. YuNet, PaddleOCR, and ZXing are integrated as provider adapters; they are not claimed as newly trained models. \\
 04 - Fusion & \statuspill{CGTide}{UNCALIBRATED} & Evidence types, geometry conversion, provenance, thresholds, fusion, unavailable-provider states, and tests exist. Threshold values are candidates, not release-calibrated rules. \\
 05 - Review/export & \statuspill{CGTide}{PROTOTYPE} & Normalization, manual masks, rendering, policy, and assurance paths exist. The complete reviewer workflow and independent attack suite require integration testing. \\
 06 - Release & \statuspill{CGRose}{BLOCKED} & Target-domain data, trained specialists, frozen threshold profiles, three-seed results, robustness tests, and locked-test evidence are missing. \\
@@ -117,5 +117,26 @@ Three public-domain images outside training exposed important behavior:
 These checks are not a benchmark, and they must never be trained on. Their role is permanent qualitative regression testing: after each release candidate, run the same images and compare the visible failure pattern.
 
 \begin{warningbox}[Current operating status]
-There is no Kaggle job running and no V2 training run in progress. The Kaggle bundle is prepared only. Specialist providers must report themselves as unavailable when their dependencies or weights are missing; an unavailable provider must never be mistaken for ``no sensitive content found.''
+The specialist Kaggle jobs completed, but their scores are research baselines rather than release evidence. Baseline Kaggle version 3 is currently running after the mirror mismatch was fixed. Specialist providers must report themselves as unavailable when their dependencies or weights are missing; an unavailable provider must never be mistaken for ``no sensitive content found.''
 \end{warningbox}
+
+\section{Completed specialist runs}
+
+The following results are the current evidence available from the Kaggle runs. They show which branches are promising and which require more data or training; they do not unlock the test split or the release gates.
+
+\begin{longtable}{@{}L{31mm}L{36mm}L{26mm}L{29mm}L{35mm}@{}}
+\toprule
+\textbf{Branch} & \textbf{Architecture and data} & \textbf{Epochs} & \textbf{Best metric} & \textbf{Interpretation} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Branch} & \textbf{Architecture and data} & \textbf{Epochs} & \textbf{Best metric} & \textbf{Interpretation} \\
+\midrule
+\endhead
+Face & Faster R-CNN ResNet-50 FPN v2; WIDER FACE & 10 & box mAP 0.2947; AP50 0.5323 & Weak baseline; small/occluded/domain-shifted faces remain difficult. \\
+Plate & Faster R-CNN ResNet-50 FPN v2; Indian plate data & 30 & box mAP 0.7781; AP50 0.9857 & Strongest specialist baseline; still needs India-first held-out validation. \\
+Handwriting & Mask R-CNN ResNet-50 FPN v2; HierText handwritten subset & 15 & mask mAP 0.1577; box mAP 0.1793 & Weak baseline; line-only labels and scene mismatch limit coverage. \\
+\bottomrule
+\end{longtable}
+
+The face and handwriting numbers are not evidence that Kaggle is inadequate. They are evidence that a short run, generic image domain, and limited localization data are inadequate for the target problem. The next experiments should change resolution, target-domain data, and training duration one variable at a time.

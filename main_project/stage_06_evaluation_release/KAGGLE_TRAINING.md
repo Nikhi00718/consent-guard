@@ -13,8 +13,8 @@ $env:PYTHONPATH='C:\consentGuard\main_project\src'
 .venv\Scripts\python.exe main_project/scripts/stage_02_baseline_model/prepare_kaggle_data.py
 ```
 
-The manifest covers 5,361 unique train/validation images (about 10.1 GiB),
-all specialist records, and no test records. To materialize the package for a
+The manifest covers 5,361 unique baseline train/validation images (about 10.1 GiB)
+and no test records. Specialist models deliberately use separate sources. To materialize the package for a
 private Kaggle Dataset, add `--copy --dataset-dir <directory>` and upload that
 directory as a private Dataset. Do not upload the locked test split.
 
@@ -32,7 +32,11 @@ python main_project/scripts/stage_02_baseline_model/run_kaggle_training.py \
   --data-root /kaggle/input/consentguard-v2-trainval
 ```
 
-Repeat with `face`, `plate`, and `handwriting`. For finalist evidence, repeat
+Repeat with `face`, `plate`, and `handwriting`. Supply WIDER FACE with
+`--face-root`, the Indian plate Kaggle dataset with `--plate-root`, and the
+official HierText train/validation files with `--handwriting-root`. The helper
+`notebooks/kaggle/consentguard_train.py` attaches/downloads these sources.
+For finalist evidence, repeat
 each component with seeds `1337 2027 31415` in separate checkpointed sessions.
 The runner writes an atomic run manifest, per-run logs, and checkpoints under
 `artifacts/`.
@@ -40,6 +44,18 @@ The runner writes an atomic run manifest, per-run logs, and checkpoints under
 `--component all` exists for deliberate experiments, but it is not the default:
 the handbook requires one justified experiment per free GPU session and
 checkpoint/resume support.
+
+The prepared publisher creates separate `baseline`, `face`, `plate`, and
+`handwriting` kernels so a Kaggle time limit cannot erase every component in a
+single run:
+
+```powershell
+.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\publish_kaggle_assets.py `
+  --username YOUR_KAGGLE_USERNAME --upload-datasets --push-kernel
+```
+
+The command requires a private `C:\Users\atnik\.kaggle\kaggle.json` credential;
+never add that file to the repository.
 
 ## Important limits
 
@@ -49,3 +65,5 @@ checkpoint/resume support.
   throughput without a multi-GPU launcher.
 - Target-2K general/India data still requires licensing and an approved frozen
   manifest before it can enter release evidence.
+- WIDER FACE and HierText are research-license sources in this plan. Their
+  checkpoints cannot be relabeled as production-ready models.

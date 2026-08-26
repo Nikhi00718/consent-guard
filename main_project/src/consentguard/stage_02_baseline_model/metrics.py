@@ -88,7 +88,7 @@ def _mean_valid(values: np.ndarray) -> float:
     return float(valid.mean()) if valid.size else -1.0
 
 
-def _segmentation_per_class(
+def _per_class(
     evaluator: Any,
     class_map: dict[str, int] | None,
 ) -> tuple[list[int], dict[str, dict[str, float | int]]]:
@@ -149,6 +149,7 @@ def evaluate_instance_segmentation(
     annotations_coco: list[dict[str, Any]] = []
     bbox_detections_coco: list[dict[str, Any]] = []
     segmentation_detections_coco: list[dict[str, Any]] = []
+    prediction_has_masks: bool | None = None
     observed_categories: set[int] = set()
     annotation_id = 1
     batches = 0
@@ -209,16 +210,16 @@ def evaluate_instance_segmentation(
             # TorchVision orders detections by confidence. COCO's standard
             # summary uses at most 100 detections per image.
             keep = keep[:max_detections_per_image]
+            current_has_masks = "masks" in prediction
+            if prediction_has_masks is None:
+                prediction_has_masks = current_has_masks
+            elif prediction_has_masks != current_has_masks:
+                raise RuntimeError("Model returned masks for only part of the evaluation set")
             for prediction_index in keep.tolist():
                 class_id = int(prediction["labels"][prediction_index].item())
                 if class_id == 0:
                     continue
                 observed_categories.add(class_id)
-                mask = (
-                    prediction["masks"][prediction_index, 0].detach().cpu().numpy()
-                    >= 0.5
-                )
-                rle = _compressed_rle(mask_utils, mask)
                 score = float(scores[prediction_index].item())
                 bbox_detections_coco.append(
                     {
@@ -233,14 +234,20 @@ def evaluate_instance_segmentation(
                 # Keep segmentation detections separate from bounding-box
                 # detections. COCO loadRes otherwise assigns bbox area to a
                 # joint result, which makes segmentation area buckets wrong.
-                segmentation_detections_coco.append(
-                    {
-                        "image_id": image_id,
-                        "category_id": class_id,
-                        "segmentation": rle,
-                        "score": score,
-                    }
-                )
+                if current_has_masks:
+                    mask = (
+                        prediction["masks"][prediction_index, 0].detach().cpu().numpy()
+                        >= 0.5
+                    )
+                    rle = _compressed_rle(mask_utils, mask)
+                    segmentation_detections_coco.append(
+                        {
+                            "image_id": image_id,
+                            "category_id": class_id,
+                            "segmentation": rle,
+                            "score": score,
+                        }
+                    )
             images_seen += 1
         batches += 1
 
@@ -262,35 +269,40 @@ def evaluate_instance_segmentation(
         "annotations": annotations_coco,
         "categories": categories,
     }
-    bbox_metrics, _ = _run_coco_eval(
+    bbox_metrics, bbox_evaluator = _run_coco_eval(
         COCO,
         COCOeval,
         ground_truth_dataset,
         bbox_detections_coco,
         "bbox",
     )
-    segmentation_metrics, segmentation_evaluator = _run_coco_eval(
-        COCO,
-        COCOeval,
-        ground_truth_dataset,
-        segmentation_detections_coco,
-        "segm",
-    )
     result: dict[str, Any] = {
         **bbox_metrics,
-        **segmentation_metrics,
-        "primary_map": segmentation_metrics["segm_map"],
-        "primary_metric": "segm_map",
+        "primary_map": bbox_metrics["bbox_map"],
+        "primary_metric": "bbox_map",
         "evaluated_images": images_seen,
         "evaluated_batches": batches,
         "ground_truth_instances": len(annotations_coco),
         "retained_predictions": len(bbox_detections_coco),
         "score_threshold": score_threshold,
         "max_detections_per_image": max_detections_per_image,
-        "mask_storage": "coco_compressed_rle",
+        "mask_storage": "coco_compressed_rle" if prediction_has_masks else "not_applicable_box_detector",
     }
+    primary_evaluator = bbox_evaluator
+    if prediction_has_masks:
+        segmentation_metrics, segmentation_evaluator = _run_coco_eval(
+            COCO,
+            COCOeval,
+            ground_truth_dataset,
+            segmentation_detections_coco,
+            "segm",
+        )
+        result.update(segmentation_metrics)
+        result["primary_map"] = segmentation_metrics["segm_map"]
+        result["primary_metric"] = "segm_map"
+        primary_evaluator = segmentation_evaluator
     if class_metrics:
-        classes, per_class = _segmentation_per_class(segmentation_evaluator, class_map)
+        classes, per_class = _per_class(primary_evaluator, class_map)
         result["classes"] = classes
         result["per_class"] = per_class
     return result

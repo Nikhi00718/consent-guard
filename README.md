@@ -159,6 +159,12 @@ result, and writes a sidecar audit report containing hashes and geometry only.
 - `TRAINING_SETUP_REPORT.md` — measured readiness evidence and final commands.
 - `ConsentGuard_Final_Research_Design.md` — complete research and safety plan.
 
+For an automatic local research preview, install `.[app]` and run
+`main_project/scripts/stage_05_review_export/run_demo_app.py`. The UI accepts an
+uploaded/webcam image, lets the user select model branches and privacy groups,
+and shows fused detection and redaction previews. It is not a production-safe
+export path; the manual review and assurance gate remains authoritative.
+
 Dataset media, model checkpoints, and generated outputs are intentionally
 ignored by version control and must not be redistributed without their original
 licenses and research-use terms.

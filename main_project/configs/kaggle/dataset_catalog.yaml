@@ -1,0 +1,62 @@
+schema_version: consentguard-training-sources-v1
+policy:
+  test_split_locked: true
+  allow_cross_model_source_reuse: false
+  release_claims_require_target_2k: true
+
+sources:
+  baseline:
+    dataset: visual_redactions_v1
+    purpose: broad privacy instance segmentation
+    access: private_kaggle_dataset
+    kaggle_slug: null
+    license: research dataset terms; preserve the bundled source notice
+    train_split: train2017
+    validation_split: val2017
+    test_split: test2017
+    test_usage: locked
+
+  face:
+    dataset: WIDER_FACE
+    purpose: face bounding-box localization and safety coverage
+    access: public_kaggle_dataset
+    kaggle_slug: aiacademymaterials/wider-face-detection
+    license: CC-BY-NC-ND-4.0 on the selected Kaggle mirror
+    production_eligible: false
+    train_split: train
+    validation_split: val
+    test_usage: excluded
+
+  plate:
+    dataset: Indian License Plates with Labels
+    purpose: India-specific license-plate localization
+    access: public_kaggle_dataset
+    kaggle_slug: kedarsai/indian-license-plates-with-labels
+    license: CC0 on the Kaggle dataset card
+    production_eligible: false
+    caveat: mixed web provenance and pseudo-labels require independent target validation
+    train_split: deterministic_80_percent
+    validation_split: deterministic_20_percent
+    test_usage: none
+
+  handwriting:
+    dataset: HierText
+    purpose: handwritten and scene-text polygon localization
+    access: official_public_download
+    image_train_url: https://open-images-dataset.s3.amazonaws.com/ocr/train.tgz
+    image_validation_url: https://open-images-dataset.s3.amazonaws.com/ocr/validation.tgz
+    annotation_train_url: https://raw.githubusercontent.com/google-research-datasets/hiertext/main/gt/train.jsonl.gz
+    annotation_validation_url: https://raw.githubusercontent.com/google-research-datasets/hiertext/main/gt/validation.jsonl.gz
+    license: CC-BY-SA-4.0
+    production_eligible: false
+    train_split: train
+    validation_split: validation
+    test_usage: excluded
+
+  barcode:
+    dataset: generated_barcode_robustness_suite
+    purpose: ZXing decode and residual-content assurance tests
+    access: generated_in_notebook
+    license: generated test fixtures
+    trainable_model: false
+    test_usage: validation-only synthetic attacks

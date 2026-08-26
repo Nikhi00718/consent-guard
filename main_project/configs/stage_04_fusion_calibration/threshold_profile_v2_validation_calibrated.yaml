@@ -78,6 +78,14 @@ rules:
   expansion_fraction: 0.12
   dilation_pixels: 4
   mandatory_review: true
+- provider: face_fasterrcnn
+  privacy_class: face
+  score_threshold: 0.2
+  min_area_pixels: 16
+  expansion_fraction: 0.12
+  dilation_pixels: 4
+  mandatory_review: true
+  experimental: true
 - provider: plate_yunet
   privacy_class: license_plate
   score_threshold: 0.8

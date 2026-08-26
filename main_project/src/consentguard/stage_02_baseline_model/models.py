@@ -16,7 +16,11 @@ from consentguard.shared.paths import project_path
 os.environ.setdefault("TORCH_HOME", str(project_path("data/cache/torch")))
 
 
-SUPPORTED_MODELS = {"maskrcnn_resnet50_fpn_v2", "maskrcnn_resnet50_fpn"}
+SUPPORTED_MODELS = {
+    "fasterrcnn_resnet50_fpn_v2",
+    "maskrcnn_resnet50_fpn_v2",
+    "maskrcnn_resnet50_fpn",
+}
 
 
 class ClassAgnosticMaskRCNNPredictor(nn.Module):
@@ -66,8 +70,10 @@ def build_instance_segmentation_model(
 
     try:
         from torchvision.models.detection import (
+            FasterRCNN_ResNet50_FPN_V2_Weights,
             MaskRCNN_ResNet50_FPN_V2_Weights,
             MaskRCNN_ResNet50_FPN_Weights,
+            fasterrcnn_resnet50_fpn_v2,
             maskrcnn_resnet50_fpn,
             maskrcnn_resnet50_fpn_v2,
         )
@@ -113,7 +119,14 @@ def build_instance_segmentation_model(
         if model_config.get(config_key) is not None:
             shared_kwargs[argument_name] = int(model_config[config_key])
 
-    if name == "maskrcnn_resnet50_fpn_v2":
+    if name == "fasterrcnn_resnet50_fpn_v2":
+        weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT if pretrained else None
+        model = fasterrcnn_resnet50_fpn_v2(
+            weights=weights,
+            weights_backbone=None,
+            **shared_kwargs,
+        )
+    elif name == "maskrcnn_resnet50_fpn_v2":
         weights = MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT if pretrained else None
         # Pass ``weights_backbone`` explicitly so builder defaults cannot cause
         # a surprise network download in offline smoke/checkpoint-loading runs.
@@ -132,15 +145,16 @@ def build_instance_segmentation_model(
 
     box_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(box_features, num_classes)
-    mask_features = model.roi_heads.mask_predictor.conv5_mask.in_channels
-    if bool(model_config.get("class_agnostic_mask", False)):
-        model.roi_heads.mask_predictor = ClassAgnosticMaskRCNNPredictor(
-            mask_features,
-            256,
-            num_classes,
-        )
-    else:
-        model.roi_heads.mask_predictor = MaskRCNNPredictor(mask_features, 256, num_classes)
+    if hasattr(model.roi_heads, "mask_predictor") and model.roi_heads.mask_predictor is not None:
+        mask_features = model.roi_heads.mask_predictor.conv5_mask.in_channels
+        if bool(model_config.get("class_agnostic_mask", False)):
+            model.roi_heads.mask_predictor = ClassAgnosticMaskRCNNPredictor(
+                mask_features,
+                256,
+                num_classes,
+            )
+        else:
+            model.roi_heads.mask_predictor = MaskRCNNPredictor(mask_features, 256, num_classes)
 
     if bool(model_config.get("small_object_anchors", False)):
         # Keep three anchors per location, so the existing RPN head remains

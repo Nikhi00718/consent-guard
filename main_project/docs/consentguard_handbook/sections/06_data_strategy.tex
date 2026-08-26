@@ -35,6 +35,37 @@ ConsentGuard Target-2K & Primary deployment validation and selective fine-tuning
 \bottomrule
 \end{longtable}
 
+\section{Minimum dataset specification by model}
+
+The numbers below are planning targets for a release-quality first version, not claims about data already acquired. A smaller dataset can support a research baseline, but the class remains experimental until its held-out evidence meets the release gates.
+
+\begin{longtable}{@{}L{26mm}L{31mm}L{38mm}L{42mm}@{}}
+\toprule
+\textbf{Provider} & \textbf{Minimum useful training set} & \textbf{Required label format} & \textbf{Required validation coverage} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Provider} & \textbf{Minimum useful training set} & \textbf{Required label format} & \textbf{Required validation coverage} \\
+\midrule
+\endhead
+Global Mask R-CNN & 3,000--5,000 full images with all supported classes and at least 500 reviewed negatives & COCO-style boxes, instance masks, class IDs, empty targets, provenance & 300--500 images; every class, size bucket, and negative slice represented \\
+Face detector & 20,000+ face boxes for robust pretraining; 1,000+ consented target-domain images for adaptation & One box per visible face, occlusion, size bucket, blur/profile flags & At least 200 face instances in general and India-first domains, including tiny and crowded faces \\
+Plate detector & 10,000+ plate instances, including at least 2,000 India-specific; hard negatives at a 1:2 ratio & Tight box plus original quadrilateral, readability, country/layout, occlusion & At least 200 plates per domain; night, glare, oblique, motorcycle, and distant slices \\
+Printed text & 20,000+ text regions for pretraining or provider benchmarking; 1,000+ target scenes & Word/line polygon, script, orientation, printed/uncertain flag; text string optional and access-controlled & At least 200 regions per domain with Latin and Indic scripts, small/rotated text, screens and documents \\
+Handwriting & 10,000+ line/word/page regions plus 1,000+ full phone scenes; 500+ real or staged target scenes & Polygon or mask, handwritten flag, line/word/page granularity, script, occlusion, readability & At least 100 instances per supported slice; full-scene localization is mandatory, recognition is secondary \\
+Barcode/QR & 5,000+ code quadrilaterals across symbologies, sizes, blur, glare, and perspective & Quadrilateral, symbology, decode-before-export flag, occlusion & At least 200 codes plus 200 barcode-like hard negatives \\
+\shortstack[l]{Document, medicine,\\signature} & 2,000+ annotated instances per safety-critical class or mark experimental & Polygon/mask, subtype, embedded text relation, occlusion, consent/provenance & At least 100 instances per class with a separate negative review \\
+\bottomrule
+\end{longtable}
+
+\subsection{Per-image metadata that must travel with every sample}
+
+Every record needs a stable image ID, original source URL or consent record, licence, retrieval date, SHA-256, normalized pixel hash, contributor or capture group, ontology version, split group, annotation version, and withdrawal status. Every instance needs class, geometry, visibility/occlusion, size bucket, difficulty flags, annotator, adjudication status, and source provenance. These fields are part of the dataset specification because they prevent leakage and make a result reproducible.
+
+\subsection{The critical distinction: training versus validation}
+
+Public datasets supply representation and variety; Target-2K supplies deployment evidence. Do not use the same target image in pretraining, calibration, qualitative regression, or the locked test. Keep a source/capture group in one split, and maintain a private ledger for directly collected material.
+
 \section{Recommended use by specialist}
 
 \subsection{Face}
@@ -112,4 +143,3 @@ All members of a duplicate/source group enter the same split. When two public da
 Do not scrape real private IDs, medical prescriptions, addresses, signatures, or phone screenshots merely because they are technically visible online. Use staged or fictional content wherever possible. When realistic private content is necessary, obtain explicit participant consent, minimize retention, restrict access, and support withdrawal.
 
 The project should demonstrate privacy engineering through its own data behavior.
-

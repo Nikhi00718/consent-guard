@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import copy
-import hashlib
 import json
 from pathlib import Path
 
@@ -13,9 +11,7 @@ import torch
 
 from consentguard.shared.paths import project_path
 from consentguard.shared.runtime import atomic_json_dump, select_device
-from consentguard.stage_02_baseline_model.config import load_training_config, validate_checkpoint_inference_compatibility
-from consentguard.stage_02_baseline_model.models import build_instance_segmentation_model
-from consentguard.stage_03_specialists.maskrcnn import MaskRCNNEvidenceProvider
+from consentguard.stage_02_baseline_model.config import load_training_config
 from consentguard.stage_03_specialists.face_yunet import YuNetFaceProvider
 from consentguard.stage_03_specialists.plate_yunet import LPDYuNetPlateProvider
 from consentguard.stage_03_specialists.text_paddleocr import PaddleOCRTextProvider
@@ -24,6 +20,7 @@ from consentguard.stage_03_specialists.ppocr_onnx import PPOCRTextGeometryProvid
 from consentguard.stage_04_fusion_calibration.domain import AssuranceStatus, ConsentState
 from consentguard.stage_04_fusion_calibration.evidence import ThresholdRegistry
 from consentguard.stage_05_review_export.pipeline import ReviewExportService
+from consentguard.stage_05_review_export.provider_factory import load_torchvision_provider
 
 
 def _load_mask(path: Path, *, width: int, height: int) -> np.ndarray:
@@ -42,31 +39,8 @@ def _build_provider(
     device: torch.device,
     *,
     provider_name: str = "maskrcnn",
-) -> MaskRCNNEvidenceProvider:
-    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
-    validate_checkpoint_inference_compatibility(checkpoint, config)
-    model_config = copy.deepcopy(config.section("model"))
-    # Loading a checkpoint must never trigger a surprise pretrained-weight download.
-    model_config["pretrained"] = False
-    model_config["trainable_backbone_layers"] = 5
-    data = config.section("data")
-    model = build_instance_segmentation_model(
-        model_config,
-        num_classes=config.num_classes,
-        min_size=int(data["short_side"]),
-        max_size=int(data["max_long_side"]),
-    )
-    model.load_state_dict(checkpoint["model_state"])
-    version = f"{checkpoint_path.name}:{hashlib.sha256(checkpoint_path.read_bytes()).hexdigest()[:16]}"
-    return MaskRCNNEvidenceProvider(
-        model,
-        device,
-        class_map=config.class_map,
-        version=version,
-        provider_name=provider_name,
-        short_side=int(data["short_side"]),
-        max_long_side=int(data["max_long_side"]),
-    )
+) -> object:
+    return load_torchvision_provider(config, checkpoint_path, device, provider_name=provider_name)
 
 
 def main() -> None:

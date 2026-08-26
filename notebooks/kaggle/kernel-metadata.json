@@ -1,0 +1,17 @@
+{
+  "id": "YOUR_KAGGLE_USERNAME/consentguard-train",
+  "title": "ConsentGuard model training",
+  "code_file": "consentguard_train.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [
+    "aiacademymaterials/wider-face-detection",
+    "kedarsai/indian-license-plates-with-labels"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

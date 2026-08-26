@@ -21,6 +21,32 @@ Pillow + ExifTool & EXIF, GPS, device, timestamps, thumbnails, orientation & Met
 \bottomrule
 \end{longtable}
 
+\section{Architecture map: what each model actually does}
+
+\begin{longtable}{@{}L{31mm}L{49mm}L{53mm}@{}}
+\toprule
+\textbf{Component} & \textbf{Architecture in plain language} & \textbf{Why it is used and what it cannot do} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Component} & \textbf{Architecture in plain language} & \textbf{Why it is used and what it cannot do} \\
+\midrule
+\endhead
+Global Mask R-CNN & ResNet-50 convolutional backbone, FPN multi-scale features, RPN proposals, box/class head, and mask head & Finds broad instance regions and masks. It is not reliable enough alone for tiny plates, handwriting, or every privacy class. \\
+Face Faster R-CNN & ResNet-50 FPN backbone, region proposal network, box classifier/regressor, one face class plus background & Flexible box detector for face fine-tuning. It localizes; it does not recognize identity or create embeddings. \\
+YuNet & Lightweight convolutional one-stage face detector exported as OpenCV ONNX & Fast local face proposal provider. It is a pretrained runtime specialist, not a biometric recognition model. \\
+Plate Faster R-CNN & Same two-stage FPN detector with a one-class plate head and plate-specific thresholds & Handles small plates with a dedicated class distribution. It does not read plate characters and cannot certify identity. \\
+PaddleOCR DB detector & Differentiable binarization-style text detector producing quadrilateral geometry, optionally followed by recognition & Finds printed text regions and can recognize text when enabled. ConsentGuard keeps strings out of the core evidence path where possible. \\
+Handwriting detector & Mask R-CNN baseline today; DB-style polygon detector is the next candidate & Finds handwriting regions in full scenes. Recognition is optional and must not be required for safe localization. \\
+ZXing-C++ & Deterministic barcode/QR decoding pipeline with geometric corner output & Finds and decodes common codes without learned weights. Visually barcode-like regions remain review candidates if decoding fails. \\
+Metadata checker & Pillow/ExifTool parsing and independent post-export inspection & Detects GPS, device, timestamp, thumbnail, and profile metadata. It is not a neural model and does not inspect pixels. \\
+\bottomrule
+\end{longtable}
+
+\section{What is trained and what is integrated}
+
+The current project deliberately mixes learned and deterministic providers. The global, face, plate, and handwriting branches have trainable checkpoints or training recipes. YuNet, PaddleOCR, and ZXing are integrated specialist providers whose pretrained or deterministic behavior must first be benchmarked; they are not described as newly trained ConsentGuard models. This distinction matters for licensing, reproducibility, and honest reporting.
+
 \section{Global Mask R-CNN provider}
 
 The global provider remains important even after specialists are added. It supplies broad scene understanding and irregular masks for classes that do not have enough data to justify a dedicated detector. The frozen model family is Mask R-CNN ResNet-50 FPN v2.

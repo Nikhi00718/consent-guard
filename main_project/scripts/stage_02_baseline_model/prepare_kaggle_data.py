@@ -10,20 +10,21 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
+import os
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
+
+from PIL import Image, ImageOps
 
 
 ROOT = Path(__file__).resolve().parents[3]
 GLOBAL_ROOT = ROOT / "data" / "processed" / "visual_redactions_verified_visual_v2_negatives"
-SPECIALIST_ROOT = ROOT / "data" / "processed" / "specialists"
 SOURCES = {
-    "global": GLOBAL_ROOT,
-    "face": SPECIALIST_ROOT / "face",
-    "plate": SPECIALIST_ROOT / "plate",
-    "handwriting": SPECIALIST_ROOT / "handwriting",
+    "baseline": GLOBAL_ROOT,
 }
 
 
@@ -35,8 +36,37 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _decoded_image_identity(path: Path) -> tuple[str, int, int]:
+    """Return a stable hash of the orientation-corrected RGB pixels."""
+
+    with Image.open(path) as image:
+        canonical = ImageOps.exif_transpose(image).convert("RGB")
+        digest = hashlib.sha256(canonical.tobytes()).hexdigest()
+        width, height = canonical.size
+    return digest, width, height
+
+
+def _image_manifest_entry(item: tuple[str, Path]) -> tuple[str, Path, dict[str, Any]]:
+    """Read an image once and derive both transport and decoded identities."""
+
+    relative, source = item
+    payload = source.read_bytes()
+    with Image.open(io.BytesIO(payload)) as image:
+        canonical = ImageOps.exif_transpose(image).convert("RGB")
+        pixel_sha256 = hashlib.sha256(canonical.tobytes()).hexdigest()
+        width, height = canonical.size
+    return relative, source, {
+        "path": relative,
+        "bytes": len(payload),
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "pixel_sha256": pixel_sha256,
+        "width": width,
+        "height": height,
+    }
+
+
 def _records(source: Path) -> list[Path]:
-    return [source / "records_train2017.jsonl", source / "records_val2017.jsonl"] if source == GLOBAL_ROOT else [source / "records_train.jsonl", source / "records_val.jsonl"]
+    return [source / "records_train2017.jsonl", source / "records_val2017.jsonl"]
 
 
 def build_manifest(output: Path, *, copy_files: bool) -> dict[str, Any]:
@@ -66,15 +96,19 @@ def build_manifest(output: Path, *, copy_files: bool) -> dict[str, Any]:
 
     entries = []
     total_bytes = 0
-    for relative, source in sorted(image_paths.items()):
-        size = source.stat().st_size
-        total_bytes += size
-        entry = {"path": relative, "bytes": size, "sha256": _sha256(source)}
-        entries.append(entry)
-        if copy_files:
-            destination = output / relative
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, destination)
+    items = sorted(image_paths.items())
+    workers = min(8, max(1, os.cpu_count() or 1))
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        prepared = executor.map(_image_manifest_entry, items)
+        for index, (relative, source, entry) in enumerate(prepared, start=1):
+            total_bytes += int(entry["bytes"])
+            entries.append(entry)
+            if copy_files:
+                destination = output / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, destination)
+            if index % 250 == 0 or index == len(items):
+                print(f"Prepared baseline identities: {index}/{len(items)}", flush=True)
 
     if copy_files:
         for source in record_files + metadata_files:

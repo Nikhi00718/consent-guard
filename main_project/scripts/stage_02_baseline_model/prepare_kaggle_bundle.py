@@ -27,6 +27,9 @@ def build_bundle(config: Path, output: Path) -> dict:
     required = [ROOT / "pyproject.toml", config]
     required.extend(sorted((ROOT / "main_project" / "src").rglob("*.py")))
     required.extend(sorted((ROOT / "main_project" / "scripts" / "stage_02_baseline_model").glob("*.py")))
+    required.append(ROOT / "main_project" / "scripts" / "stage_03_specialists" / "prepare_external_specialist.py")
+    required.extend(sorted((ROOT / "main_project" / "configs" / "stage_03_specialists").glob("train_*.*yaml")))
+    required.append(ROOT / "main_project" / "configs" / "kaggle" / "dataset_catalog.yaml")
     if any(not path.is_file() for path in required):
         raise FileNotFoundError("Kaggle bundle input is missing")
     output.parent.mkdir(parents=True, exist_ok=True)

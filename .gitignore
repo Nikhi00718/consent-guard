@@ -19,6 +19,7 @@ data/manifests/*.jsonl
 artifacts/checkpoints/
 artifacts/metrics/
 artifacts/visualizations/
+artifacts/kaggle/
 outputs/
 runs/
 
