@@ -33,6 +33,25 @@ Measurements taken before the new acquisition wave:
 
 Free space increased from 83.51 GiB to 105.34 GiB after checkpoint cleanup.
 
+After the staged dataset downloads and the reusable Faster R-CNN cache were
+installed, the C: volume had 97.86 GiB free. The temporary one-step CCPD2020
+training checkpoint was deleted after verification, so this figure does not
+include an unnecessary smoke-test model.
+
+## Laptop training smoke validation
+
+The CCPD2020 plate configuration passed preflight on the local NVIDIA GeForce
+RTX 3050 Laptop GPU (4 GiB VRAM). A one-optimizer-step CUDA run also passed:
+
+- 5,769 train images loaded; validation was intentionally skipped.
+- Peak allocated GPU memory: 2.33 GB; peak reserved: 2.37 GB of 4.29 GB.
+- Faster R-CNN COCO initialization loaded from the verified TorchVision cache.
+- The temporary smoke checkpoint was removed after the run.
+
+This validates the local data/model path, not full-model quality. Full training
+remains a Kaggle job; use the laptop for conversion, checks, smoke tests, and
+small overfit runs.
+
 ## Model-by-model data plan
 
 | Component | What runs now | Current data and measured scale | Main problem | New data/decision | Train it? |
