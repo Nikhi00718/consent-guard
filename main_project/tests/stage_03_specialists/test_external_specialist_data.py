@@ -87,6 +87,26 @@ def test_indian_plate_converter_applies_exif_orientation(tmp_path: Path) -> None
     assert record["instances"][0]["bbox"] == [24.0, 37.5, 32.0, 25.0]
 
 
+def test_ccpd_converter_uses_official_splits_and_filename_polygon(tmp_path: Path) -> None:
+    filename = (
+        "025-90_0-10&20_70&60-70&60_10&20_10&60_70&20-"
+        "0_0_3_24_26_31_31-100-20.jpg"
+    )
+    for split in ("train", "val", "test"):
+        _image(tmp_path / "CCPD2020" / "ccpd_green" / split / filename)
+
+    train, validation = module.convert_ccpd(tmp_path)
+
+    assert len(train) == len(validation) == 1
+    assert train[0]["image_split"] == "train"
+    assert validation[0]["image_split"] == "val"
+    assert train[0]["instances"][0]["bbox"] == [10.0, 20.0, 60.0, 40.0]
+    assert train[0]["instances"][0]["polygons"] == [
+        [70.0, 60.0, 10.0, 20.0, 10.0, 60.0, 70.0, 20.0]
+    ]
+    assert all(Path(record["image_path"]).parent.name != "test" for record in train + validation)
+
+
 def test_hiertext_converter_keeps_only_handwritten_lines(tmp_path: Path) -> None:
     annotations = {}
     for split in ("train", "validation"):

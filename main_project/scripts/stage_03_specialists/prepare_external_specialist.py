@@ -248,6 +248,86 @@ def convert_indian_plates(root: Path, *, seed: int = 1337, validation_fraction: 
     return results["train"], results["val"]
 
 
+def _ccpd_point(value: str) -> tuple[float, float]:
+    coordinates = value.split("&")
+    if len(coordinates) != 2:
+        raise ValueError(f"Invalid CCPD coordinate: {value!r}")
+    return float(coordinates[0]), float(coordinates[1])
+
+
+def _ccpd_geometry(path: Path, *, width: int, height: int) -> tuple[tuple[float, float, float, float], list[float]]:
+    """Decode the plate quadrilateral embedded in an official CCPD filename."""
+
+    parts = path.stem.split("-")
+    if len(parts) < 4:
+        raise ValueError(f"Invalid CCPD filename: {path.name}")
+    points = [_ccpd_point(value) for value in parts[3].split("_")]
+    if len(points) != 4:
+        raise ValueError(f"Expected four CCPD plate corners in {path.name}")
+    clipped = [
+        (max(0.0, min(float(width), x)), max(0.0, min(float(height), y)))
+        for x, y in points
+    ]
+    xs = [point[0] for point in clipped]
+    ys = [point[1] for point in clipped]
+    x, y = min(xs), min(ys)
+    box_width, box_height = max(xs) - x, max(ys) - y
+    if box_width <= 1 or box_height <= 1:
+        raise ValueError(f"Degenerate CCPD plate geometry in {path.name}")
+    polygon = [coordinate for point in clipped for coordinate in point]
+    return (x, y, box_width, box_height), polygon
+
+
+def _ccpd_split_root(root: Path, split: str) -> Path:
+    direct = root / split
+    if direct.is_dir():
+        return direct
+    matches = [path for path in root.rglob(split) if path.is_dir()]
+    if len(matches) != 1:
+        raise FileNotFoundError(f"Expected one CCPD {split!r} directory under {root}; found {len(matches)}")
+    return matches[0]
+
+
+def convert_ccpd(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Convert the official CCPD train/validation folders without using test."""
+
+    class_name = CLASS_NAMES["plate"]
+    results: dict[str, list[dict[str, Any]]] = {}
+    for split in ("train", "val"):
+        split_root = _ccpd_split_root(root, split)
+        records = []
+        images = sorted(
+            path
+            for path in split_root.rglob("*")
+            if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
+        )
+        if not images:
+            raise FileNotFoundError(f"No CCPD images found under {split_root}")
+        for image_path in images:
+            with Image.open(image_path) as image:
+                width, height = image.size
+            bbox, polygon = _ccpd_geometry(image_path, width=width, height=height)
+            instance = _instance(
+                instance_id=0,
+                class_name=class_name,
+                bbox=bbox,
+                polygon=polygon,
+            )
+            records.append(
+                _record(
+                    image_path=image_path,
+                    image_id=f"ccpd-{split}-{image_path.stem}",
+                    width=width,
+                    height=height,
+                    split=split,
+                    source="CCPD-official",
+                    instances=[instance],
+                )
+            )
+        results[split] = records
+    return results["train"], results["val"]
+
+
 def _read_hiertext(path: Path) -> Iterable[dict[str, Any]]:
     """Stream the large pretty-printed ``annotations`` array without loading it all."""
 
@@ -366,7 +446,14 @@ def convert_hiertext(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, A
     return results["train"], results["validation"]
 
 
-def write_records(component: str, output: Path, train: list[dict[str, Any]], validation: list[dict[str, Any]]) -> dict[str, Any]:
+def write_records(
+    component: str,
+    output: Path,
+    train: list[dict[str, Any]],
+    validation: list[dict[str, Any]],
+    *,
+    rectangle_masks_from_boxes: bool | None = None,
+) -> dict[str, Any]:
     output.mkdir(parents=True, exist_ok=True)
     class_name = CLASS_NAMES[component]
     class_map_path = output / "class_map.json"
@@ -389,7 +476,11 @@ def write_records(component: str, output: Path, train: list[dict[str, Any]], val
         "component": component,
         "class_name": class_name,
         "test_split_used": False,
-        "rectangle_masks_from_boxes": component in {"face", "plate"},
+        "rectangle_masks_from_boxes": (
+            component in {"face", "plate"}
+            if rectangle_masks_from_boxes is None
+            else rectangle_masks_from_boxes
+        ),
         "splits": summaries,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -402,15 +493,33 @@ def main() -> None:
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=1337)
+    parser.add_argument("--plate-format", choices=("yolo", "ccpd"), default="yolo")
     args = parser.parse_args()
     source = args.source_root.resolve()
     if args.component == "face":
         train, validation = convert_widerface(source)
     elif args.component == "plate":
-        train, validation = convert_indian_plates(source, seed=args.seed)
+        if args.plate_format == "ccpd":
+            train, validation = convert_ccpd(source)
+        else:
+            train, validation = convert_indian_plates(source, seed=args.seed)
     else:
         train, validation = convert_hiertext(source)
-    print(json.dumps(write_records(args.component, args.output.resolve(), train, validation), indent=2, sort_keys=True))
+    print(
+        json.dumps(
+            write_records(
+                args.component,
+                args.output.resolve(),
+                train,
+                validation,
+                rectangle_masks_from_boxes=False
+                if args.component == "plate" and args.plate_format == "ccpd"
+                else None,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 if __name__ == "__main__":

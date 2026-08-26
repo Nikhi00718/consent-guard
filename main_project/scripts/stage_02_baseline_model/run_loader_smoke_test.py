@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 import sys
@@ -15,11 +16,20 @@ from consentguard.stage_01_data.dataset import VisualRedactionsDataset
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--records",
+        type=Path,
+        default=ROOT / "data" / "processed" / "visual_redactions_verified_visual" / "records_train2017.jsonl",
+    )
+    parser.add_argument("--limit", type=int, default=100)
+    parser.add_argument("--output", type=Path, default=ROOT / "reports" / "loader_smoke_test.json")
+    args = parser.parse_args()
     dataset = VisualRedactionsDataset(
-        ROOT / "data" / "processed" / "visual_redactions_verified_visual" / "records_train2017.jsonl",
+        args.records,
         short_side=512,
         max_long_side=1024,
-        limit=100,
+        limit=args.limit,
     )
     total_instances = 0
     total_positive_pixels = 0
@@ -57,7 +67,8 @@ def main() -> None:
         "resized_shapes": sorted(shapes),
         "passed": True,
     }
-    output = ROOT / "reports" / "loader_smoke_test.json"
+    output = args.output.resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
 

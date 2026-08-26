@@ -39,6 +39,35 @@ sources:
     validation_split: deterministic_20_percent
     test_usage: none
 
+  plate_pretrain_ccpd2020:
+    dataset: CCPD2020
+    purpose: license-plate quadrilateral localization pretraining
+    access: official_zenodo_download
+    canonical_record: https://zenodo.org/records/15647076
+    archive_url: https://zenodo.org/records/15647076/files/CCPD2020.zip?download=1
+    archive_bytes: 907711344
+    archive_md5: eb93e88c5988879f8da6f92bbf083324
+    license: MIT according to the official CCPD repository and preservation record
+    production_eligible: true
+    caveat: Chinese green-plate data is pretraining only and cannot validate Indian deployment
+    train_split: train
+    validation_split: val
+    test_usage: excluded
+
+  plate_augment_indo_alpr:
+    dataset: INDO-ALPR
+    purpose: tropical plate-domain augmentation
+    access: official_mendeley_download
+    canonical_record: https://data.mendeley.com/datasets/j3256db3fz/1
+    doi: 10.17632/j3256db3fz.1
+    download_url: https://data.mendeley.com/public-api/zip/j3256db3fz/download/1
+    published_download_size: 7.11 GB
+    published_images: 6174
+    license: CC-BY-4.0
+    production_eligible: true
+    caveat: preserve native annotations and audit them before conversion
+    test_usage: none
+
   handwriting:
     dataset: HierText
     purpose: handwritten and scene-text polygon localization
@@ -52,6 +81,33 @@ sources:
     train_split: train
     validation_split: validation
     test_usage: excluded
+
+  handwriting_representation_devanagari:
+    dataset: IIIT-INDIC-HW-WORDS Devanagari
+    purpose: Indic handwriting representation and synthetic-scene source
+    access: official_institutional_download
+    canonical_page: https://ilocr.iiit.ac.in/ihtr/dataset.html
+    train_url: https://ilocr.iiit.ac.in/ihtr/assets/dataset/trainingset/devanagari.zip
+    train_archive_bytes: 1365324036
+    validation_url: https://ilocr.iiit.ac.in/ihtr/assets/dataset/validationset.zip
+    validation_archive_bytes: 218448204
+    published_train_images: 69583
+    published_validation_images: 1000
+    license: verify and archive institutional CC-BY-4.0 evidence before model release
+    production_eligible: pending_license_evidence_archive
+    caveat: word crops do not replace full-scene localization data
+    test_usage: excluded
+
+  privacy_external_biv:
+    dataset: BIV-Priv-Seg
+    purpose: external private-object segmentation evaluation
+    access: official_public_download
+    canonical_page: https://vizwiz.cs.colorado.edu/biv-priv/
+    license: CC-BY-4.0
+    production_eligible: true
+    support_usage: quarantine_pending_protocol_review
+    query_usage: locked_external_evaluation
+    test_usage: external_only
 
   barcode:
     dataset: generated_barcode_robustness_suite
