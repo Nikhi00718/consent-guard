@@ -60,8 +60,9 @@ never add that file to the repository.
 ## First new experiment: official CCPD2020 plate detector
 
 The first replacement experiment is isolated from the legacy Indian plate
-mirror. Build the current code bundle, stage the official CCPD2020 archive,
-and publish one private dataset plus one GPU kernel:
+mirror. Build the current code bundle and publish one private code dataset plus
+one GPU kernel. The kernel downloads the official CCPD2020 archive from Zenodo
+at runtime and verifies its MD5 before conversion:
 
 ```powershell
 .venv\Scripts\python.exe main_project/scripts/stage_02_baseline_model/prepare_kaggle_bundle.py `
@@ -74,7 +75,8 @@ and publish one private dataset plus one GPU kernel:
 The kernel is `nikhil00718/consentguard-plate-ccpd2020-training`. It uses only
 CCPD2020 train/validation records (5,769/1,001 images) and does not attach the
 old Indian plate dataset. If Kaggle is still indexing the new private dataset,
-wait for it to become ready and rerun the same publisher with `--push` only.
+If Kaggle is still indexing the new code dataset, wait for it to become ready
+and rerun the same publisher with `--push` only.
 Do not start a second
 unrelated component while this plate run is active.
 

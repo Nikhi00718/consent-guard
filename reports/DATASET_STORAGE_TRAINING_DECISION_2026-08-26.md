@@ -52,6 +52,18 @@ This validates the local data/model path, not full-model quality. Full training
 remains a Kaggle job; use the laptop for conversion, checks, smoke tests, and
 small overfit runs.
 
+## CCPD2020 Kaggle submission
+
+The dedicated plate kernel is
+`nikhil00718/consentguard-plate-ccpd2020-training`. Its first version was
+stopped after Kaggle rejected the still-indexing private image dataset source.
+Version 2 uses the official Zenodo record directly instead: it downloads
+`CCPD2020.zip`, checks the official MD5
+`eb93e88c5988879f8da6f92bbf083324`, extracts it, converts only train/val, and
+then starts the `plate_ccpd2020` configuration. The corrected version is
+running; no quality metric is claimed until its output checkpoint and
+validation report are available.
+
 ## Model-by-model data plan
 
 | Component | What runs now | Current data and measured scale | Main problem | New data/decision | Train it? |

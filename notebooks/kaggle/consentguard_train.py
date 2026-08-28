@@ -33,6 +33,8 @@ REPO = Path("/kaggle/working/consentguard")
 INPUT = Path("/kaggle/input")
 WORK = Path("/kaggle/working")
 PYTORCH_CU118_INDEX = "https://download.pytorch.org/whl/cu118"
+CCPD2020_URL = "https://zenodo.org/api/records/15647076/files/CCPD2020.zip/content"
+CCPD2020_MD5 = "eb93e88c5988879f8da6f92bbf083324"
 
 
 def find_mount(fragment: str) -> Path:
@@ -64,6 +66,14 @@ def find_content_root(mount: Path, relative: Path) -> Path:
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def md5(path: Path) -> str:
+    digest = hashlib.md5()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
@@ -226,6 +236,25 @@ def prepare_hiertext() -> Path:
     return root
 
 
+def prepare_ccpd2020() -> Path:
+    """Download and verify the official CCPD2020 archive for the plate run."""
+
+    root = WORK / "ccpd2020"
+    archive = root / "CCPD2020.zip"
+    download(CCPD2020_URL, archive)
+    actual = md5(archive)
+    if actual.lower() != CCPD2020_MD5:
+        raise RuntimeError(f"CCPD2020 MD5 mismatch: expected {CCPD2020_MD5}, got {actual}")
+    extracted = root / "extracted"
+    marker = extracted / ".verified-extracted"
+    if not marker.exists():
+        extracted.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(archive) as handle:
+            handle.extractall(extracted)
+        marker.write_text("ok\n", encoding="utf-8")
+    return extracted
+
+
 def ensure_torch_gpu_compatibility() -> None:
     """Pin an official Pascal-compatible build only when Kaggle's build omits the assigned GPU."""
 
@@ -304,7 +333,7 @@ if COMPONENT in {"face", "all"}:
 if COMPONENT in {"plate", "all"}:
     command.extend(("--plate-root", str(find_mount("indian-license-plates"))))
 if COMPONENT in {"plate_ccpd2020", "all"}:
-    command.extend(("--ccpd-root", str(find_mount("ccpd2020"))))
+    command.extend(("--ccpd-root", str(prepare_ccpd2020())))
 if COMPONENT in {"handwriting", "all"}:
     command.extend(("--handwriting-root", str(prepare_hiertext())))
 
