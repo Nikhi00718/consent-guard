@@ -34,3 +34,7 @@ The archive is structurally valid and safe to keep as an external training candi
 Raw images remain under `data/raw/` and are intentionally ignored by Git; this report and any generated manifests are the reproducible artifacts that belong in the repository.
 
 The preparation script now supports `--group-by-parent`. For this download the reproducible grouped records are **117 train images / 193 boxes** (folders `vid-2` and `vid-3`) and **43 validation images / 68 boxes** (folder `vid-1`). The grouped records are stored locally under `data/processed/external/deepakat_indian_vehicle_number_plate_yolo_grouped/` and are also ignored by Git.
+
+## Existing checkpoint sanity test
+
+The current production checkpoint (`specialist_plate_ccpd2020_india_finetune_5ep/best.pt`) was evaluated on the held-out `vid-1` images at IoU 0.50. At confidence 0.50 it produced **1 true positive, 44 false positives, and 67 missed boxes** (precision 2.2%, recall 1.5%). This is not a defect in the audit: the frames contain very small plates in wide 1920×1080 road scenes, which are a clear domain/scale shift from the current training data. The new dataset is therefore useful as a targeted tiny-plate fine-tuning experiment, but this checkpoint should remain the website default until a retrained model beats its existing validation metrics.
