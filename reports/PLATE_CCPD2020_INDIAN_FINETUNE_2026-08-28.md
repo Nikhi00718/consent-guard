@@ -1,6 +1,6 @@
 # CCPD2020 to Indian plate fine-tune
 
-**Date:** 2026-08-28  
+**Date:** 2026-08-28
 **Decision:** keep this checkpoint as the current Indian plate research candidate; do not promote it as a production phone/vehicle detector until a scene-level, labeled Indian test is available.
 
 ## Result in one paragraph
