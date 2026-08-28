@@ -1,0 +1,18 @@
+{
+  "code_file": "consentguard_finetune_india.py",
+  "competition_sources": [],
+  "dataset_sources": [
+    "nikhil00718/consentguard-training-code-india-finetune-v1",
+    "nikhil00718/consentguard-ccpd2020-checkpoint-v1",
+    "kedarsai/indian-license-plates-with-labels"
+  ],
+  "enable_gpu": true,
+  "enable_internet": true,
+  "id": "nikhil00718/consentguard-ccpd-to-indian-plate-fine-tune",
+  "is_private": true,
+  "kernel_sources": [],
+  "kernel_type": "script",
+  "language": "python",
+  "model_sources": [],
+  "title": "ConsentGuard CCPD to Indian plate fine-tune"
+}

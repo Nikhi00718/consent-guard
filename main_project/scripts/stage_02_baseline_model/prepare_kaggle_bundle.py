@@ -28,6 +28,7 @@ def build_bundle(config: Path, output: Path) -> dict:
     required.extend(sorted((ROOT / "main_project" / "src").rglob("*.py")))
     required.extend(sorted((ROOT / "main_project" / "scripts" / "stage_02_baseline_model").glob("*.py")))
     required.append(ROOT / "main_project" / "scripts" / "stage_03_specialists" / "prepare_external_specialist.py")
+    required.append(ROOT / "main_project" / "scripts" / "stage_03_specialists" / "fine_tune_plate_from_checkpoint.py")
     required.extend(sorted((ROOT / "main_project" / "configs" / "stage_03_specialists").glob("train_*.*yaml")))
     required.append(ROOT / "main_project" / "configs" / "kaggle" / "dataset_catalog.yaml")
     if any(not path.is_file() for path in required):

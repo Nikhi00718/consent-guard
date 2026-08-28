@@ -5,7 +5,7 @@
 
 ## Executive result
 
-The new checkpoint is healthy on its own CCPD2020 validation protocol, but its transfer behaviour on the local Indian INDO-ALPR originals is weak and poorly calibrated. On the same 2,000 Indian images, only **67 images (3.35%)** reached a top detection score of at least 0.50, and the median top score was **0.00032**. The existing Indian Mask R-CNN baseline reached **138 images (6.90%)** at 0.50 and had a median top score of **0.02566**.
+The new checkpoint is healthy on its own CCPD2020 validation protocol, but its transfer behaviour on the local Indian INDO-ALPR originals is weak and poorly calibrated. On the same 2,000 Indian images, only **67 images (3.35%)** reached a top detection score of at least 0.50, and the median top score was **0.00032**. The existing local Mask R-CNN baseline reached **138 images (6.90%)** at 0.50 and had a median top score of **0.02566**.
 
 This is not an Indian accuracy result: the transfer set has no localization ground truth, and most files are already plate crops rather than phone/vehicle scenes. The measured result says the CCPD model is usable for continued experimentation and as a checkpoint to fine-tune, but it does **not** justify replacing the current model or releasing it as India-ready.
 
@@ -14,7 +14,7 @@ This is not an Indian accuracy result: the transfer set has no localization grou
 | Model | Training data | Architecture and setup | Training result | Local checkpoint |
 |---|---|---|---|---|
 | **New CCPD specialist** | Official CCPD2020: 5,769 train records and 1,001 validation records; train/val only, no CCPD test claim | One-class `fasterrcnn_resnet50_fpn_v2`, COCO initialization, small-object anchors, 512/768 resize, crop augmentation, 12 epochs, batch 1, gradient accumulation 4 | Final box mAP **0.8768816**; best box mAP **0.8879097**; 17,316 optimizer steps; successful return code 0 | `artifacts/checkpoints/specialist_plate_ccpd2020_fasterrcnn/best.pt` (345,600,239 bytes; SHA-256 `ff0916d64c9b9130cf82fe63a97d0b7086413b521989fea41ad050a98ea8c72e`) |
-| **Existing local baseline** | Indian plate records: 633 train and 1,576 validation records in `data/processed/specialists/plate` | One-class `maskrcnn_resnet50_fpn_v2`, class-agnostic masks, 512/768 resize, 5 epochs | Used as a same-image transfer control here; its previously documented `0.7702` plate mAP belongs to a separate earlier Indian Faster R-CNN run and must not be conflated with this Mask R-CNN checkpoint | `artifacts/checkpoints/specialist_plate_maskrcnn_5ep/last.pt` (366,614,551 bytes; SHA-256 `1c1e74aeafc7130ab7b34739f7c96bfbdb531d3e55ea2a27155d235759271246`) |
+| **Existing local baseline** | Visual Redactions-derived plate records: 633 train and 1,576 validation records in `data/processed/specialists/plate` | One-class `maskrcnn_resnet50_fpn_v2`, class-agnostic masks, 512/768 resize, 5 epochs | Used as a same-image transfer control here; its previously documented `0.7702` plate mAP belongs to a separate earlier Indian Faster R-CNN run and must not be conflated with this Mask R-CNN checkpoint | `artifacts/checkpoints/specialist_plate_maskrcnn_5ep/last.pt` (366,614,551 bytes; SHA-256 `1c1e74aeafc7130ab7b34739f7c96bfbdb531d3e55ea2a27155d235759271246`) |
 
 The CCPD training source was downloaded from the official Zenodo archive, verified by the recorded official MD5, converted into the project’s one-class records, and trained in the dedicated Kaggle job. Only the selected checkpoint and metadata were downloaded to the laptop; the full image archive is not required for this transfer test.
 
@@ -41,7 +41,7 @@ The evaluator ran both checkpoints over all 2,000 files, one model at a time on 
 | Model | Valid images | Any raw box | Top score >= 0.50 | Top score >= 0.70 | Top score >= 0.90 | Median top score | Median top-box area |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | CCPD Faster R-CNN | 2,000 | 2,000 (100%) | **67 (3.35%)** | **48 (2.40%)** | **22 (1.10%)** | **0.00032** | 7.26% of image |
-| Indian Mask R-CNN baseline | 2,000 | 2,000 (100%) | **138 (6.90%)** | **68 (3.40%)** | **23 (1.15%)** | **0.02566** | 4.59% of image |
+| Existing local Mask R-CNN baseline | 2,000 | 2,000 (100%) | **138 (6.90%)** | **68 (3.40%)** | **23 (1.15%)** | **0.02566** | 4.59% of image |
 
 Useful slices:
 
