@@ -35,3 +35,15 @@ face, plate, OCR, and barcode detectors against the freshly encoded asset.
 Residual findings fail assurance; missing attack providers become
 `UNCERTAIN`, never a pass. These local detector attacks improve the prototype
 but do not replace independent release-qualified attacker implementations.
+
+## React reviewer
+
+`scripts/stage_05_review_export/run_web_app.py` serves the compiled React
+workspace and a typed `/v1` FastAPI adapter. Uploads live in randomized,
+TTL-bound session directories; browser responses never expose local paths or
+the original filename. Analysis runs once, then the reviewer can correct the
+native-resolution union mask before a newly encoded preview is inspected.
+
+Only an explicit `GRANTED` consent assertion can continue toward export.
+Denied or revoked consent rejects export, and uncertain assurance or a
+non-release-ready threshold profile withholds the download capability.

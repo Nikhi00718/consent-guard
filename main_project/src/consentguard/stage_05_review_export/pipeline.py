@@ -36,6 +36,16 @@ class PipelineResult:
     provider_errors: dict[str, str]
 
 
+@dataclass(frozen=True)
+class AnalysisSnapshot:
+    """Reusable analysis state for interactive review clients."""
+
+    image: NormalizedImage
+    evidence: EvidenceSnapshot
+    candidates: ReviewCandidateSet
+    provider_errors: dict[str, str]
+
+
 class ReviewExportService:
     """Compose existing stages without letting providers make policy decisions."""
 
@@ -54,17 +64,9 @@ class ReviewExportService:
         self.policy = policy or ReleasePolicy()
         self.attack_providers = tuple(attack_providers)
 
-    def run(
-        self,
-        source_path: str | Path,
-        *,
-        consent_state: ConsentState,
-        review_completed: bool,
-        output_path: str | Path | None = None,
-        approved_mask: np.ndarray | None = None,
-        allow_unchanged: bool = False,
-        attack_checks: dict[str, AssuranceStatus] | None = None,
-    ) -> PipelineResult:
+    def analyze(self, source_path: str | Path) -> AnalysisSnapshot:
+        """Analyze once and retain the normalized pixels for manual review."""
+
         image = normalize_image(source_path)
         analysis = self.orchestrator.analyze(image)
         registry = EvidenceRegistry()
@@ -79,6 +81,28 @@ class ReviewExportService:
             height=image.height,
             unavailable_providers=snapshot.unavailable_providers,
         )
+        return AnalysisSnapshot(
+            image=image,
+            evidence=snapshot,
+            candidates=candidates,
+            provider_errors=analysis.provider_errors,
+        )
+
+    def render_review(
+        self,
+        analysis: AnalysisSnapshot,
+        *,
+        consent_state: ConsentState,
+        review_completed: bool,
+        output_path: str | Path | None = None,
+        approved_mask: np.ndarray | None = None,
+        allow_unchanged: bool = False,
+        attack_checks: dict[str, AssuranceStatus] | None = None,
+    ) -> PipelineResult:
+        """Render and decide from an existing analysis without rerunning models."""
+
+        image = analysis.image
+        candidates = analysis.candidates
 
         rendered: dict[str, object] | None = None
         destination: Path | None = Path(output_path).resolve() if output_path is not None else None
@@ -125,11 +149,33 @@ class ReviewExportService:
         )
         return PipelineResult(
             image=image,
-            evidence=snapshot,
+            evidence=analysis.evidence,
             candidates=candidates,
             assurance=assurance_report,
             decision=decision,
             output_path=destination,
             export_report=rendered,
             provider_errors=analysis.provider_errors,
+        )
+
+    def run(
+        self,
+        source_path: str | Path,
+        *,
+        consent_state: ConsentState,
+        review_completed: bool,
+        output_path: str | Path | None = None,
+        approved_mask: np.ndarray | None = None,
+        allow_unchanged: bool = False,
+        attack_checks: dict[str, AssuranceStatus] | None = None,
+    ) -> PipelineResult:
+        analysis = self.analyze(source_path)
+        return self.render_review(
+            analysis,
+            consent_state=consent_state,
+            review_completed=review_completed,
+            output_path=output_path,
+            approved_mask=approved_mask,
+            allow_unchanged=allow_unchanged,
+            attack_checks=attack_checks,
         )

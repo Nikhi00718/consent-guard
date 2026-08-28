@@ -68,6 +68,20 @@ def test_policy_fails_closed_for_unknown_consent_and_uncertain_assurance() -> No
     assert uncertain.action is ReleaseAction.HOLD_FOR_REVIEW
 
 
+def test_policy_rejects_denied_or_revoked_consent_even_after_redaction() -> None:
+    policy = ReleasePolicy()
+    for state in (ConsentState.DENIED, ConsentState.REVOKED):
+        decision = policy.decide(
+            _candidate_set(),
+            state,
+            _passing_assurance(),
+            review_completed=True,
+            redaction_applied=True,
+        )
+        assert decision.action is ReleaseAction.REJECT_EXPORT
+        assert decision.export_allowed is False
+
+
 def test_assurance_verifies_redaction_but_is_uncertain_without_attackers(tmp_path: Path) -> None:
     source = tmp_path / "source.jpg"
     output = tmp_path / "output.png"

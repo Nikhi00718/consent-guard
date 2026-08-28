@@ -66,6 +66,13 @@ class SessionStore:
                 removed.append(entry.name)
         return tuple(sorted(removed))
 
+    def delete(self, handle: SessionHandle) -> None:
+        """Delete one owned session and all of its staged artifacts."""
+
+        self._assert_owned(handle)
+        self._assert_inside_root(handle.root)
+        shutil.rmtree(handle.root)
+
     def _assert_owned(self, handle: SessionHandle) -> None:
         self._assert_inside_root(handle.root)
         if handle.root.name != handle.session_id or not handle.session_id.startswith("session-"):

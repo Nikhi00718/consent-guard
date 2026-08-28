@@ -165,6 +165,21 @@ uploaded/webcam image, lets the user select model branches and privacy groups,
 and shows fused detection and redaction previews. It is not a production-safe
 export path; the manual review and assurance gate remains authoritative.
 
+The React reviewer combines analysis, native-resolution mask correction,
+explicit consent, assurance results, and capability-gated export in one local
+workspace. Build it once, then launch the FastAPI host:
+
+```powershell
+npm --prefix main_project/frontend install
+npm --prefix main_project/frontend run build
+.\.venv\Scripts\python.exe main_project\scripts\stage_05_review_export\run_web_app.py
+```
+
+Open `http://127.0.0.1:7860`. The server stays localhost-only unless an explicit
+`--host` is supplied. Current research profiles and missing independent attack
+checks remain fail-closed, so a reviewed preview can exist while download is
+blocked.
+
 Dataset media, model checkpoints, and generated outputs are intentionally
 ignored by version control and must not be redistributed without their original
 licenses and research-use terms.

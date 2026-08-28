@@ -41,6 +41,16 @@ def test_session_store_rejects_path_escape_and_cleans_expired(tmp_path: Path) ->
     assert store.cleanup_expired(now=handle.created_at + 100.0) == (handle.session_id,)
 
 
+def test_session_store_deletes_only_the_owned_session(tmp_path: Path) -> None:
+    store = SessionStore(tmp_path / "sessions", ttl_seconds=30)
+    first = store.create()
+    second = store.create()
+    store.stage_bytes(first, b"first", suffix=".png")
+    store.delete(first)
+    assert not first.root.exists()
+    assert second.root.is_dir()
+
+
 def test_evidence_registry_deduplicates_and_preserves_unavailable_state() -> None:
     registry = EvidenceRegistry()
     item = _evidence("e-2")

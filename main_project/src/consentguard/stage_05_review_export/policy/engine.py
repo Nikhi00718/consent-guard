@@ -29,6 +29,12 @@ class ReleasePolicy:
         allow_unchanged: bool = False,
     ) -> ReleaseDecision:
         reasons: list[str] = []
+        if consent_state in {ConsentState.DENIED, ConsentState.REVOKED}:
+            reasons.append(f"CONSENT_{consent_state.value}")
+            return self._decision(ReleaseAction.REJECT_EXPORT, reasons)
+        if consent_state in {ConsentState.UNKNOWN, ConsentState.PENDING, ConsentState.EXPIRED}:
+            reasons.append(f"CONSENT_{consent_state.value}")
+            return self._decision(ReleaseAction.HOLD_FOR_CONSENT, reasons)
         if assurance.status is AssuranceStatus.FAIL:
             reasons.append("ASSURANCE_FAILED")
             return self._decision(ReleaseAction.REJECT_EXPORT, reasons)
@@ -41,9 +47,6 @@ class ReleasePolicy:
             if candidates.requires_review and not review_completed:
                 reasons.append("MANDATORY_REVIEW_INCOMPLETE")
             return self._decision(ReleaseAction.HOLD_FOR_REVIEW, reasons)
-        if consent_state in {ConsentState.UNKNOWN, ConsentState.PENDING, ConsentState.EXPIRED}:
-            reasons.append(f"CONSENT_{consent_state.value}")
-            return self._decision(ReleaseAction.HOLD_FOR_CONSENT, reasons)
         if not candidates.threshold_profile_release_ready:
             reasons.append("THRESHOLD_PROFILE_NOT_RELEASE_READY")
         if candidates.unavailable_providers:
@@ -52,8 +55,6 @@ class ReleasePolicy:
             reasons.append("MANDATORY_REVIEW_INCOMPLETE")
         if candidates.candidates and not redaction_applied:
             reasons.append("CANDIDATES_NOT_REDACTED")
-        if consent_state in {ConsentState.DENIED, ConsentState.REVOKED} and not redaction_applied:
-            reasons.append(f"CONSENT_{consent_state.value}_REQUIRES_REDACTION")
         if reasons:
             return self._decision(ReleaseAction.HOLD_FOR_REVIEW, reasons)
         if allow_unchanged and not candidates.candidates and review_completed and not redaction_applied:
