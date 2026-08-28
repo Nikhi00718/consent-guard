@@ -64,6 +64,15 @@ then starts the `plate_ccpd2020` configuration. The corrected version is
 running; no quality metric is claimed until its output checkpoint and
 validation report are available.
 
+The run has now completed successfully: 12/12 epochs, 17,316 optimizer steps,
+and return code 0. The final CCPD2020 validation box mAP is `0.8768816` with
+best recorded mAP `0.8879097`, compared with the old Indian plate baseline mAP
+`0.770246`. This is an absolute improvement of about `0.1066` on the
+corresponding validation protocol. The checkpoint is retained in the Kaggle
+kernel output at
+`artifacts/checkpoints/kaggle_plate_ccpd2020_seed1337/last.pt`; this result is
+not yet an India/deployment claim because CCPD2020 is a separate source domain.
+
 ## Model-by-model data plan
 
 | Component | What runs now | Current data and measured scale | Main problem | New data/decision | Train it? |
