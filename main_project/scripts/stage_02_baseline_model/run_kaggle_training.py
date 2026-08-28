@@ -27,6 +27,7 @@ COMPONENT_CONFIGS = {
     "baseline": ROOT / "main_project/configs/stage_02_baseline_model/train_maskrcnn_moderate_v2_negatives_10ep.yaml",
     "face": ROOT / "main_project/configs/stage_03_specialists/train_face_widerface_fasterrcnn.yaml",
     "plate": ROOT / "main_project/configs/stage_03_specialists/train_plate_india_fasterrcnn.yaml",
+    "plate_ccpd2020": ROOT / "main_project/configs/stage_03_specialists/train_plate_ccpd2020_fasterrcnn.yaml",
     "handwriting": ROOT / "main_project/configs/stage_03_specialists/train_handwriting_hiertext_maskrcnn.yaml",
 }
 
@@ -131,19 +132,23 @@ def _prepare_external(component: str, source_root: Path | None, seed: int) -> di
         "class_map": output / "class_map.json",
     }
     if source_root is not None:
+        preparer_component = "plate" if component == "plate_ccpd2020" else component
+        command = [
+            sys.executable,
+            str(SPECIALIST_PREPARER),
+            "--component",
+            preparer_component,
+            "--source-root",
+            str(source_root),
+            "--output",
+            str(output),
+            "--seed",
+            str(seed),
+        ]
+        if component == "plate_ccpd2020":
+            command.extend(("--plate-format", "ccpd"))
         result = subprocess.run(
-            [
-                sys.executable,
-                str(SPECIALIST_PREPARER),
-                "--component",
-                component,
-                "--source-root",
-                str(source_root),
-                "--output",
-                str(output),
-                "--seed",
-                str(seed),
-            ],
+            command,
             cwd=ROOT,
             env={**os.environ, "PYTHONPATH": str(ROOT / "main_project" / "src")},
             check=False,
@@ -165,6 +170,7 @@ def main() -> None:
     parser.add_argument("--data-root", type=Path, help="Private Kaggle Dataset mount containing data/processed")
     parser.add_argument("--face-root", type=Path, help="WIDER FACE Kaggle Dataset mount")
     parser.add_argument("--plate-root", type=Path, help="Indian plate Kaggle Dataset mount")
+    parser.add_argument("--ccpd-root", type=Path, help="Official CCPD2020 Kaggle Dataset mount")
     parser.add_argument("--handwriting-root", type=Path, help="HierText train/validation root")
     parser.add_argument("--epochs", type=int, help="override the config epoch count")
     parser.add_argument("--manifest", type=Path, default=Path("reports/kaggle_training_manifest.json"))
@@ -182,6 +188,7 @@ def main() -> None:
     source_roots = {
         "face": args.face_root,
         "plate": args.plate_root,
+        "plate_ccpd2020": args.ccpd_root,
         "handwriting": args.handwriting_root,
     }
     overrides = {

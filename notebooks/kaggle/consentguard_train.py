@@ -1,6 +1,6 @@
 """Kaggle GPU entry point for one ConsentGuard model component.
 
-Edit COMPONENT to baseline, face, plate, handwriting, or all. Separate Kaggle
+Edit COMPONENT to baseline, face, plate, plate_ccpd2020, handwriting, or all. Separate Kaggle
 sessions are recommended because every run checkpoints independently.
 """
 
@@ -303,6 +303,8 @@ if COMPONENT in {"face", "all"}:
     command.extend(("--face-root", str(find_mount("wider-face"))))
 if COMPONENT in {"plate", "all"}:
     command.extend(("--plate-root", str(find_mount("indian-license-plates"))))
+if COMPONENT in {"plate_ccpd2020", "all"}:
+    command.extend(("--ccpd-root", str(find_mount("ccpd2020"))))
 if COMPONENT in {"handwriting", "all"}:
     command.extend(("--handwriting-root", str(prepare_hiertext())))
 

@@ -57,6 +57,27 @@ single run:
 The command requires a private `C:\Users\atnik\.kaggle\kaggle.json` credential;
 never add that file to the repository.
 
+## First new experiment: official CCPD2020 plate detector
+
+The first replacement experiment is isolated from the legacy Indian plate
+mirror. Build the current code bundle, stage the official CCPD2020 archive,
+and publish one private dataset plus one GPU kernel:
+
+```powershell
+.venv\Scripts\python.exe main_project/scripts/stage_02_baseline_model/prepare_kaggle_bundle.py `
+  --config main_project/configs/stage_03_specialists/train_plate_ccpd2020_fasterrcnn.yaml `
+  --output artifacts/kaggle/consentguard-training-code-ccpd2020.zip
+.venv\Scripts\python.exe main_project/scripts/stage_02_baseline_model/publish_ccpd2020_kaggle_job.py `
+  --username nikhil00718 --upload --push
+```
+
+The kernel is `nikhil00718/consentguard-plate-ccpd2020-training`. It uses only
+CCPD2020 train/validation records (5,769/1,001 images) and does not attach the
+old Indian plate dataset. If Kaggle is still indexing the new private dataset,
+wait for it to become ready and rerun the same publisher with `--push` only.
+Do not start a second
+unrelated component while this plate run is active.
+
 ## Important limits
 
 - Kaggle GPU access and quotas are account-dependent; configure credentials
