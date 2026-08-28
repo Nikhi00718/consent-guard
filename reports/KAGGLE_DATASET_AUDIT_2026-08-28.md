@@ -32,3 +32,5 @@ Per source video folder:
 The archive is structurally valid and safe to keep as an external training candidate. It is much smaller than the 1,650-image Roboflow NIVU export and consists of frames from only three videos. Neighboring frames can be near-duplicates, so a random image split would leak scene appearance between train and validation. For a trustworthy experiment, split by `vid-*` folder (or use this dataset only as an additional fine-tuning source) and keep the already-trained checkpoint as the production baseline until the grouped evaluation improves it.
 
 Raw images remain under `data/raw/` and are intentionally ignored by Git; this report and any generated manifests are the reproducible artifacts that belong in the repository.
+
+The preparation script now supports `--group-by-parent`. For this download the reproducible grouped records are **117 train images / 193 boxes** (folders `vid-2` and `vid-3`) and **43 validation images / 68 boxes** (folder `vid-1`). The grouped records are stored locally under `data/processed/external/deepakat_indian_vehicle_number_plate_yolo_grouped/` and are also ignored by Git.

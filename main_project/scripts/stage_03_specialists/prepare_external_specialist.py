@@ -202,15 +202,41 @@ def _plate_pairs(root: Path) -> list[tuple[Path, Path]]:
     return pairs
 
 
-def convert_indian_plates(root: Path, *, seed: int = 1337, validation_fraction: float = 0.2) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def convert_indian_plates(
+    root: Path,
+    *,
+    seed: int = 1337,
+    validation_fraction: float = 0.2,
+    group_by_parent: bool = False,
+    source_name: str = "kaggle-kedarsai-indian-license-plates-with-labels",
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if not 0.05 <= validation_fraction <= 0.5:
         raise ValueError("validation_fraction must be in [0.05, 0.5]")
     class_name = CLASS_NAMES["plate"]
     pairs = _plate_pairs(root)
     indices = list(range(len(pairs)))
-    random.Random(seed).shuffle(indices)
     validation_count = max(1, round(len(indices) * validation_fraction))
-    validation_indices = set(indices[:validation_count])
+    if group_by_parent:
+        # Video-frame datasets often contain near-identical neighbouring
+        # images.  Keep every frame from a parent folder together so that the
+        # validation score measures a held-out scene rather than memorisation.
+        groups: dict[str, list[int]] = {}
+        for index, (image_path, _label_path) in enumerate(pairs):
+            groups.setdefault(image_path.parent.as_posix(), []).append(index)
+        group_names = sorted(groups)
+        random.Random(seed).shuffle(group_names)
+        validation_indices: set[int] = set()
+        for group_name in group_names:
+            if len(validation_indices) >= validation_count and validation_indices:
+                break
+            validation_indices.update(groups[group_name])
+        if len(validation_indices) == len(indices) and len(group_names) > 1:
+            # Preserve at least one training group when the requested fraction
+            # is larger than a single group.
+            validation_indices.difference_update(groups[group_names[-1]])
+    else:
+        random.Random(seed).shuffle(indices)
+        validation_indices = set(indices[:validation_count])
     results = {"train": [], "val": []}
     for pair_index, (image_path, label_path) in enumerate(pairs):
         split = "val" if pair_index in validation_indices else "train"
@@ -241,7 +267,7 @@ def convert_indian_plates(root: Path, *, seed: int = 1337, validation_fraction: 
                 width=width,
                 height=height,
                 split=split,
-                source="kaggle-kedarsai-indian-license-plates-with-labels",
+                source=source_name,
                 instances=instances,
             )
         )
@@ -494,6 +520,16 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--seed", type=int, default=1337)
     parser.add_argument("--plate-format", choices=("yolo", "ccpd"), default="yolo")
+    parser.add_argument(
+        "--group-by-parent",
+        action="store_true",
+        help="keep frames from the same parent folder together in the train/val split",
+    )
+    parser.add_argument(
+        "--source-name",
+        default=None,
+        help="provenance label stored in generated records (defaults to the legacy Kaggle source)",
+    )
     args = parser.parse_args()
     source = args.source_root.resolve()
     if args.component == "face":
@@ -502,7 +538,12 @@ def main() -> None:
         if args.plate_format == "ccpd":
             train, validation = convert_ccpd(source)
         else:
-            train, validation = convert_indian_plates(source, seed=args.seed)
+            train, validation = convert_indian_plates(
+                source,
+                seed=args.seed,
+                group_by_parent=args.group_by_parent,
+                source_name=args.source_name or "kaggle-kedarsai-indian-license-plates-with-labels",
+            )
     else:
         train, validation = convert_hiertext(source)
     print(
