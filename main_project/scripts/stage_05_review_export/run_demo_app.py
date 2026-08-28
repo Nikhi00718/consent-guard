@@ -299,8 +299,16 @@ def main() -> None:
     parser.add_argument("--checkpoint", default="artifacts/checkpoints/maskrcnn_moderate_v2_negatives_10ep/last.pt")
     parser.add_argument("--face-config", default="main_project/configs/stage_03_specialists/train_face_maskrcnn_5ep.yaml")
     parser.add_argument("--face-checkpoint", default="artifacts/checkpoints/specialist_face_maskrcnn_5ep/last.pt")
-    parser.add_argument("--plate-config", default="main_project/configs/stage_03_specialists/train_plate_maskrcnn_5ep.yaml")
-    parser.add_argument("--plate-checkpoint", default="artifacts/checkpoints/specialist_plate_maskrcnn_5ep/last.pt")
+    parser.add_argument(
+        "--plate-config",
+        default="main_project/configs/stage_03_specialists/train_plate_ccpd2020_india_finetune_5ep.yaml",
+        help="Indian fine-tuned plate detector config (override to compare another checkpoint).",
+    )
+    parser.add_argument(
+        "--plate-checkpoint",
+        default="artifacts/checkpoints/specialist_plate_ccpd2020_india_finetune_5ep/best.pt",
+        help="Indian fine-tuned plate detector checkpoint (override to compare another checkpoint).",
+    )
     parser.add_argument("--handwriting-config", default="main_project/configs/stage_03_specialists/train_handwriting_maskrcnn_5ep.yaml")
     parser.add_argument("--handwriting-checkpoint", default="artifacts/checkpoints/specialist_handwriting_maskrcnn_5ep/last.pt")
     parser.add_argument("--threshold-profile", default="main_project/configs/stage_04_fusion_calibration/threshold_profile_v2_validation_calibrated.yaml")
