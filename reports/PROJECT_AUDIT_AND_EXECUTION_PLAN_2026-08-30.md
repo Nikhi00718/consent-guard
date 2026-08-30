@@ -10,10 +10,11 @@ website. It is target-domain evidence: several classes have too little licensed
 data, only one random seed has been run for the specialists, and the independent
 residual-content attacks required by Stage 06 are not complete.
 
-The correct immediate target is one controlled plate experiment, not replacing
-every model at once. The current website continues to use the CCPD-to-India
-checkpoint until the new full-scene candidate beats it on frozen validation and
-the separate Deepak road-video challenge.
+The controlled full-scene plate experiment is now complete. It substantially
+improved both frozen sets, but missed the precommitted Deepak recall floor at
+score 0.50 (0.4118 observed versus 0.50 required). The current website therefore
+continues to use the CCPD-to-India checkpoint; the new checkpoint remains a
+research artifact rather than receiving a post-hoc threshold exception.
 
 ## What is actually in the system
 
@@ -23,7 +24,7 @@ the separate Deepak road-video challenge.
 | Face geometry | OpenCV YuNet pretrained detector | YuNet weights are upstream pretrained weights; ConsentGuard does not retrain YuNet | Fast independent box evidence; no identity inference | Keep. Retraining YuNet is not the next priority |
 | Face specialist | Mask R-CNN on Visual Redactions; separate Faster R-CNN WIDER FACE experiment | Local Visual Redactions specialist plus WIDER FACE run with 12,880 train and 3,226 validation images | Local mask mAP 0.5811 on 1,576 validation images; WIDER box mAP 0.2947 and small-object mAP 0.2232 | Useful experimental face evidence; needs three seeds and target-domain assurance |
 | Plate geometry | OpenCV LPD-YuNet pretrained detector | Upstream model is mainly Chinese-plate geometry | Useful independent proposal source, but India domain transfer is not established | Keep only as corroborating evidence; never let it grant release |
-| Plate specialist | Faster R-CNN ResNet-50 FPN v2 | CCPD2020 → Indian adaptation → new full-scene research bundle | Existing India checkpoint box mAP 0.7736 on its validation, but only 1 TP/44 FP/67 FN at confidence 0.5 on the held-out Deepak road-video challenge | Train the new candidate; keep current website checkpoint until it wins |
+| Plate specialist | Faster R-CNN ResNet-50 FPN v2 | CCPD2020 → Indian adaptation → grouped full-scene research bundle | Kaggle v4 reached box mAP 0.5810; at score 0.50 it improved Deepak from 1 TP/44 FP/67 FN to 28 TP/7 FP/40 FN, but recall 0.4118 missed the frozen 0.50 floor | Retain as research checkpoint; keep current website default and add new road-domain data |
 | Printed text | PP-OCRv3 ONNX geometry | Upstream pretrained detector; recognized text is discarded | Geometry provider works; it is not a handwriting model | Keep as independent printed-text evidence |
 | Handwriting | Mask R-CNN plus optional PaddleOCR geometry | Local Visual Redactions and Kaggle HierText: 8,281 train and 1,724 validation images | Local bounded mask mAP 0.0526; HierText mask mAP 0.1577 | Not release-ready; next major data/model target after plate |
 | QR/barcode | zxing-cpp | No learned ConsentGuard dataset | Deterministic decoder/geometry provider | No training is required |
@@ -123,28 +124,25 @@ verification.
 The laptop's RTX 3050 has 4 GB VRAM. Both candidate configurations pass model
 and data preflight. Real standard- and high-resolution CUDA training steps
 completed at losses 0.0471 and 0.0352 respectively without an out-of-memory
-error. Full five-epoch training and 1,824-image validation still belong on
-Kaggle's larger GPU because local throughput is much lower. The Kaggle candidate
-uses 800/1333 resize and 768-pixel object-context crops because tiny/full-scene
-plates are the present failure mode. The 512/768 configuration remains the
-faster laptop fallback.
+error. The full five-epoch training and 1,824-image validation completed on
+Kaggle's Tesla P100. The candidate used 800/1333 resize and 768-pixel
+object-context crops because tiny/full-scene plates are the present failure
+mode. The 512/768 configuration remains the faster laptop fallback.
 
 ## Execution order
 
-1. Publish the private, no-test Kaggle transport and deterministic code bundle.
-2. Run the high-resolution five-epoch plate candidate from the current
-   CCPD-to-India checkpoint.
-3. Download the completed checkpoint and logs; verify their hashes and run
-   frozen validation plus the independent Deepak `vid-1` challenge with
-   `evaluate_plate_detection_challenge.py`.
-4. Replace the website default only if the candidate improves target-domain
-   recall without an unacceptable false-positive increase. Otherwise retain
-   the current checkpoint and record the failed experiment.
-5. Run two additional seeds only for a candidate that clears the first gate.
-6. After plate, address handwriting with better target-domain data and an OCR
+1. The private no-test transport, deterministic code bundle, high-resolution
+   Kaggle run, output download, hash verification, and both frozen evaluations
+   are complete.
+2. The candidate failed only the Deepak recall requirement, so the website
+   default remains unchanged and two additional seeds are not justified yet.
+3. Acquire new rights-cleared road-domain small/blurred/oblique plate examples
+   and hard negatives. Keep Deepak `vid-1` locked and create a separate
+   threshold-calibration split before the next run.
+4. After plate, address handwriting with better target-domain data and an OCR
    detector/segmentation comparison. Face is the next assurance task, not the
    next model rewrite.
-7. Build Target-2K through rights-cleared collection/outsourced annotation.
+5. Build Target-2K through rights-cleared collection/outsourced annotation.
    Target-2K, three seeds, fused leakage/FPR confidence bounds, and independent
    residual-content attacks remain mandatory before any release-safe claim.
 
@@ -192,3 +190,15 @@ recall is at least 0.6832 with false positives/image no greater than 0.6557;
 Deepak `vid-1` recall is at least 0.50 with false positives/image no greater
 than 1.0233. This promotion does not make the system release-ready; the stricter
 Stage 06 95% recall, multi-seed, confidence-bound, and attack gates still apply.
+
+Kaggle version 4 completed with no test use and zero cross-split hash leakage.
+Its observed results were:
+
+| Frozen set | Candidate recall | Candidate precision | Candidate FP/image | Gate result |
+|---|---:|---:|---:|---|
+| Merged validation | 0.7723 | 0.4697 | 0.1826 | Pass |
+| Deepak `vid-1` | 0.4118 | 0.8000 | 0.1628 | **Fail: recall below 0.50** |
+
+Therefore `website_promotion_allowed` is false. Detailed evidence is in
+`reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md` and
+`reports/plate_full_scene_kaggle_v4_verification.json`.

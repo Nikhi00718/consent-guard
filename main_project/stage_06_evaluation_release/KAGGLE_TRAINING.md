@@ -82,7 +82,7 @@ unrelated component while this plate run is active.
 
 ## Full-scene Indian plate adaptation
 
-The next candidate uses the leakage-safe merged train/validation records and
+The completed version-4 candidate used the leakage-safe merged train/validation records and
 initializes from the current CCPD-to-India checkpoint. The publisher verifies
 every referenced image hash, rejects paths outside the repository, excludes the
 test split, and uses hard links for local staging:
@@ -95,10 +95,18 @@ test split, and uses hard links for local staging:
 The private data transport is
 `nikhil00718/consentguard-plate-full-scene-v1`; the private code dataset is
 `nikhil00718/consentguard-plate-full-scene-code-v1`; and the isolated GPU kernel
-is `nikhil00718/consentguard-plate-full-scene-training`. The default remote run
-uses the high-resolution 800/1333 candidate. It must beat the frozen validation
-and Deepak `vid-1` challenge before its checkpoint can replace the website
-default.
+is `nikhil00718/consentguard-plate-full-scene-training`. Version 4 used the
+high-resolution 800/1333 configuration and completed successfully. It passed
+the merged-validation gate but missed the locked Deepak recall gate (0.4118
+versus 0.50), so it remains a research artifact and did not replace the website
+default. Run the offline integrity and promotion verifier with:
+
+```powershell
+.venv\Scripts\python.exe main_project/scripts/stage_03_specialists/verify_plate_full_scene_kaggle_run.py
+```
+
+The detailed record is
+`reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md`.
 
 ## Important limits
 

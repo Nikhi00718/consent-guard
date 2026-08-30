@@ -62,6 +62,14 @@ publisher splits. `prepare_grouped_yolo_plate.py` replaces that split before
 See `reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md` for counts, limits,
 and the checkpoint promotion rule.
 
+Kaggle version 4 completed the high-resolution full-scene experiment. It
+improved merged-validation recall from 0.6832 to 0.7723 and reduced false
+positives/image from 0.6557 to 0.1826, but achieved only 0.4118 recall on the
+locked Deepak `vid-1` challenge at the precommitted score threshold. The 0.50
+promotion requirement therefore failed and the website default was not changed.
+See `reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md` and rerun
+`verify_plate_full_scene_kaggle_run.py` for the hash-verified decision.
+
 ## Code rule
 
 All providers implement the same `EvidenceProvider.analyze()` contract and

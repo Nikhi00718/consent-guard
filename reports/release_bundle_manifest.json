@@ -68,6 +68,13 @@
         "sha256": "ce12ab60591bd5662d73ca90d28384717bba4597ee7ef9307970c5bc9e6d2fc1"
       },
       {
+        "bytes": 1748,
+        "path": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_plate_full_scene_research_v1_highres_5ep.yaml",
+        "present": true,
+        "required": true,
+        "sha256": "88a9c553e7719fa2a0b50514953a7eac4cd489d51c0bcf8c9085538aae0a72fa"
+      },
+      {
         "bytes": 1682,
         "path": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_handwriting_maskrcnn_5ep.yaml",
         "present": true,
@@ -133,7 +140,7 @@
         "sha256": "08094dadabf693b0efad47faac93d76a4d1576db5733460663f4f7fef4cd3c0d"
       }
     ],
-    "generation_base_commit": "a9ddf7df20c1e2cb8398e96be69c8bae94318818",
+    "generation_base_commit": "ba2fb517978deaf6862f56a2b0510b882ac05911",
     "provider_assets": [
       {
         "bytes": 1716,
@@ -194,13 +201,53 @@
         "sha256": "cd345c79a369f24f18f117c360be2491191cb0f757df0de1f1c821112248dbe6"
       },
       {
-        "bytes": 11631,
+        "bytes": 68997,
+        "path": "C:\\consentGuard\\reports\\plate_full_scene_v4_deepak_challenge.json",
+        "present": true,
+        "required": true,
+        "sha256": "639f1553ff7cc5571cabe9f3f884d7eefb016e8545e68fefe9b00628a67aa7d3"
+      },
+      {
+        "bytes": 2700872,
+        "path": "C:\\consentGuard\\reports\\plate_full_scene_v4_merged_validation.json",
+        "present": true,
+        "required": true,
+        "sha256": "08260ccf3aa5dde2aa341cff898c128e6ab3164377ff0ceed95f311a1726f1cf"
+      },
+      {
+        "bytes": 6318,
+        "path": "C:\\consentGuard\\reports\\plate_full_scene_kaggle_v4_verification.json",
+        "present": true,
+        "required": true,
+        "sha256": "648fef3a17da42c12147b6b9bbb9781756354b658c4a53e55562759b79224f29"
+      },
+      {
+        "bytes": 6395,
+        "path": "C:\\consentGuard\\reports\\PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md",
+        "present": true,
+        "required": true,
+        "sha256": "eac0b7c23f8001c2be158e6f75a00974c27aa55ed4739c2b6364ef886395ef3a"
+      },
+      {
+        "bytes": 12143,
         "path": "C:\\consentGuard\\reports\\PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md",
         "present": true,
         "required": true,
-        "sha256": "6ed52228cdbdc7f74d3956715eadea70747bf573b65132af6a8d53684cb68e98"
+        "sha256": "72e9bb39505651b9e5da5d0c4593e956f8ebcbdeefbe53217e899d5d457629c2"
       }
-    ]
+    ],
+    "research_checkpoints": {
+      "plate_full_scene_kaggle_v4": {
+        "bytes": 346511469,
+        "path": "C:\\consentGuard\\artifacts\\kaggle\\remote-runs\\plate-full-scene-v4\\consentguard\\artifacts\\checkpoints\\specialist_plate_full_scene_research_v1_highres_5ep\\best.pt",
+        "present": true,
+        "required": true,
+        "sha256": "45181310c47940361128aa2478da523829e7b3a9fa5f24d6a2b5335884ec6bcd",
+        "storage_note": "local ignored artifact recoverable from private Kaggle kernel version 4; promotion failed the frozen Deepak recall gate",
+        "tracked_in_git": false,
+        "website_default": false
+      }
+    }
   },
   "blockers": [
     "No licensed Target-2K general/India manifest, pixels, and annotations are admitted.",
@@ -208,7 +255,8 @@
     "The global V2 validation segmentation mAP is below the preservation gate.",
     "Fused validation does not yet contain general/India domain recall or full-bundle leakage/FPR confidence bounds.",
     "Independent OCR, barcode, face, and plate residual-content attacks are not implemented as passing checks.",
-    "The threshold profile is explicitly release_ready: false; plate and handwriting specialists remain experimental."
+    "The threshold profile is explicitly release_ready: false; plate and handwriting specialists remain experimental.",
+    "The full-scene plate candidate missed the precommitted Deepak recall promotion floor (0.4118 < 0.50)."
   ],
   "bundle_status": "VALIDATION_ONLY_BLOCKED",
   "gate_input": {
@@ -442,6 +490,7 @@
   "next_safe_actions": [
     "Acquire and admit only licensed Target-2K data with image-level rights and a frozen manifest.",
     "Run the fused evaluator on the full V2 validation split and target-domain splits.",
+    "Add rights-cleared small/blurred Indian road plates and a separate calibration split without tuning on locked Deepak vid-1.",
     "Train and evaluate three controlled seeds per release candidate.",
     "Implement independent output attackers and archive their reports before opening the locked test once."
   ],
@@ -449,7 +498,7 @@
   "repository": {
     "branch": "agent/object-centric-crops",
     "commit_relation": "This manifest is generated content, so the commit containing it is expected to be a descendant of generation_base_commit.",
-    "generation_base_commit": "a9ddf7df20c1e2cb8398e96be69c8bae94318818",
+    "generation_base_commit": "ba2fb517978deaf6862f56a2b0510b882ac05911",
     "root": "C:\\consentGuard"
   },
   "schema_version": "consentguard-release-bundle-v1",

@@ -15,6 +15,15 @@ pixels. The current milestone is the perception/localization model required by
 the broader consent-state-aware release policy in
 `ConsentGuard_Final_Research_Design.md`.
 
+## Latest plate experiment
+
+The grouped full-scene Indian plate candidate completed on Kaggle and greatly
+improved frozen validation and road-video results. It still missed the
+precommitted Deepak recall promotion floor (0.4118 versus 0.50), so the website
+default was deliberately left unchanged. See
+[`reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md`](reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md)
+for the data, training, checkpoint hashes, metrics, and next target.
+
 ## Architecture
 
 - Primary reproducible baseline: TorchVision `maskrcnn_resnet50_fpn_v2`.

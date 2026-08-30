@@ -103,6 +103,7 @@ def build(output: Path) -> dict[str, Any]:
             _artifact("main_project/configs/stage_04_fusion_calibration/threshold_profile_v2_validation_calibrated.yaml"),
             _artifact("main_project/configs/stage_03_specialists/train_face_maskrcnn_5ep.yaml"),
             _artifact("main_project/configs/stage_03_specialists/train_plate_ccpd2020_india_finetune_5ep.yaml"),
+            _artifact("main_project/configs/stage_03_specialists/train_plate_full_scene_research_v1_highres_5ep.yaml"),
             _artifact("main_project/configs/stage_03_specialists/train_handwriting_maskrcnn_5ep.yaml"),
         ],
         "reports": [
@@ -113,11 +114,29 @@ def build(output: Path) -> dict[str, Any]:
             _artifact("reports/maskrcnn_moderate_v2_negatives_10ep_finetuned_specialists_smoke.json"),
             _artifact("reports/plate_deepak_current_challenge.json"),
             _artifact("reports/plate_full_scene_current_validation.json"),
+            _artifact("reports/plate_full_scene_v4_deepak_challenge.json"),
+            _artifact("reports/plate_full_scene_v4_merged_validation.json"),
+            _artifact("reports/plate_full_scene_kaggle_v4_verification.json"),
+            _artifact("reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md"),
             _artifact("reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md"),
         ],
         "checkpoints": {
             name: {**_artifact(path), "tracked_in_git": False, "storage_note": "local ignored artifact; hash is recorded for reproducibility"}
             for name, path in checkpoint_specs.items()
+        },
+        "research_checkpoints": {
+            "plate_full_scene_kaggle_v4": {
+                **_artifact(
+                    "artifacts/kaggle/remote-runs/plate-full-scene-v4/consentguard/artifacts/checkpoints/"
+                    "specialist_plate_full_scene_research_v1_highres_5ep/best.pt"
+                ),
+                "tracked_in_git": False,
+                "website_default": False,
+                "storage_note": (
+                    "local ignored artifact recoverable from private Kaggle kernel version 4; "
+                    "promotion failed the frozen Deepak recall gate"
+                ),
+            }
         },
         "provider_assets": [_artifact("artifacts/specialists/opencv_zoo/MANIFEST.json")],
     }
@@ -147,10 +166,12 @@ def build(output: Path) -> dict[str, Any]:
             "Fused validation does not yet contain general/India domain recall or full-bundle leakage/FPR confidence bounds.",
             "Independent OCR, barcode, face, and plate residual-content attacks are not implemented as passing checks.",
             "The threshold profile is explicitly release_ready: false; plate and handwriting specialists remain experimental.",
+            "The full-scene plate candidate missed the precommitted Deepak recall promotion floor (0.4118 < 0.50).",
         ],
         "next_safe_actions": [
             "Acquire and admit only licensed Target-2K data with image-level rights and a frozen manifest.",
             "Run the fused evaluator on the full V2 validation split and target-domain splits.",
+            "Add rights-cleared small/blurred Indian road plates and a separate calibration split without tuning on locked Deepak vid-1.",
             "Train and evaluate three controlled seeds per release candidate.",
             "Implement independent output attackers and archive their reports before opening the locked test once.",
         ],
