@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -23,7 +24,6 @@ def _one(pattern: str) -> Path:
     return matches[0]
 
 
-code_archive = _one("consentguard-training-code-plate-full-scene-v1.zip")
 transport_manifest = _one("transport_manifest.json")
 transport_root = transport_manifest.parent
 transport = json.loads(transport_manifest.read_text(encoding="utf-8"))
@@ -32,9 +32,31 @@ if transport.get("test_split_used") is not False:
 if transport.get("cross_split_hash_leakage") != 0:
     raise RuntimeError("Transport manifest reports cross-split image leakage")
 
-REPO.mkdir(parents=True, exist_ok=False)
-with zipfile.ZipFile(code_archive) as archive:
-    archive.extractall(REPO)
+code_archives = sorted(INPUT.rglob("consentguard-training-code-plate-full-scene-v1.zip"))
+if len(code_archives) == 1:
+    REPO.mkdir(parents=True, exist_ok=False)
+    with zipfile.ZipFile(code_archives[0]) as archive:
+        archive.extractall(REPO)
+    code_delivery = {"mode": "archive", "source": str(code_archives[0])}
+elif not code_archives:
+    # Kaggle expands ZIP files inside dataset versions created with
+    # ``--dir-mode zip``.  Locate the unique extracted project root and copy it
+    # into /kaggle/working so checkpoints and metrics are writable outputs.
+    project_files = sorted(INPUT.rglob("pyproject.toml"))
+    project_roots = [
+        path.parent
+        for path in project_files
+        if (path.parent / DEFAULT_CONFIG).is_file()
+    ]
+    if len(project_roots) != 1:
+        raise RuntimeError(
+            "Expected one extracted ConsentGuard code root below /kaggle/input, "
+            f"found: {project_roots}"
+        )
+    shutil.copytree(project_roots[0], REPO)
+    code_delivery = {"mode": "expanded_dataset", "source": str(project_roots[0])}
+else:
+    raise RuntimeError(f"Expected at most one code archive below /kaggle/input, found: {code_archives}")
 
 data_link = REPO / "data"
 data_link.symlink_to(transport_root / "data", target_is_directory=True)
@@ -54,5 +76,12 @@ command = [
     "--device",
     "cuda",
 ]
-print(json.dumps({"command": command, "transport": transport}, indent=2, sort_keys=True), flush=True)
+print(
+    json.dumps(
+        {"code_delivery": code_delivery, "command": command, "transport": transport},
+        indent=2,
+        sort_keys=True,
+    ),
+    flush=True,
+)
 subprocess.run(command, cwd=REPO, check=True)
