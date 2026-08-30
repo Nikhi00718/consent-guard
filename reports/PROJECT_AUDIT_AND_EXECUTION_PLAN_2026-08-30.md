@@ -129,7 +129,8 @@ faster laptop fallback.
 2. Run the high-resolution five-epoch plate candidate from the current
    CCPD-to-India checkpoint.
 3. Download the completed checkpoint and logs; verify their hashes and run
-   frozen validation plus the independent Deepak `vid-1` challenge.
+   frozen validation plus the independent Deepak `vid-1` challenge with
+   `evaluate_plate_detection_challenge.py`.
 4. Replace the website default only if the candidate improves target-domain
    recall without an unacceptable false-positive increase. Otherwise retain
    the current checkpoint and record the failed experiment.
