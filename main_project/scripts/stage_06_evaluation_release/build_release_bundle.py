@@ -112,6 +112,7 @@ def build(output: Path) -> dict[str, Any]:
             _artifact("reports/fused_validation_v2_1_baseline.json", required=False),
             _artifact("reports/maskrcnn_moderate_v2_negatives_10ep_finetuned_specialists_smoke.json"),
             _artifact("reports/plate_deepak_current_challenge.json"),
+            _artifact("reports/plate_full_scene_current_validation.json"),
             _artifact("reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md"),
         ],
         "checkpoints": {
