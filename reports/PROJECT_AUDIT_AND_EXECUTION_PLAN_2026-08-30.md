@@ -152,6 +152,10 @@ Good:
 - Dataset/checkpoint payloads are ignored by ordinary Git.
 - The React production build, Python tests, and self-contained Playwright flow
   are executable without a separately started ML backend.
+- A real held-out road-frame smoke loaded the broad, face, plate, handwriting,
+  YuNet, LPD-YuNet, PP-OCR, and barcode paths together on the 4 GB laptop GPU;
+  no provider was marked unavailable and policy correctly returned
+  `HOLD_FOR_CONSENT` with export disabled.
 
 Still blocked:
 
