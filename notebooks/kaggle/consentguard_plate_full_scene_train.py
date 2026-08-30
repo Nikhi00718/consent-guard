@@ -15,6 +15,8 @@ INPUT = Path("/kaggle/input")
 WORK = Path("/kaggle/working")
 REPO = WORK / "consentguard"
 DEFAULT_CONFIG = "main_project/configs/stage_03_specialists/train_plate_full_scene_research_v1_highres_5ep.yaml"
+CUDA_FALLBACK_INDEX = "https://download.pytorch.org/whl/cu118"
+CUDA_FALLBACK_PACKAGES = ("torch==2.7.1", "torchvision==0.22.1")
 
 
 def _one(pattern: str) -> Path:
@@ -22,6 +24,60 @@ def _one(pattern: str) -> Path:
     if len(matches) != 1:
         raise RuntimeError(f"Expected exactly one {pattern!r} below /kaggle/input, found: {matches}")
     return matches[0]
+
+
+def _cuda_probe() -> dict[str, object]:
+    probe = """
+import json
+import torch
+
+result = {
+    "torch": torch.__version__,
+    "torch_cuda": torch.version.cuda,
+    "cuda_available": torch.cuda.is_available(),
+}
+try:
+    result["gpu"] = torch.cuda.get_device_name(0) if torch.cuda.is_available() else None
+    result["capability"] = list(torch.cuda.get_device_capability(0)) if torch.cuda.is_available() else None
+    tensor = torch.ones(1, device="cuda")
+    result["allocation"] = float(tensor.cpu().item())
+    result["compatible"] = True
+except Exception as error:
+    result["compatible"] = False
+    result["error"] = f"{type(error).__name__}: {error}"
+print(json.dumps(result, sort_keys=True))
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", probe],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return json.loads(completed.stdout.splitlines()[-1])
+
+
+def _ensure_cuda_compatible_torch() -> dict[str, object]:
+    before = _cuda_probe()
+    if before.get("compatible") is True:
+        return {"action": "existing_install_compatible", "before": before, "after": before}
+    print(json.dumps({"cuda_probe_before_fallback": before}, indent=2, sort_keys=True), flush=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--no-cache-dir",
+            *CUDA_FALLBACK_PACKAGES,
+            "--index-url",
+            CUDA_FALLBACK_INDEX,
+        ],
+        check=True,
+    )
+    after = _cuda_probe()
+    if after.get("compatible") is not True:
+        raise RuntimeError(f"CUDA remained unusable after the compatibility install: {after}")
+    return {"action": "installed_cu118_fallback", "before": before, "after": after}
 
 
 transport_manifest = _one("transport_manifest.json")
@@ -64,6 +120,7 @@ checkpoint = transport_root / transport["initialization_checkpoint"]
 if not checkpoint.is_file():
     raise FileNotFoundError(f"Initialization checkpoint is missing: {checkpoint}")
 
+cuda_runtime = _ensure_cuda_compatible_torch()
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-e", str(REPO)], check=True)
 config = os.environ.get("CONSENTGUARD_PLATE_CONFIG", DEFAULT_CONFIG)
 command = [
@@ -78,7 +135,12 @@ command = [
 ]
 print(
     json.dumps(
-        {"code_delivery": code_delivery, "command": command, "transport": transport},
+        {
+            "code_delivery": code_delivery,
+            "command": command,
+            "cuda_runtime": cuda_runtime,
+            "transport": transport,
+        },
         indent=2,
         sort_keys=True,
     ),
