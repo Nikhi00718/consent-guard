@@ -28,17 +28,16 @@
         "storage_note": "local ignored artifact; hash is recorded for reproducibility",
         "tracked_in_git": false
       },
-      "plate_maskrcnn": {
-        "bytes": 366614551,
-        "path": "C:\\consentGuard\\artifacts\\checkpoints\\specialist_plate_maskrcnn_5ep\\last.pt",
+      "plate_fasterrcnn_india": {
+        "bytes": 346511469,
+        "path": "C:\\consentGuard\\artifacts\\checkpoints\\specialist_plate_ccpd2020_india_finetune_5ep\\best.pt",
         "present": true,
         "required": true,
-        "sha256": "1c1e74aeafc7130ab7b34739f7c96bfbdb531d3e55ea2a27155d235759271246",
+        "sha256": "d8a7a551fe3a9f264bb1ad34066f583d92ae9344503112a582554e29975a81b8",
         "storage_note": "local ignored artifact; hash is recorded for reproducibility",
         "tracked_in_git": false
       }
     },
-    "code_commit": "6d693a2296d814d81b64f622d1c66ea66c57c796",
     "configs": [
       {
         "bytes": 1823,
@@ -48,11 +47,11 @@
         "sha256": "250edd641ab77b85d17a19232c91f70889d67a5aec7a679a00403aee4c1ddea5"
       },
       {
-        "bytes": 3797,
+        "bytes": 3986,
         "path": "C:\\consentGuard\\main_project\\configs\\stage_04_fusion_calibration\\threshold_profile_v2_validation_calibrated.yaml",
         "present": true,
         "required": true,
-        "sha256": "822b21c04ac2e694f9b6c72d18e05866e8910f03195a74db72e1830cbe97205a"
+        "sha256": "633e196fe5e53e158c217910bdf6a9e8ca9d07d24fe303e50c0ec6686a2202cc"
       },
       {
         "bytes": 1704,
@@ -62,11 +61,11 @@
         "sha256": "1ce598e318170771a8d1fd72def780c0d2cc2276d094950875ceec9ba0cf49a3"
       },
       {
-        "bytes": 1639,
-        "path": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_plate_maskrcnn_5ep.yaml",
+        "bytes": 2128,
+        "path": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_plate_ccpd2020_india_finetune_5ep.yaml",
         "present": true,
         "required": true,
-        "sha256": "9252266088dd6b3e33789ca1c9d7c6fa5ca922a42b357ce03e3ba3186e419cae"
+        "sha256": "ce12ab60591bd5662d73ca90d28384717bba4597ee7ef9307970c5bc9e6d2fc1"
       },
       {
         "bytes": 1682,
@@ -99,6 +98,20 @@
         "sha256": "03bdc6fef69597d2beb3ebccfac3a4ccbbe85d1b4a2e7d694245910f3773d290"
       },
       {
+        "bytes": 61369,
+        "path": "C:\\consentGuard\\reports\\roboflow_nivu_indian_plate_v1_audit.json",
+        "present": true,
+        "required": true,
+        "sha256": "93e75497ae3e1ca1bdcffbad85942fc7ded1c1e8255bbf9a028a7996897274de"
+      },
+      {
+        "bytes": 1422051,
+        "path": "C:\\consentGuard\\data\\manifests\\roboflow_nivu_indian_plate_v1.jsonl",
+        "present": true,
+        "required": true,
+        "sha256": "bb50452cd3bb4699a769dac61848e0be7e874709dab5c2895f1bb404e7ec9884"
+      },
+      {
         "bytes": 257,
         "path": "C:\\consentGuard\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\class_map.json",
         "present": true,
@@ -120,6 +133,7 @@
         "sha256": "08094dadabf693b0efad47faac93d76a4d1576db5733460663f4f7fef4cd3c0d"
       }
     ],
+    "generation_base_commit": "9614475193f8c0209cb9bac59c116959959de35d",
     "provider_assets": [
       {
         "bytes": 1716,
@@ -164,6 +178,20 @@
         "present": true,
         "required": true,
         "sha256": "a0a076535cde20ff469cf315333ef5de66895371992e653bc961b00eabab6d63"
+      },
+      {
+        "bytes": 34744,
+        "path": "C:\\consentGuard\\reports\\plate_deepak_current_challenge.json",
+        "present": true,
+        "required": true,
+        "sha256": "eabbca773211a651c828750ab1e232e044725a278332588535bcd8fdae458ab7"
+      },
+      {
+        "bytes": 10100,
+        "path": "C:\\consentGuard\\reports\\PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md",
+        "present": true,
+        "required": true,
+        "sha256": "9c52ba1038b0625252fb4ae6100e1e0b4d95047ce2cd9aed8e03c7a3663bf521"
       }
     ]
   },
@@ -413,9 +441,9 @@
   "release_candidate": false,
   "repository": {
     "branch": "agent/object-centric-crops",
-    "commit": "6d693a2296d814d81b64f622d1c66ea66c57c796",
-    "root": "C:\\consentGuard",
-    "worktree_status": ""
+    "commit_relation": "This manifest is generated content, so the commit containing it is expected to be a descendant of generation_base_commit.",
+    "generation_base_commit": "9614475193f8c0209cb9bac59c116959959de35d",
+    "root": "C:\\consentGuard"
   },
   "schema_version": "consentguard-release-bundle-v1",
   "test_split_used": false
