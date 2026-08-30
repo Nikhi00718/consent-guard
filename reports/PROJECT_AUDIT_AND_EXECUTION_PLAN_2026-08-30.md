@@ -29,6 +29,12 @@ the separate Deepak road-video challenge.
 | QR/barcode | zxing-cpp | No learned ConsentGuard dataset | Deterministic decoder/geometry provider | No training is required |
 | Metadata | EXIF/container inspection | No learned dataset | Rule-based evidence | No training is required |
 
+The nine broad learned classes are face, license plate, person body, nudity,
+handwriting, disability evidence, medicine, fingerprint, and signature. There
+are no separate trainable models for person body, nudity, disability, medicine,
+fingerprint, or signature yet; those remain responsibilities of the broad
+Mask R-CNN and are among the reasons Target-2K is required.
+
 ## Why YuNet exists and whether we should train it
 
 YuNet is present because a second, independently implemented face detector can
