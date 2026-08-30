@@ -83,15 +83,17 @@ def build(output: Path) -> dict[str, Any]:
     checkpoint_specs = {
         "global_maskrcnn": "artifacts/checkpoints/maskrcnn_moderate_v2_negatives_10ep/last.pt",
         "face_maskrcnn": "artifacts/checkpoints/specialist_face_maskrcnn_5ep/last.pt",
-        "plate_maskrcnn": "artifacts/checkpoints/specialist_plate_maskrcnn_5ep/last.pt",
+        "plate_fasterrcnn_india": "artifacts/checkpoints/specialist_plate_ccpd2020_india_finetune_5ep/best.pt",
         "handwriting_maskrcnn": "artifacts/checkpoints/specialist_handwriting_maskrcnn_5ep/last.pt",
     }
     artifacts = {
-        "code_commit": _git(["rev-parse", "HEAD"]),
+        "generation_base_commit": _git(["rev-parse", "HEAD"]),
         "data": [
             _artifact("reports/visual_redactions_release_validation.json"),
             _artifact("reports/processed_records_v2_negatives_validation.json"),
             _artifact("reports/same_release_split_leakage_audit_clean.json"),
+            _artifact("reports/roboflow_nivu_indian_plate_v1_audit.json"),
+            _artifact("data/manifests/roboflow_nivu_indian_plate_v1.jsonl"),
             _artifact("data/processed/visual_redactions_verified_visual_v2_negatives/class_map.json"),
             _artifact("data/processed/visual_redactions_verified_visual_v2_negatives/records_train2017.jsonl"),
             _artifact("data/processed/visual_redactions_verified_visual_v2_negatives/records_val2017.jsonl"),
@@ -100,7 +102,7 @@ def build(output: Path) -> dict[str, Any]:
             _artifact("main_project/configs/stage_02_baseline_model/train_maskrcnn_moderate_v2_negatives_10ep.yaml"),
             _artifact("main_project/configs/stage_04_fusion_calibration/threshold_profile_v2_validation_calibrated.yaml"),
             _artifact("main_project/configs/stage_03_specialists/train_face_maskrcnn_5ep.yaml"),
-            _artifact("main_project/configs/stage_03_specialists/train_plate_maskrcnn_5ep.yaml"),
+            _artifact("main_project/configs/stage_03_specialists/train_plate_ccpd2020_india_finetune_5ep.yaml"),
             _artifact("main_project/configs/stage_03_specialists/train_handwriting_maskrcnn_5ep.yaml"),
         ],
         "reports": [
@@ -109,6 +111,8 @@ def build(output: Path) -> dict[str, Any]:
             _artifact("reports/specialist_finetune_summary.json"),
             _artifact("reports/fused_validation_v2_1_baseline.json", required=False),
             _artifact("reports/maskrcnn_moderate_v2_negatives_10ep_finetuned_specialists_smoke.json"),
+            _artifact("reports/plate_deepak_current_challenge.json"),
+            _artifact("reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md"),
         ],
         "checkpoints": {
             name: {**_artifact(path), "tracked_in_git": False, "storage_note": "local ignored artifact; hash is recorded for reproducibility"}
@@ -123,8 +127,11 @@ def build(output: Path) -> dict[str, Any]:
         "repository": {
             "root": str(ROOT),
             "branch": _git(["branch", "--show-current"]),
-            "commit": _git(["rev-parse", "HEAD"]),
-            "worktree_status": _git(["status", "--short"]),
+            "generation_base_commit": _git(["rev-parse", "HEAD"]),
+            "commit_relation": (
+                "This manifest is generated content, so the commit containing it is expected "
+                "to be a descendant of generation_base_commit."
+            ),
         },
         "test_split_used": False,
         "artifacts": artifacts,
