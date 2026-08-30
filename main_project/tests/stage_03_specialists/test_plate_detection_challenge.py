@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from PIL import Image
+
 
 SCRIPT_ROOT = Path(__file__).resolve().parents[2] / "scripts" / "stage_03_specialists"
 sys.path.insert(0, str(SCRIPT_ROOT))
@@ -29,3 +31,13 @@ def test_metrics_handle_empty_predictions() -> None:
     assert metrics["recall"] == 0.0
     assert metrics["f1"] == 0.0
     assert metrics["false_positives_per_image"] == 0.0
+
+
+def test_frozen_record_decoder_keeps_web_ingest_limits_separate(tmp_path: Path) -> None:
+    path = tmp_path / "record.jpg"
+    Image.new("RGB", (32, 24), "white").save(path)
+
+    image = module._normalize_challenge_image(path)
+
+    assert image.source_format == "JPEG"
+    assert (image.width, image.height) == (32, 24)

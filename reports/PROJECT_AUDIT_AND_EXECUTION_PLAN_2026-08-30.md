@@ -175,3 +175,20 @@ Still blocked:
 
 This is not wasted work. It is a functional, auditable research system whose
 remaining gaps are now explicit and testable.
+
+## Frozen website-promotion gate
+
+The gate was fixed before the new checkpoint was available. At score threshold
+0.50 and IoU 0.50, the current website checkpoint establishes these baselines:
+
+| Frozen set | Recall | Precision | False positives/image |
+|---|---:|---:|---:|
+| Merged validation: 1,824 images / 382 boxes | 0.6832 | 0.1791 | 0.6557 |
+| Deepak `vid-1`: 43 images / 68 boxes | 0.0147 | 0.0222 | 1.0233 |
+
+The new candidate may replace the experimental website default only if all of
+the following hold: the Kaggle run succeeds with no test use; merged-validation
+recall is at least 0.6832 with false positives/image no greater than 0.6557;
+Deepak `vid-1` recall is at least 0.50 with false positives/image no greater
+than 1.0233. This promotion does not make the system release-ready; the stricter
+Stage 06 95% recall, multi-seed, confidence-bound, and attack gates still apply.

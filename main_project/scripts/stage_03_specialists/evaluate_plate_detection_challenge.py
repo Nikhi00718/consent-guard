@@ -15,6 +15,7 @@ import json
 import sys
 import time
 from datetime import datetime, timezone
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -24,11 +25,13 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 import torch
+import numpy as np
+from PIL import Image, ImageOps
 
 from consentguard.shared.paths import project_path
 from consentguard.shared.runtime import atomic_json_dump, select_device
 from consentguard.stage_02_baseline_model.config import load_training_config
-from consentguard.stage_05_review_export.ingest import normalize_image
+from consentguard.stage_05_review_export.ingest import NormalizedImage
 from consentguard.stage_05_review_export.provider_factory import load_torchvision_provider
 
 
@@ -57,6 +60,46 @@ def _ground_truth(record: dict[str, Any]) -> list[tuple[float, float, float, flo
         if width > 0 and height > 0:
             result.append((x, y, x + width, y + height))
     return result
+
+
+def _normalize_challenge_image(path: Path) -> NormalizedImage:
+    """Decode an admitted record like training, without changing web limits.
+
+    Some frozen Visual Redactions files are MPO or exceed the public API's
+    40-megapixel safety limit. Their byte hashes were verified before this
+    function is called, and the training loader admitted them. The evaluator
+    therefore uses frame 0 with a separate 100-megapixel hard ceiling. The web
+    ingest allowlist and limits remain unchanged.
+    """
+
+    payload = path.read_bytes()
+    with Image.open(BytesIO(payload)) as source:
+        source_format = str(source.format or "UNKNOWN").upper()
+        source.seek(0)
+        if source.width * source.height > 100_000_000:
+            raise ValueError(f"Frozen challenge image exceeds 100 million pixels: {path}")
+        exif = source.getexif()
+        orientation_applied = bool(exif.get(274, 1) != 1)
+        metadata_categories = ["exif"] if exif else []
+        for key in ("icc_profile", "xmp", "comment", "dpi"):
+            if key in source.info:
+                metadata_categories.append(key)
+        pixels = np.asarray(ImageOps.exif_transpose(source).convert("RGB"), dtype=np.uint8).copy()
+        if getattr(source, "n_frames", 1) > 1:
+            source_format = f"{source_format}_FRAME_0"
+    pixel_digest = hashlib.sha256()
+    pixel_digest.update(pixels.shape[1].to_bytes(8, "little"))
+    pixel_digest.update(pixels.shape[0].to_bytes(8, "little"))
+    pixel_digest.update(pixels.tobytes(order="C"))
+    return NormalizedImage(
+        source_path=path.resolve(),
+        source_sha256=hashlib.sha256(payload).hexdigest(),
+        pixel_sha256=pixel_digest.hexdigest(),
+        pixels_rgb=pixels,
+        source_format=source_format,
+        metadata_categories=tuple(sorted(metadata_categories)),
+        orientation_applied=orientation_applied,
+    )
 
 
 def _match(
@@ -118,7 +161,7 @@ def _evaluate_candidate(
         expected_hash = record.get("image_sha256")
         if expected_hash and _sha256(image_path).lower() != str(expected_hash).lower():
             raise RuntimeError(f"Challenge image hash mismatch: {image_path}")
-        image = normalize_image(image_path)
+        image = _normalize_challenge_image(image_path)
         evidence = provider.analyze(image)
         predictions = [
             (float(item.confidence), tuple(float(value) for value in item.geometry.box_xyxy))
