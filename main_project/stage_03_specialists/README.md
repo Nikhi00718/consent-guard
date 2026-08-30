@@ -45,11 +45,22 @@ accepts these optional checkpoints with `--face-checkpoint`, `--plate-checkpoint
 `--handwriting-checkpoint`; their evidence is fused under the normal Stage 04
 threshold/review gates.
 
-No external image corpus was silently added to training. WIDER FACE and
-IIIT-INDIC-HW-WORDS remain candidate sources pending image-level use-rights
-records; the Indian LPR source is explicitly not admitted because its project
-states that the dataset cannot be publicly released. This keeps the training
-manifest honest and prevents an unlicensed dataset from entering the model.
+No external image corpus is silently added to training. WIDER FACE and HierText
+were used only in isolated research-license Kaggle experiments with frozen
+train/validation records; their checkpoints cannot be relabeled for unrestricted
+commercial use. IIIT-INDIC-HW-WORDS remains a candidate pending image-level
+use-rights records. The earlier Indian LPR source is explicitly not admitted
+because its project states that the dataset cannot be publicly released. This
+keeps the training manifest honest and prevents an unlicensed dataset from
+entering the model.
+
+The later Roboflow `nivu/indian-license-plate-knte7` v1 export is admitted only
+as an experimental CC BY 4.0 user-published source. Its original split is not
+admitted: the reproducible audit found 17 source/duplicate groups spanning
+publisher splits. `prepare_grouped_yolo_plate.py` replaces that split before
+`merge_specialist_records.py` builds the no-test full-scene research candidate.
+See `reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md` for counts, limits,
+and the checkpoint promotion rule.
 
 ## Code rule
 

@@ -15,6 +15,7 @@ data/cache/
 data/downloads/
 data/download_logs/
 data/manifests/*.jsonl
+!data/manifests/roboflow_nivu_indian_plate_v1.jsonl
 
 artifacts/checkpoints/
 artifacts/metrics/

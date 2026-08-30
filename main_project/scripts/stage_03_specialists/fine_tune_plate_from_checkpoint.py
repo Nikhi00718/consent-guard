@@ -23,7 +23,7 @@ from consentguard.shared.paths import project_path
 from consentguard.shared.runtime import atomic_json_dump, environment_snapshot, seed_everything, select_device
 from consentguard.stage_02_baseline_model.config import (
     load_training_config,
-    validate_checkpoint_inference_compatibility,
+    validate_checkpoint_initialization_compatibility,
 )
 from consentguard.stage_02_baseline_model.data_loading import build_data_loaders
 from consentguard.stage_02_baseline_model.models import build_instance_segmentation_model, model_summary
@@ -64,7 +64,7 @@ def main() -> None:
     if not checkpoint_path.is_file():
         raise FileNotFoundError(f"Initialization checkpoint does not exist: {checkpoint_path}")
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
-    validate_checkpoint_inference_compatibility(checkpoint, config)
+    validate_checkpoint_initialization_compatibility(checkpoint, config)
 
     seed_everything(
         int(config.section("experiment")["seed"]),

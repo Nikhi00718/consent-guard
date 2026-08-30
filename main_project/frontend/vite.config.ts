@@ -1,13 +1,15 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
+const apiTarget = process.env.CONSENTGUARD_API_TARGET ?? "http://127.0.0.1:7860";
+
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
-      "/v1": "http://127.0.0.1:7860",
-      "/health": "http://127.0.0.1:7860",
+      "/v1": apiTarget,
+      "/health": apiTarget,
     },
   },
   test: {

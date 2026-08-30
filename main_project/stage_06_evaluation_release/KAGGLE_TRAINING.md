@@ -80,6 +80,26 @@ and rerun the same publisher with `--push` only.
 Do not start a second
 unrelated component while this plate run is active.
 
+## Full-scene Indian plate adaptation
+
+The next candidate uses the leakage-safe merged train/validation records and
+initializes from the current CCPD-to-India checkpoint. The publisher verifies
+every referenced image hash, rejects paths outside the repository, excludes the
+test split, and uses hard links for local staging:
+
+```powershell
+.venv\Scripts\python.exe main_project/scripts/stage_03_specialists/prepare_plate_full_scene_kaggle_job.py
+.venv\Scripts\python.exe main_project/scripts/stage_03_specialists/prepare_plate_full_scene_kaggle_job.py --upload --push
+```
+
+The private data transport is
+`nikhil00718/consentguard-plate-full-scene-v1`; the private code dataset is
+`nikhil00718/consentguard-plate-full-scene-code-v1`; and the isolated GPU kernel
+is `nikhil00718/consentguard-plate-full-scene-training`. The default remote run
+uses the high-resolution 800/1333 candidate. It must beat the frozen validation
+and Deepak `vid-1` challenge before its checkpoint can replace the website
+default.
+
 ## Important limits
 
 - Kaggle GPU access and quotas are account-dependent; configure credentials

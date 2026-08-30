@@ -137,6 +137,38 @@ def validate_checkpoint_inference_compatibility(
             )
 
 
+def validate_checkpoint_initialization_compatibility(
+    checkpoint: dict[str, Any],
+    config: TrainingConfig,
+) -> None:
+    """Validate reusable detector weights without freezing training transforms.
+
+    Fine-tuning may intentionally change image resolution, crop policy, and
+    proposal limits.  Those values must remain strict for inference/resume,
+    but they do not change the learned tensor layout used for initialization.
+    ``load_state_dict`` remains the final tensor-level compatibility check.
+    """
+
+    if checkpoint.get("class_map") != config.class_map:
+        raise ConfigError("Checkpoint class_map does not match the selected configuration")
+    saved = checkpoint.get("config")
+    if not isinstance(saved, dict):
+        raise ConfigError("Checkpoint does not contain its resolved training configuration")
+    saved_model = saved.get("model")
+    active_model = config.values.get("model")
+    if not isinstance(saved_model, dict) or not isinstance(active_model, dict):
+        raise ConfigError("Checkpoint or active model configuration is missing")
+    for field, default in (
+        ("name", None),
+        ("small_object_anchors", False),
+        ("class_agnostic_mask", False),
+    ):
+        if saved_model.get(field, default) != active_model.get(field, default):
+            raise ConfigError(
+                f"Checkpoint model.{field} is incompatible with initialization configuration"
+            )
+
+
 def load_training_config(path: str | Path, *, require_validation_data: bool = True) -> TrainingConfig:
     config_path = project_path(path)
     if not config_path.is_file():

@@ -183,3 +183,7 @@ blocked.
 Dataset media, model checkpoints, and generated outputs are intentionally
 ignored by version control and must not be redistributed without their original
 licenses and research-use terms.
+
+The current all-model repository audit, dataset counts, limitations, and next
+training decision are recorded in
+[`reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md`](reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md).
