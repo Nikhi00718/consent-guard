@@ -133,7 +133,7 @@
         "sha256": "08094dadabf693b0efad47faac93d76a4d1576db5733460663f4f7fef4cd3c0d"
       }
     ],
-    "generation_base_commit": "9614475193f8c0209cb9bac59c116959959de35d",
+    "generation_base_commit": "6cb5a26992b1b98c2fe43a0d1f5caf391c6fb029",
     "provider_assets": [
       {
         "bytes": 1716,
@@ -187,11 +187,11 @@
         "sha256": "eabbca773211a651c828750ab1e232e044725a278332588535bcd8fdae458ab7"
       },
       {
-        "bytes": 10100,
+        "bytes": 10368,
         "path": "C:\\consentGuard\\reports\\PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md",
         "present": true,
         "required": true,
-        "sha256": "9c52ba1038b0625252fb4ae6100e1e0b4d95047ce2cd9aed8e03c7a3663bf521"
+        "sha256": "f55afcece23596c296db71eabfe805065181f2a04c7f63b69782ed88a6330ed3"
       }
     ]
   },
@@ -442,7 +442,7 @@
   "repository": {
     "branch": "agent/object-centric-crops",
     "commit_relation": "This manifest is generated content, so the commit containing it is expected to be a descendant of generation_base_commit.",
-    "generation_base_commit": "9614475193f8c0209cb9bac59c116959959de35d",
+    "generation_base_commit": "6cb5a26992b1b98c2fe43a0d1f5caf391c6fb029",
     "root": "C:\\consentGuard"
   },
   "schema_version": "consentguard-release-bundle-v1",
