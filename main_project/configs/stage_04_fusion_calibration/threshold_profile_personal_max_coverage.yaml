@@ -1,124 +1,147 @@
 # Personal-tool coverage profile.
 #
-# The validation-calibrated profile optimizes precision: on a real photo it
-# discarded 212 of 276 detections and left one region to erase. For a personal
-# redaction tool the trade is the other way round. A false alarm costs one
-# un-erase click; a miss leaks. Thresholds are therefore low, geometry is
-# expanded, and every class stays mandatory_review so the interface keeps
-# telling the truth about what it is unsure of.
+# Goal: catch more than the precision-tuned research profile, because a false
+# alarm costs one un-erase click while a miss leaks. But "lower every
+# threshold" is not that trade: at score 0.06 a real photo produced 2,431
+# detections whose union covered 99.6% of the image, which is a black
+# rectangle, not a redaction.
 #
-# Rules are matched provider+class, then provider+*, then *+class, then *+*.
-# Class-level rules are the tuning surface here so that tiled providers
-# (maskrcnn_tiled, plate_fasterrcnn_tiled, ...) inherit the same behavior as
-# their single-pass parents.
+# So each class gets three numbers instead of one:
+#   score_threshold    - below the calibrated value, above the noise floor
+#   max_area_fraction  - a plausibility cap; a single detection larger than
+#                        this share of the image is junk for that class
+#   dilation/expansion - generous, so edges of covered content do not survive
+#
+# Reference points from the V2 validation calibration (see
+# threshold_profile_v2_validation_calibrated.yaml and reports/): face 0.65,
+# plate 0.25, body 0.35, nudity 0.10, rare classes 0.05-0.80.
+#
+# Rules match provider+class, then provider+*, then *+class, then *+*. Class
+# rules are the tuning surface so tiled providers inherit their parent's
+# behaviour. Every class stays mandatory_review: the interface must keep saying
+# what it is unsure about.
 #
 # release_ready stays false: this is not calibrated release evidence, and in
-# personal policy mode that flag becomes a visible warning instead of a lock.
+# personal policy mode that flag is shown as a warning rather than blocking.
 profile_id: threshold-profile-personal-max-coverage
 release_ready: false
 rules:
-# --- Faces: strongest class, so it can afford a moderate threshold.
+# --- Faces: the strongest class. 0.40 against a calibrated 0.65.
 - provider: '*'
   privacy_class: a105_face_all
-  score_threshold: 0.3
-  min_area_pixels: 8
+  score_threshold: 0.4
+  min_area_pixels: 12
   expansion_fraction: 0.08
-  dilation_pixels: 8
+  dilation_pixels: 6
+  max_area_fraction: 0.35
   mandatory_review: true
 - provider: '*'
   privacy_class: face
-  score_threshold: 0.3
-  min_area_pixels: 8
+  score_threshold: 0.4
+  min_area_pixels: 12
   expansion_fraction: 0.1
-  dilation_pixels: 8
+  dilation_pixels: 6
+  max_area_fraction: 0.35
   mandatory_review: true
-# --- Plates: small, oblique, and frequently missed. Cover generously.
+# --- Plates: small, oblique, often missed, and never large in a photo.
 - provider: '*'
   privacy_class: a108_license_plate_all
-  score_threshold: 0.12
-  min_area_pixels: 6
+  score_threshold: 0.15
+  min_area_pixels: 8
   expansion_fraction: 0.18
-  dilation_pixels: 8
+  dilation_pixels: 6
+  max_area_fraction: 0.12
   mandatory_review: true
 - provider: '*'
   privacy_class: license_plate
-  score_threshold: 0.12
-  min_area_pixels: 6
+  score_threshold: 0.15
+  min_area_pixels: 8
   expansion_fraction: 0.18
-  dilation_pixels: 8
+  dilation_pixels: 6
+  max_area_fraction: 0.12
   mandatory_review: true
-# --- Bodies: accurate, but erasing one destroys most of a photo. The interface
-# leaves this group switched off by default; the rule exists for when it is on.
+# --- Bodies: accurate, and erasing one removes most of a photo, so the
+# interface leaves this group off by default. The cap stays high on purpose.
 - provider: '*'
   privacy_class: a109_person_body
-  score_threshold: 0.4
-  min_area_pixels: 32
+  score_threshold: 0.35
+  min_area_pixels: 64
   dilation_pixels: 4
+  max_area_fraction: 0.95
   mandatory_review: true
 - provider: '*'
   privacy_class: a110_nudity_all
-  score_threshold: 0.05
-  min_area_pixels: 8
-  expansion_fraction: 0.1
-  dilation_pixels: 10
+  score_threshold: 0.15
+  min_area_pixels: 32
+  expansion_fraction: 0.08
+  dilation_pixels: 8
+  max_area_fraction: 0.6
   mandatory_review: true
   experimental: true
-# --- Text: the largest privacy win and the weakest learned class. The OCR
-# detector carries this group; the learned handwriting head only adds recall.
+# --- Text: the biggest privacy win. The OCR detector carries this group; the
+# learned handwriting head is weak (3% pixel recall) so it only adds recall.
 - provider: '*'
   privacy_class: printed_text
-  score_threshold: 0.2
-  min_area_pixels: 6
+  score_threshold: 0.25
+  min_area_pixels: 8
   expansion_fraction: 0.12
-  dilation_pixels: 6
+  dilation_pixels: 5
+  max_area_fraction: 0.3
   mandatory_review: true
 - provider: '*'
   privacy_class: a26_handwriting
-  score_threshold: 0.06
-  min_area_pixels: 6
-  expansion_fraction: 0.15
-  dilation_pixels: 8
+  score_threshold: 0.15
+  min_area_pixels: 8
+  expansion_fraction: 0.12
+  dilation_pixels: 6
+  max_area_fraction: 0.25
   mandatory_review: true
   experimental: true
 - provider: '*'
   privacy_class: handwriting
-  score_threshold: 0.06
-  min_area_pixels: 6
-  expansion_fraction: 0.15
-  dilation_pixels: 8
+  score_threshold: 0.15
+  min_area_pixels: 8
+  expansion_fraction: 0.12
+  dilation_pixels: 6
+  max_area_fraction: 0.25
   mandatory_review: true
   experimental: true
-# --- Documents and biometrics: rare, weak, and high consequence when missed.
+# --- Documents and biometrics: rare, weak, high consequence when missed, and
+# physically small, so the area caps do most of the noise filtering.
 - provider: '*'
   privacy_class: a8_signature
-  score_threshold: 0.06
-  min_area_pixels: 6
-  expansion_fraction: 0.15
-  dilation_pixels: 8
+  score_threshold: 0.15
+  min_area_pixels: 8
+  expansion_fraction: 0.12
+  dilation_pixels: 6
+  max_area_fraction: 0.15
   mandatory_review: true
   experimental: true
 - provider: '*'
   privacy_class: a7_fingerprint
-  score_threshold: 0.06
-  min_area_pixels: 6
-  expansion_fraction: 0.12
-  dilation_pixels: 8
+  score_threshold: 0.15
+  min_area_pixels: 8
+  expansion_fraction: 0.1
+  dilation_pixels: 6
+  max_area_fraction: 0.15
   mandatory_review: true
   experimental: true
 - provider: '*'
   privacy_class: a43_medicine
-  score_threshold: 0.08
-  min_area_pixels: 8
-  expansion_fraction: 0.12
-  dilation_pixels: 8
+  score_threshold: 0.2
+  min_area_pixels: 12
+  expansion_fraction: 0.1
+  dilation_pixels: 6
+  max_area_fraction: 0.25
   mandatory_review: true
   experimental: true
 - provider: '*'
   privacy_class: a39_disability_physical
-  score_threshold: 0.15
-  min_area_pixels: 8
-  expansion_fraction: 0.1
-  dilation_pixels: 8
+  score_threshold: 0.3
+  min_area_pixels: 12
+  expansion_fraction: 0.08
+  dilation_pixels: 6
+  max_area_fraction: 0.4
   mandatory_review: true
   experimental: true
 # --- Barcodes and QR: a decoded symbol is certain, so cover the quiet zone.
@@ -128,13 +151,15 @@ rules:
   min_area_pixels: 4
   expansion_fraction: 0.25
   dilation_pixels: 8
+  max_area_fraction: 0.3
   mandatory_review: true
 # --- Anything a future provider reports, including unknown model classes.
 - provider: '*'
   privacy_class: '*'
-  score_threshold: 0.2
-  min_area_pixels: 8
-  expansion_fraction: 0.1
-  dilation_pixels: 6
+  score_threshold: 0.35
+  min_area_pixels: 12
+  expansion_fraction: 0.08
+  dilation_pixels: 5
+  max_area_fraction: 0.3
   mandatory_review: true
   experimental: true

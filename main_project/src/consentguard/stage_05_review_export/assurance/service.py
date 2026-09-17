@@ -35,6 +35,8 @@ class AssuranceService:
         self,
         asset_path: str | Path,
         providers: tuple[object, ...],
+        *,
+        thresholds: object | None = None,
     ) -> dict[str, AssuranceStatus]:
         """Run configured residual-content detectors on the freshly encoded asset.
 
@@ -43,6 +45,12 @@ class AssuranceService:
         are mapped to the four assurance categories without storing OCR text.
         This is a practical local attack harness; independent attack models
         should still be supplied before a production release.
+
+        ``thresholds`` is the same versioned profile the detection path uses.
+        Without it, every check fails on every image: these detectors always
+        emit low-confidence noise (LPD-YuNet needs 0.8 to be believed), so an
+        unfiltered finding count says nothing about residual content and the
+        warning becomes something the reviewer learns to ignore.
         """
 
         image = normalize_image(asset_path)
@@ -66,8 +74,26 @@ class AssuranceService:
             except Exception:
                 results[attack_name] = AssuranceStatus.FAIL
             else:
-                results[attack_name] = AssuranceStatus.FAIL if findings else AssuranceStatus.PASS
+                credible = self._credible(findings, thresholds)
+                results[attack_name] = AssuranceStatus.FAIL if credible else AssuranceStatus.PASS
         return results
+
+    @staticmethod
+    def _credible(findings: list, thresholds: object | None) -> list:
+        """Keep only findings the detection profile would have acted on."""
+
+        if thresholds is None:
+            return list(findings)
+        credible = []
+        for finding in findings:
+            try:
+                rule = thresholds.get(finding.provider, finding.privacy_class)  # type: ignore[attr-defined]
+            except (KeyError, AttributeError):
+                credible.append(finding)  # No rule: stay conservative.
+                continue
+            if finding.confidence >= rule.score_threshold:
+                credible.append(finding)
+        return credible
 
     def inspect(self, asset: RenderedAsset) -> AssuranceReport:
         checks = [self._decode_check(asset), self._hash_check(asset), self._metadata_check(asset)]

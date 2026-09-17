@@ -142,3 +142,54 @@ def test_attack_runner_marks_findings_failed_and_missing_attacks_uncertain(tmp_p
     assert results["barcode"] is AssuranceStatus.FAIL
     assert results["ocr"] is AssuranceStatus.UNCERTAIN
     assert results["plate"] is AssuranceStatus.UNCERTAIN
+
+
+def test_residual_attack_findings_respect_the_threshold_profile(tmp_path: Path) -> None:
+    """Low-confidence detector noise on the output must not fail assurance.
+
+    These detectors always emit something. Without the profile filter every
+    export would carry a residual warning and the signal would be worthless.
+    """
+
+    from consentguard.stage_04_fusion_calibration.domain import Evidence, EvidenceGeometry
+    from consentguard.stage_04_fusion_calibration.evidence import ThresholdRegistry
+
+    profile = tmp_path / "profile.yaml"
+    profile.write_text(
+        "profile_id: assurance-test\nrelease_ready: false\nrules:\n"
+        "  - {provider: yunet, privacy_class: face, score_threshold: 0.4, min_area_pixels: 1}\n",
+        encoding="utf-8",
+    )
+    thresholds = ThresholdRegistry.load(profile)
+
+    class NoisyFaceProvider:
+        name = "yunet"
+        version = "noise-v1"
+
+        def __init__(self, confidence: float) -> None:
+            self.confidence = confidence
+
+        def analyze(self, image):
+            return [
+                Evidence(
+                    evidence_id="residual-1",
+                    provider=self.name,
+                    provider_version=self.version,
+                    privacy_class="face",
+                    geometry=EvidenceGeometry(image.width, image.height, box_xyxy=(1, 1, 5, 5)),
+                    confidence=self.confidence,
+                )
+            ]
+
+    asset = tmp_path / "output.png"
+    cv2.imwrite(str(asset), np.zeros((16, 16, 3), dtype=np.uint8))
+    service = AssuranceService(required_attack_checks=("face",))
+
+    noise = service.run_attack_checks(asset, (NoisyFaceProvider(0.08),), thresholds=thresholds)
+    assert noise["face"] is AssuranceStatus.PASS
+
+    credible = service.run_attack_checks(asset, (NoisyFaceProvider(0.91),), thresholds=thresholds)
+    assert credible["face"] is AssuranceStatus.FAIL
+
+    unfiltered = service.run_attack_checks(asset, (NoisyFaceProvider(0.08),))
+    assert unfiltered["face"] is AssuranceStatus.FAIL

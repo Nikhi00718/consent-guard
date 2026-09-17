@@ -35,7 +35,13 @@ class EvidenceFusion:
                 rejected.append(item.evidence_id)
                 continue
             mask = geometry_to_mask(item.geometry, rule)
-            if int(mask.sum()) < rule.min_area_pixels:
+            area = int(mask.sum())
+            if area < rule.min_area_pixels:
+                rejected.append(item.evidence_id)
+                continue
+            if area > rule.max_area_fraction * width * height:
+                # Implausibly large for this class: a single sprawling mask would
+                # otherwise swallow the whole image.
                 rejected.append(item.evidence_id)
                 continue
             flags = tuple(sorted(set(item.uncertainty_flags)))

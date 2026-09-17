@@ -128,7 +128,11 @@ class ReviewExportService:
             )
             resolved_attack_checks = attack_checks
             if resolved_attack_checks is None and self.attack_providers:
-                resolved_attack_checks = self.assurance.run_attack_checks(destination, self.attack_providers)
+                resolved_attack_checks = self.assurance.run_attack_checks(
+                    destination,
+                    self.attack_providers,
+                    thresholds=self.fusion.thresholds,
+                )
             assurance_report = self.assurance.inspect(
                 RenderedAsset(
                     destination,

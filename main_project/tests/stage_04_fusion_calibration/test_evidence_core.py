@@ -68,3 +68,37 @@ def test_fusion_reports_unavailable_provider_and_rejected_low_score() -> None:
     assert result.candidates == ()
     assert result.rejected_evidence_ids == ("weak-face",)
     assert result.unavailable_providers == ("paddleocr",)
+
+
+def test_area_cap_rejects_a_sprawling_low_confidence_mask(tmp_path) -> None:
+    """A low score threshold must not let one mask swallow the whole image."""
+
+    from consentguard.stage_04_fusion_calibration.domain import Evidence, EvidenceGeometry
+    from consentguard.stage_04_fusion_calibration.evidence import EvidenceFusion, ThresholdRegistry
+
+    profile = tmp_path / "capped.yaml"
+    profile.write_text(
+        "profile_id: cap-test\nrelease_ready: false\nrules:\n"
+        "  - {provider: '*', privacy_class: a26_handwriting, score_threshold: 0.1,"
+        " min_area_pixels: 1, max_area_fraction: 0.25, mandatory_review: true}\n",
+        encoding="utf-8",
+    )
+    fusion = EvidenceFusion(ThresholdRegistry.load(profile))
+
+    def _evidence(evidence_id: str, box: tuple[float, float, float, float]) -> Evidence:
+        return Evidence(
+            evidence_id=evidence_id,
+            provider="maskrcnn",
+            provider_version="v1",
+            privacy_class="a26_handwriting",
+            geometry=EvidenceGeometry(20, 20, box_xyxy=box),
+            confidence=0.12,
+        )
+
+    result = fusion.combine(
+        [_evidence("small", (1, 1, 5, 5)), _evidence("sprawling", (0, 0, 20, 20))],
+        width=20,
+        height=20,
+    )
+    assert result.rejected_evidence_ids == ("sprawling",)
+    assert len(result.candidates) == 1

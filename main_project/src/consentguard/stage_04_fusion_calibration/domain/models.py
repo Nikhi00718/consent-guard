@@ -113,6 +113,13 @@ class ThresholdRule:
     dilation_pixels: int = 0
     mandatory_review: bool = True
     experimental: bool = False
+    #: Reject a single detection covering more of the image than this fraction.
+    #: Lowering a score threshold to catch small regions also admits sprawling
+    #: low-confidence masks; one of those can union the whole image into a
+    #: single black rectangle. A per-class plausibility cap keeps a low
+    #: threshold usable: a handwriting mask over a quarter of a photo is junk,
+    #: while a body mask legitimately can be.
+    max_area_fraction: float = 1.0
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.score_threshold <= 1.0:
@@ -123,6 +130,8 @@ class ThresholdRule:
             raise ValueError("expansion_fraction must be in [0, 1]")
         if self.dilation_pixels < 0:
             raise ValueError("dilation_pixels must be non-negative")
+        if not 0.0 < self.max_area_fraction <= 1.0:
+            raise ValueError("max_area_fraction must be in (0, 1]")
 
 
 @dataclass(frozen=True)
