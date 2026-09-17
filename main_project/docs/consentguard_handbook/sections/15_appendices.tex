@@ -1,0 +1,126 @@
+\chapter{Reference checklists}
+
+\section{Dataset admission checklist}
+
+\begin{itemize}[label=$\square$,leftmargin=8mm]
+  \item Canonical source URL and retrieval date recorded.
+  \item Image licence and annotation licence separately recorded.
+  \item Intended research/deployment use permitted.
+  \item Redistribution rights known.
+  \item Original and normalized hashes generated.
+  \item Ontology mapping reviewed.
+  \item Contributor/source/sequence group assigned.
+  \item Exact and perceptual duplicate audit passed.
+  \item Split assigned only after grouping.
+  \item Sensitive-content access and withdrawal policy recorded.
+  \item Dataset version manifest frozen.
+\end{itemize}
+
+\section{Training-run checklist}
+
+\begin{itemize}[label=$\square$,leftmargin=8mm]
+  \item Written hypothesis and controlled change.
+  \item Data/config/code hashes captured.
+  \item Test split inaccessible.
+  \item Environment preflight passed.
+  \item Loader and one-batch learning smoke tests passed.
+  \item Resume path tested.
+  \item Per-epoch checkpoints and metrics persisted.
+  \item Best-checkpoint selection rule fixed in advance.
+  \item Privacy metrics and subgroup metrics generated.
+  \item Result compared with frozen baseline.
+  \item Conclusion recorded even if negative.
+\end{itemize}
+
+\section{Threshold-profile checklist}
+
+\begin{itemize}[label=$\square$,leftmargin=8mm]
+  \item Raw validation predictions cached and hashed.
+  \item Score, size, expansion, and dilation sweeps completed.
+  \item Instance/pixel recall and leakage reported.
+  \item Precision, over-redaction, and negative false positives reported.
+  \item General/India and difficult slices reported.
+  \item Calibration curves include sample counts.
+  \item Review candidates/time measured.
+  \item Failed classes marked experimental.
+  \item Manual overrides audited.
+  \item Profile ID, rationale, and hashes frozen.
+\end{itemize}
+
+\section{Release checklist}
+
+\begin{itemize}[label=$\square$,leftmargin=8mm]
+  \item All trained finalists have three seeds.
+  \item Provider/checkpoint hashes match bundle manifest.
+  \item Required providers run offline without hidden downloads.
+  \item Threshold, fusion, policy, and assurance versions frozen.
+  \item Unit, integration, robustness, UI, and export-attack tests pass.
+  \item Validation gates pass with required confidence bounds.
+  \item Code and evaluation scripts frozen before test opening.
+  \item Locked tests opened once and archived.
+  \item Every release gate passes; no aggregate hiding.
+  \item Model card and data sheet publish failures and limits.
+  \item Final output described as a human-reviewed assistant.
+\end{itemize}
+
+\chapter{Current artifact facts}
+
+\section{Frozen comparator identity}
+
+\begin{tabularx}{\textwidth}{@{}L{45mm}Y@{}}
+\toprule
+Baseline ID & \file{baseline-v0.1} \\
+Status & Frozen comparator, not release model \\
+Family & Mask R-CNN ResNet-50 FPN v2 \\
+Best epoch & 5 \\
+Checkpoint bytes & 366,962,711 \\
+Checkpoint SHA-256 & \path{f03329d758ca8643cef1fac423413c3bbbaf73cc88eea8ee49d2ba90424740a0} \\
+Validation record SHA-256 & \path{8b377d439e12ceabdedf8278d5dd29805556f8e4a6932d26cc4571a53fb4ab29} \\
+Test split used & No \\
+\bottomrule
+\end{tabularx}
+
+\section{Training composition snapshot}
+
+The V2 negative-inclusive training split contains 3,785 images, 726 negatives, and 12,075 selected-class instances. Class instance counts are:
+
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Class} & \textbf{Instances} & \textbf{Images} \\
+\midrule
+Face & 3,992 & 2,081 \\
+Licence plate & 370 & 211 \\
+Person body & 5,852 & 2,654 \\
+Nudity & 316 & 230 \\
+Handwriting & 1,040 & 250 \\
+Disability evidence & 73 & 41 \\
+Medicine & 116 & 32 \\
+Fingerprint & 78 & 22 \\
+Signature & 238 & 153 \\
+\bottomrule
+\end{tabular}
+
+Size distribution: 516 small, 2,014 medium, and 9,545 large instances under the stored profile definition. The imbalance and small-object scarcity reinforce the specialist-data decision.
+
+\section{Recommended next command sequence}
+
+The next model work should follow this sequence conceptually:
+
+\begin{lstlisting}[language={}]
+1. verify baseline-v0.1 hashes and evaluation
+2. validate V2 negative-inclusive records
+3. run local loader and learning smoke tests
+4. prepare a fresh Kaggle bundle
+5. run/resume negative-inclusive global training
+6. evaluate on frozen validation only
+7. generate diagnostics and compare with baseline
+8. accept or reject the candidate in writing
+\end{lstlisting}
+
+Specialist acquisition/training can begin in parallel at the project-management level, but provider integration remains one component at a time for understandable failures.
+
+\chapter{Primary source notes}
+
+The dataset and tool recommendations in this handbook are grounded in primary project documentation and papers. WIDER FACE emphasizes scale, pose, and occlusion difficulty \citep{yang2016wider}. TextOCR provides large arbitrary-shaped scene-text annotations \citep{singh2021textocr}. IAM and IIIT provide complementary English and Indic handwriting resources \citep{dutta2018iam,gongidi2021indic}. Indian LPR addresses India-specific plate variation \citep{agarwal2021indianlpr}. BIV-Priv-Seg shows that private objects that are small, non-salient, non-textual, or absent remain difficult for modern models \citep{tseng2025biv}.
+
+These sources identify candidates, not automatic permission. Before download or training, preserve the current terms, verify image-level rights, and record the exact version used.

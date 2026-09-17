@@ -1,0 +1,6 @@
+# Optional specialist runtimes. Keep PaddleOCR isolated from the main PyTorch
+# environment because its native runtime currently conflicts with this Windows
+# stack on some inference paths.
+zxing-cpp==3.0.0
+paddlepaddle==3.3.0
+paddleocr==3.3.0

@@ -1,0 +1,148 @@
+\chapter{ConsentGuard Target-2K}
+
+\section{Purpose and composition}
+
+Target-2K is the deployment-focused dataset. It contains 2,000 licensed, staged, fictional, or consented still images:
+
+\begin{itemize}[leftmargin=6mm]
+  \item 1,000 general mobile/social photographs;
+  \item 1,000 India-first mobile/social photographs;
+  \item at least 500 true negative images;
+  \item at least 500 difficult-condition images; and
+  \item enough mixed scenes to test overlapping evidence from multiple providers.
+\end{itemize}
+
+The India-first half should not mean stereotypical landmarks. It means actual deployment characteristics: Indian registration plates, Indic scripts, local documents and packaging, common phone cameras, urban/rural lighting, motorcycles and auto-rickshaws, crowded scenes, informal plate mounting, and mixed-language text.
+
+\section{Capture matrix}
+
+\begin{longtable}{@{}L{34mm}L{44mm}L{69mm}@{}}
+\toprule
+\textbf{Dimension} & \textbf{Required variation} & \textbf{Reason} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Dimension} & \textbf{Required variation} & \textbf{Reason} \\
+\midrule
+\endhead
+Device & Low/mid/high-range phones, different sensors and aspect ratios & Avoid one-camera bias \\
+Lighting & Day, night, indoor, shadows, colored light, backlight, glare & Expose missed small objects and OCR failures \\
+Quality & Native, social-media compression, screenshots, repeated JPEG & Match sharing pipelines \\
+Viewpoint & Frontal, oblique, overhead, partial crop, perspective & Stress geometry and text/plate detection \\
+Scale & Close, medium, distant, crowded & Measure small-object recall \\
+Occlusion & Masks, helmets, hands, bags, foliage, overlapping people & Stress faces, bodies, plates, and text \\
+Scripts & Latin plus Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Odia, Tamil, Telugu, and Urdu where feasible & Test India-first text and handwriting \\
+Content & Faces, people, plates, handwriting, printed text, signatures, IDs, prescriptions, medicine, barcodes, screenshots & Exercise the full provider bundle \\
+Negatives & Harmless scenes plus class-specific hard negatives & Measure false positives and reviewer burden \\
+\bottomrule
+\end{longtable}
+
+\section{Split design}
+
+Use a grouped 70/15/15 split after duplicate clustering:
+
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+\textbf{Split} & \textbf{Images} & \textbf{Share} & \textbf{Access} \\
+\midrule
+Train & 1,400 & 70\% & Model developers \\
+Validation & 300 & 15\% & Model and threshold developers \\
+Test & 300 & 15\% & Hidden until bundle freeze \\
+\bottomrule
+\end{tabular}
+
+The test set should be stored behind a separate path or account boundary. A manifest can expose counts and hashes without exposing pixels or labels.
+
+\section{Annotation protocol}
+
+\subsection{Geometry}
+
+Annotate the smallest geometry that fully covers sensitive content according to the class guide:
+
+\begin{itemize}[leftmargin=6mm]
+  \item face: box covering visible face boundary, including partial faces;
+  \item plate: quadrilateral where possible, with readable/unreadable and occlusion flags;
+  \item text: word or coherent line polygons, printed/handwritten/uncertain type;
+  \item person/body: instance mask for visible body region;
+  \item document/medicine/signature: instance mask or polygon plus embedded text annotations;
+  \item barcode: quadrilateral and symbology if decoded; and
+  \item metadata: file-level findings, not visual geometry.
+\end{itemize}
+
+Do not bake safety expansion into ground truth. Store exact annotation and apply expansion/dilation as a threshold-profile rule. This keeps evaluation interpretable.
+
+\subsection{Attributes}
+
+Each instance should carry:
+
+\begin{itemize}[leftmargin=6mm]
+  \item class and optional subtype;
+  \item visible fraction/occlusion;
+  \item readable/recognizable state where appropriate;
+  \item approximate size bucket;
+  \item printed, handwritten, or uncertain text type;
+  \item script/language when known without guessing;
+  \item difficult-condition flags; and
+  \item annotator confidence and adjudication status.
+\end{itemize}
+
+\subsection{Negative annotation}
+
+A negative image is not merely an image with no boxes. It must be reviewed against every supported class. Store \file{negative\_reviewed=true}, ontology version, reviewer ID, and review timestamp. Hard-negative subtype tags make error analysis useful.
+
+\section{Quality-control workflow}
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=7mm,
+  b/.style={rounded corners=2mm,draw=CGTide,fill=CGMist,minimum width=29mm,minimum height=12mm,align=center,font=\sffamily\small},
+  a/.style={-{Stealth[length=2mm]},draw=CGSlate,line width=0.8pt}
+]
+\node[b] (source) {Source and\\rights check};
+\node[b,right=of source] (ingest) {Hash, normalize,\\group};
+\node[b,right=of ingest] (ann1) {Primary\\annotation};
+\node[b,right=of ann1] (ann2) {Independent\\review};
+\node[b,right=of ann2] (adj) {Adjudicate\\disagreement};
+\node[b,right=of adj] (auto) {Automated\\geometry checks};
+\node[b,right=of auto] (freeze) {Version and\\freeze manifest};
+\draw[a] (source) -- (ingest);
+\draw[a] (ingest) -- (ann1);
+\draw[a] (ann1) -- (ann2);
+\draw[a] (ann2) -- (adj);
+\draw[a] (adj) -- (auto);
+\draw[a] (auto) -- (freeze);
+\end{tikzpicture}}
+\caption{Every target image passes rights, annotation, review, geometry, and manifest checks.}
+\end{figure}
+
+Automated checks reject out-of-bounds geometry, zero-area regions, invalid polygons, empty masks, unknown class IDs, duplicate instance IDs, missing provenance, split overlap, and mismatched dimensions. Sample visual overlays from every class and annotator should be inspected before a version is frozen.
+
+\section{Minimum evidence for claims}
+
+The evaluation partitions must contain at least 200 instances each for face, plate, and text, and at least 100 instances for every other class described as supported. Counts should be sufficient in both general and India-first domains for the three safety-critical groups.
+
+If a class does not meet the minimum, the UI labels it \textbf{experimental} and requires review. A high aggregate score cannot upgrade an under-evidenced class.
+
+\section{Annotation tools and storage}
+
+A local CVAT or Label Studio deployment can support boxes, polygons, masks, attributes, and reviewer workflows. Export into a project-owned schema rather than coupling the training pipeline to one tool's JSON. Store raw source files, normalized copies, annotations, and manifests separately with least-privilege access.
+
+Recommended layout:
+
+\begin{lstlisting}[language={}]
+data/target_2k/
+  provenance/          # rights and consent records
+  raw/                 # access-controlled originals
+  normalized/          # canonical pixels
+  annotations/         # versioned source exports
+  manifests/           # project schema and split groups
+  reports/             # validation and duplicate audits
+\end{lstlisting}
+
+Raw sensitive data should not be committed to Git. Git tracks schemas, scripts, manifests without private paths, and aggregated reports.
+
+\section{Release and withdrawal procedure}
+
+Every directly collected image needs a stable contributor record and a withdrawal route. Withdrawal should locate all derived normalized images, annotations, crops, caches, and future dataset versions. If a trained model cannot feasibly remove the contribution, the consent form must state that limitation before collection.

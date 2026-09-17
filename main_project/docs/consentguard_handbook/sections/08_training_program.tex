@@ -1,0 +1,120 @@
+\chapter{Training program}
+
+\section{Experiment order}
+
+The order matters. Do not train every specialist at once. Each step creates evidence needed for the next decision.
+
+\begin{enumerate}[leftmargin=7mm]
+  \item Reproduce \file{baseline-v0.1} verification from its manifest and hashes.
+  \item Run the negative-inclusive global candidate on V2 with the same moderate recipe.
+  \item Evaluate pretrained YuNet and PaddleOCR before deciding whether either needs fine-tuning.
+  \item Build and train the one-class plate detector.
+  \item Build and train the handwriting-region detector.
+  \item Mine hard negatives from target validation errors.
+  \item Calibrate all providers and classes.
+  \item Run three seeds for trained finalists.
+  \item Freeze provider versions, thresholds, code, and manifests.
+  \item Open locked test sets once and produce the release report.
+\end{enumerate}
+
+\section{Global negative-inclusive candidate}
+
+Use the existing moderate-balance architecture and optimizer settings. The controlled change is the V2 record set containing profile negatives. This experiment answers two questions:
+
+\begin{itemize}[leftmargin=6mm]
+  \item Does including ordinary images reduce candidate-stage false positives?
+  \item Does it preserve comparable Visual Redactions mask mAP within 0.01 of the frozen baseline?
+\end{itemize}
+
+Do not silently tune several hyperparameters in the same run. If the result changes, attribution should remain possible. Save environment, resolved configuration, record hash, per-epoch metrics, best/last checkpoints, optimizer state, and CUDA peak memory.
+
+\section{Plate training recipe}
+
+\subsection*{Data}
+
+Combine licensed Indian plate data, licensed general plate data, and class-specific hard negatives. Split by source, sequence, and vehicle/near-duplicate group. Convert quadrilateral labels to tight boxes for Faster R-CNN while preserving original corners for evaluation and later segmentation research.
+
+\subsection*{Model}
+
+Start from COCO-pretrained Faster R-CNN ResNet-50 FPN v2. Replace the classification head with background plus one plate class. Tune anchors only after inspecting plate-size statistics; avoid speculative anchor changes before measuring proposal recall.
+
+\subsection*{Augmentation}
+
+Use moderate scale jitter, brightness/contrast, blur, JPEG compression, perspective, small rotation, partial occlusion, and night/glare simulation. Do not horizontally flip text-bearing plates if it creates impossible mirrored data unless the task is detection-only and the choice is documented.
+
+\subsection*{Selection}
+
+Select by target validation plate recall and sensitive-pixel/box coverage at a manageable false-positive rate, not plate mAP alone. Save three finalist seeds.
+
+\section{Handwriting training recipe}
+
+The handwriting branch has two distinct problems:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item \textbf{Localization:} find all handwriting regions in a full image.
+  \item \textbf{Recognition:} optionally read a cropped region to classify likely private content.
+\end{enumerate}
+
+V1 prioritizes localization. Begin with a DB-style detector checkpoint, pretrain/fine-tune on page/word/line data, and then fine-tune on full target scenes with polygons. Maintain separate printed-text and handwriting provider names even if both originate from PaddleOCR infrastructure.
+
+Target augmentations should reproduce phone capture: page perspective, curved paper, shadow bands, glare, blur, stains, low contrast, colored pens, ruled lines, overlapping printed forms, and social-media recompression. Synthetic scenes supplement rather than replace real validation images.
+
+Evaluate localization recall by text region, pixel coverage, script, size, and capture condition. Character error rate is secondary and must not gate whether a region is shown for review.
+
+\section{Pretrained provider evaluation}
+
+Before fine-tuning YuNet or PaddleOCR, build a frozen validation harness that reports:
+
+\begin{itemize}[leftmargin=6mm]
+  \item raw score distribution;
+  \item instance recall at multiple score and size thresholds;
+  \item pixel/box coverage after expansion;
+  \item false positives on negative and hard-negative images;
+  \item runtime and peak memory; and
+  \item failures by domain and difficulty slice.
+\end{itemize}
+
+Fine-tuning is justified only if the provider misses the safety gate and the error pattern is addressable with licensed data.
+
+\section{Local versus Kaggle work}
+
+\begin{tabularx}{\textwidth}{@{}YY@{}}
+\toprule
+\textbf{RTX 3050 laptop} & \textbf{Kaggle P100} \\
+\midrule
+Data validation, duplicate checks, annotation conversion, loader tests, smoke runs, inference, provider integration, threshold sweeps, calibration, review UI, assurance, and qualitative checks. & Negative-inclusive global run, plate training, handwriting fine-tuning, expensive ablations with written hypotheses, and three-seed finalist runs. \\
+\bottomrule
+\end{tabularx}
+
+The laptop's measured 4 GB device reserved roughly 3.44--3.47 GB in previous 10-epoch runs, so memory margins are small. Keep mixed provider frameworks out of the same GPU process unless measured safe.
+
+\section{Kaggle run protocol}
+
+Every notebook/job should:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item validate dataset and config hashes before allocating the GPU;
+  \item print environment and CUDA information;
+  \item run a one-batch forward/backward smoke test;
+  \item support resume from an explicit checkpoint;
+  \item write atomic checkpoints after each epoch;
+  \item copy checkpoints and metrics to persistent Kaggle output;
+  \item retain best and last checkpoints separately;
+  \item export a compact run manifest; and
+  \item never download unpinned weights during a resumed release run.
+\end{enumerate}
+
+Kaggle quotas vary with demand. Treat compute as a constrained resource: local preflight first, one justified experiment per run, and portable artifacts after every epoch.
+
+\section{Experiment ledger}
+
+Each run gets a unique ID and records hypothesis, controlled change, dataset version/hash, config hash, code commit, seed, environment, start/end times, compute, best epoch, metrics, failure status, and conclusion. A failed run is still useful if its cause and logs are preserved.
+
+\begin{actionbox}[Stop rule]
+Do not continue global-backbone experiments unless error analysis identifies a specific failure that specialists, data, thresholds, or review cannot address more directly. A new architecture must have a written hypothesis and acceptance comparison before consuming GPU time.
+\end{actionbox}
+
+\section{Three-seed finalist rule}
+
+For every trained component admitted to the release bundle, run three seeds using the same frozen data, configuration family, and selection rule. Report each result, mean, standard deviation, and bootstrap confidence intervals on fixed predictions. The release gate uses the lower confidence bound where specified, not only the best seed.
+

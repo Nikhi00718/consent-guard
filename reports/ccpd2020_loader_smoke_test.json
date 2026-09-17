@@ -1,0 +1,10 @@
+{
+  "samples_checked": 100,
+  "unique_image_ids": 100,
+  "total_instances": 100,
+  "total_positive_mask_pixels": 1209208,
+  "resized_shapes": [
+    "512x825"
+  ],
+  "passed": true
+}

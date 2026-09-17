@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://consentguard.local/schemas/evidence-v1.schema.json",
+  "title": "ConsentGuard evidence",
+  "type": "object",
+  "required": ["evidence_id", "provider", "provider_version", "privacy_class", "geometry", "confidence"],
+  "additionalProperties": false,
+  "properties": {
+    "evidence_id": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "minLength": 1},
+    "provider_version": {"type": "string", "minLength": 1},
+    "privacy_class": {"type": "string", "minLength": 1},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "uncertainty_flags": {"type": "array", "items": {"type": "string"}},
+    "source_detection_id": {"type": ["string", "null"]},
+    "sensitivity_tier": {"type": "string"},
+    "geometry": {
+      "type": "object",
+      "required": ["width", "height"],
+      "additionalProperties": false,
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1},
+        "box_xyxy": {"type": ["array", "null"], "minItems": 4, "maxItems": 4, "items": {"type": "number"}},
+        "polygon_xy": {"type": "array", "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}}},
+        "mask_rle": {"type": "array", "items": {"type": "integer", "minimum": 0}}
+      }
+    }
+  }
+}

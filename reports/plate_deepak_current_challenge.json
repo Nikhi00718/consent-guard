@@ -1,0 +1,1044 @@
+{
+  "candidates": [
+    {
+      "checkpoint": "C:\\consentGuard\\artifacts\\checkpoints\\specialist_plate_ccpd2020_india_finetune_5ep\\best.pt",
+      "checkpoint_bytes": 346511469,
+      "checkpoint_sha256": "d8a7a551fe3a9f264bb1ad34066f583d92ae9344503112a582554e29975a81b8",
+      "config": "C:\\consentGuard\\main_project\\configs\\stage_03_specialists\\train_plate_ccpd2020_india_finetune_5ep.yaml",
+      "label": "current_india",
+      "metrics": {
+        "0.25": {
+          "f1": 0.015503875968992248,
+          "false_negatives": 67,
+          "false_positives": 60,
+          "false_positives_per_image": 1.3953488372093024,
+          "precision": 0.01639344262295082,
+          "recall": 0.014705882352941176,
+          "true_positives": 1
+        },
+        "0.50": {
+          "f1": 0.017699115044247787,
+          "false_negatives": 67,
+          "false_positives": 44,
+          "false_positives_per_image": 1.0232558139534884,
+          "precision": 0.022222222222222223,
+          "recall": 0.014705882352941176,
+          "true_positives": 1
+        },
+        "0.70": {
+          "f1": 0.019607843137254905,
+          "false_negatives": 67,
+          "false_positives": 33,
+          "false_positives_per_image": 0.7674418604651163,
+          "precision": 0.029411764705882353,
+          "recall": 0.014705882352941176,
+          "true_positives": 1
+        }
+      },
+      "per_image": [
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-1235",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-1235.jpg",
+          "raw_predictions": 55,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-1240",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-1240.jpg",
+          "raw_predictions": 42,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-1270",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-1270.jpg",
+          "raw_predictions": 39,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 3,
+          "image_id": "indian-plate-frame-170",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-170.jpg",
+          "raw_predictions": 46,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 3,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 3,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 3,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-1705",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-1705.jpg",
+          "raw_predictions": 59,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-1710",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-1710.jpg",
+          "raw_predictions": 61,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-1715",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-1715.jpg",
+          "raw_predictions": 54,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 3,
+          "image_id": "indian-plate-frame-175",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-175.jpg",
+          "raw_predictions": 46,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 3,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 3,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 3,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-2010",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2010.jpg",
+          "raw_predictions": 39,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 3,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-2015",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2015.jpg",
+          "raw_predictions": 36,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2065",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2065.jpg",
+          "raw_predictions": 54,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2090",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2090.jpg",
+          "raw_predictions": 42,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-2270",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2270.jpg",
+          "raw_predictions": 44,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 3,
+          "image_id": "indian-plate-frame-2280",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2280.jpg",
+          "raw_predictions": 50,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 3,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 3,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 3,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-2300",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2300.jpg",
+          "raw_predictions": 49,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-25",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-25.jpg",
+          "raw_predictions": 40,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2540",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2540.jpg",
+          "raw_predictions": 66,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2550",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2550.jpg",
+          "raw_predictions": 62,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-265",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-265.jpg",
+          "raw_predictions": 40,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2650",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2650.jpg",
+          "raw_predictions": 60,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-270",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-270.jpg",
+          "raw_predictions": 48,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2760",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2760.jpg",
+          "raw_predictions": 36,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-2810",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2810.jpg",
+          "raw_predictions": 47,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2855",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2855.jpg",
+          "raw_predictions": 23,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2925",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2925.jpg",
+          "raw_predictions": 44,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-2955",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-2955.jpg",
+          "raw_predictions": 35,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 3,
+          "image_id": "indian-plate-frame-30",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-30.jpg",
+          "raw_predictions": 34,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 1
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 1
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 1
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-305",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-305.jpg",
+          "raw_predictions": 52,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-3115",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-3115.jpg",
+          "raw_predictions": 53,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-315",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-315.jpg",
+          "raw_predictions": 54,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-3240",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-3240.jpg",
+          "raw_predictions": 64,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-3480",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-3480.jpg",
+          "raw_predictions": 65,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-3490",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-3490.jpg",
+          "raw_predictions": 50,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-3505",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-3505.jpg",
+          "raw_predictions": 45,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-3510",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-3510.jpg",
+          "raw_predictions": 41,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 3,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-365",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-365.jpg",
+          "raw_predictions": 48,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 3,
+          "image_id": "indian-plate-frame-480",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-480.jpg",
+          "raw_predictions": 31,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 3,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 3,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 3,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-485",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-485.jpg",
+          "raw_predictions": 28,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-5",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-5.jpg",
+          "raw_predictions": 46,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 3,
+          "image_id": "indian-plate-frame-525",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-525.jpg",
+          "raw_predictions": 43,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 3,
+              "false_positives": 3,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 3,
+              "false_positives": 2,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 3,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-65",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-65.jpg",
+          "raw_predictions": 50,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 1,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 2,
+          "image_id": "indian-plate-frame-775",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-775.jpg",
+          "raw_predictions": 38,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 2,
+              "false_positives": 1,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 2,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        },
+        {
+          "ground_truth_boxes": 1,
+          "image_id": "indian-plate-frame-785",
+          "image_path": "C:\\consentGuard\\data\\raw\\online_kaggle\\deepakat_indian_vehicle_number_plate_yolo\\vid-1\\frame-785.jpg",
+          "raw_predictions": 44,
+          "thresholds": {
+            "0.25": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.50": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            },
+            "0.70": {
+              "false_negatives": 1,
+              "false_positives": 0,
+              "true_positives": 0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "generated_at_utc": "2026-08-30T07:32:08.655735+00:00",
+  "ground_truth_boxes": 68,
+  "images": 43,
+  "iou_threshold": 0.5,
+  "records": "C:\\consentGuard\\data\\processed\\external\\deepakat_indian_vehicle_number_plate_yolo_grouped\\records_val.jsonl",
+  "records_sha256": "5f9085c5f7f49b66ac80731680fc92e63719014a07716cac7676dbf84710496d",
+  "schema_version": "plate-detection-challenge-v1",
+  "score_thresholds": [
+    0.25,
+    0.5,
+    0.7
+  ],
+  "test_split_used_for_training": false
+}

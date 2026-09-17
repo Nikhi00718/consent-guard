@@ -1,0 +1,166 @@
+\chapter{What you need to learn}
+
+You do not need to become an expert in every research area before continuing. You do need a working mental model of the concepts below, in roughly this order. The goal is to understand enough to notice when a metric, dataset, or model claim is misleading.
+
+\section{Level 1: the machine-learning experiment}
+
+\begin{conceptbox}[Train, validation, and test]
+\textbf{Training data} changes model weights. \textbf{Validation data} selects checkpoints, hyperparameters, and thresholds. \textbf{Test data} is opened once after every important choice is frozen. Looking repeatedly at test results turns the test set into another validation set and makes the reported performance optimistic.
+\end{conceptbox}
+
+ConsentGuard also needs \textbf{grouped splitting}. Images from the same contributor, burst, video sequence, web source, or near-duplicate cluster belong in one split. Otherwise the model can appear to generalize while seeing almost the same scene in training and evaluation.
+
+\begin{conceptbox}[Epoch, batch, step, and checkpoint]
+An \textbf{epoch} is one pass through the training sampler. A \textbf{batch} is the small group processed together. An optimizer \textbf{step} updates weights. A \textbf{checkpoint} stores weights and the state needed to resume. ConsentGuard must checkpoint every Kaggle epoch because free GPU sessions are temporary.
+\end{conceptbox}
+
+\textbf{Transfer learning} starts from a model that already understands generic visual patterns. Fine-tuning adapts it to privacy classes with much less data than training from scratch. \textbf{Overfitting} occurs when training performance improves while validation performance stagnates or worsens. \textbf{Seeds} control randomized operations; three seeds reveal whether a result is robust or lucky.
+
+\subsection*{Exercise}
+Open the Stage 2 resolved configuration and answer: which dataset path, class map, batch size, optimizer, learning rate, seed, and checkpoint-selection metric does it use? Then find the same values in the saved training result. If the two disagree, the experiment is not auditable.
+
+\section{Level 2: boxes, masks, text, and geometry}
+
+\begin{tabularx}{\textwidth}{@{}L{34mm}YY@{}}
+\toprule
+\textbf{Task} & \textbf{Output} & \textbf{ConsentGuard example} \\
+\midrule
+Classification & One or more labels for an image/crop & Decide whether a crop looks handwritten; not enough to redact it. \\
+Object detection & Class, confidence, and rectangle & Locate a face or licence plate. \\
+Instance segmentation & Separate pixel mask per object & Cover a person body or irregular sensitive object. \\
+Text detection & Polygon around visible text & Locate printed or handwritten text before reading it. \\
+Text recognition & Character sequence from a crop & Identify a phone number or address; optional for blanket text review. \\
+Barcode decoding & Geometry plus decoded payload/type & Find QR and linear codes and prove output cannot be decoded. \\
+\bottomrule
+\end{tabularx}
+
+A rectangle is cheap and robust but may cover extra pixels. A mask is precise but harder to annotate and can leave thin sensitive boundaries exposed. For plates and text, small expansion is often safer than exact geometry. For large bodies, solid masks preserve more of the scene than rectangles.
+
+\textbf{IoU}, or intersection over union, measures overlap:
+
+\[
+  \operatorname{IoU}(A,B) = \frac{|A \cap B|}{|A \cup B|}.
+\]
+
+IoU is useful for matching predictions to labels but does not directly measure privacy. A prediction can have mediocre IoU while covering all private text, or good IoU while leaving a readable strip visible.
+
+\textbf{Non-maximum suppression} removes duplicate boxes that overlap strongly. Aggressive suppression can remove nearby faces in crowds or stacked text lines. Fusion therefore keeps source detection IDs and provider provenance so that duplicate removal can be audited.
+
+\begin{conceptbox}[Coordinate discipline]
+Every provider must return geometry in normalized-image coordinates and record the image width and height. Rotation, EXIF orientation, resizing, letterboxing, and crops must be invertible. A correct detector with the wrong coordinate transform produces a dangerously misplaced mask.
+\end{conceptbox}
+
+\subsection*{Exercise}
+Trace one box from a provider through \file{EvidenceGeometry}, threshold expansion, fusion, manual edit, and the final renderer. Write down the coordinate system at each step and identify where clipping to image bounds occurs.
+
+\section{Level 3: metrics that answer different questions}
+
+\textbf{Precision} asks: of the proposed objects, how many were correct? \textbf{Recall} asks: of the labelled objects, how many were found? Privacy candidate generation values recall more strongly because a false positive can be removed by a reviewer, while a false negative may remain invisible.
+
+\textbf{Average precision} integrates precision across recall/score behavior. COCO mAP averages across classes and multiple IoU thresholds. AP50 uses an IoU threshold of 0.50; AP75 requires tighter localization. All are useful model-development measures, but none replaces privacy coverage.
+
+For a ground-truth sensitive union $G$ and proposed redaction union $P$:
+
+\[
+  \text{sensitive-pixel recall} = \frac{|G \cap P|}{|G|},
+  \qquad
+  \text{leakage} = 1 - \frac{|G \cap P|}{|G|}.
+\]
+
+For the non-sensitive region $\bar{G}$:
+
+\[
+  \text{over-redaction fraction} = \frac{|P \cap \bar{G}|}{|\bar{G}|}.
+\]
+
+\begin{truthbox}[Why multiple metrics are mandatory]
+High recall with extreme over-redaction produces an unusable black image. High precision with low recall produces a clean-looking but unsafe image. ConsentGuard must publish both sides of the trade-off, plus review time.
+\end{truthbox}
+
+\textbf{Negative-image false-positive rate} is the fraction of images with no supported private class that still receive one or more candidates. It measures reviewer burden and whether the system knows when nothing relevant is present.
+
+\textbf{Bootstrap confidence intervals} resample evaluation units to show statistical uncertainty. Splitting/resampling must respect groups; otherwise several almost-identical frames count as independent evidence. Rare-class results should always show the sample count next to the interval.
+
+\section{Level 4: class imbalance and domain shift}
+
+The training data is not balanced: body and face examples vastly outnumber medicine, fingerprints, disability evidence, and signatures. A model can reduce total loss mostly by improving the common classes. Sampling and loss weighting help, but extreme duplication of rare images causes overfitting.
+
+ConsentGuard uses moderate capped inverse-frequency balancing as the frozen comparator recipe. The negative experiments show that stronger sampling and class-agnostic masks do not automatically solve rare classes.
+
+\textbf{Domain shift} means evaluation images differ from training images. IAM handwriting consists largely of scanned English documents, while the target includes phone photographs, glare, clutter, perspective, compression, and Indic scripts. CCPD plates are Chinese, while Indian plates vary in fonts, layouts, colors, and informal mounting. Pretraining may transfer, but target-domain validation remains mandatory.
+
+Useful hard negatives include:
+
+\begin{itemize}[leftmargin=6mm]
+  \item posters, shop signs, logos, road markings, and clothing text for OCR;
+  \item headlights, bumpers, windows, and rectangular stickers for plates;
+  \item statues, posters, reflections, and round patterns for faces;
+  \item scribble-like textures, cables, branches, and decorative fonts for handwriting;
+  \item harmless QR-like graphics and grid patterns for barcodes.
+\end{itemize}
+
+\section{Level 5: confidence and calibration}
+
+A detector score is a ranking signal, not a universal probability. A score of 0.6 from YuNet is not directly comparable with 0.6 from PaddleOCR or Mask R-CNN. Calibration estimates how scores relate to correctness on a specific validation domain.
+
+\textbf{Reliability curves} group predictions by score and compare average confidence with observed correctness. \textbf{Expected calibration error} summarizes their difference, but curves and sample counts remain important. Threshold selection must be per provider and class because each score distribution and harm profile differs.
+
+\begin{conceptbox}[Candidate threshold versus release decision]
+A low candidate threshold increases the evidence shown to reviewers. It does not automatically mean those regions are redacted or that export is allowed. Candidate generation, human approval, consent policy, rendering, and assurance are separate decisions.
+\end{conceptbox}
+
+\section{Level 6: ensembles and evidence fusion}
+
+An ensemble combines independent models. ConsentGuard does not average raw tensors or train all specialists jointly in V1. Each provider outputs a framework-independent \file{Evidence} object. Fusion operates on geometry and provenance.
+
+This modular approach is appropriate because:
+
+\begin{itemize}[leftmargin=6mm]
+  \item each task has different data and geometry;
+  \item a weak provider can be replaced without retraining all others;
+  \item scores can be calibrated separately;
+  \item failures remain explainable to a reviewer;
+  \item deterministic barcode and metadata checks fit the same assurance story; and
+  \item a 4 GB GPU can run providers sequentially.
+\end{itemize}
+
+An optional later research phase may distill specialist outputs into a shared-backbone multi-task model. That should happen only after the specialist bundle meets the gates, because otherwise distillation merely compresses poorly understood errors.
+
+\section{Level 7: redaction is a security operation}
+
+Visual blur is not guaranteed destructive. Small text may remain OCR-readable, and metadata can contain GPS, device information, timestamps, or embedded thumbnails. ConsentGuard uses solid replacement in a newly encoded output, refuses to overwrite the source, and then reopens the fresh pixel stream.
+
+Independent assurance should:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item inspect metadata with a tool independent of the writer;
+  \item rerun face and plate detectors on the exported pixels;
+  \item rerun OCR over and around redacted regions;
+  \item rescan all barcode formats;
+  \item compare approved mask coverage with rendered pixels; and
+  \item fail closed when any required attacker is unavailable or uncertain.
+\end{enumerate}
+
+\section{Eight-week learning sequence}
+
+\begin{longtable}{@{}L{13mm}L{45mm}L{79mm}@{}}
+\toprule
+\textbf{Week} & \textbf{Concept focus} & \textbf{Repository exercise} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Week} & \textbf{Concept focus} & \textbf{Repository exercise} \\
+\midrule
+\endhead
+1 & Data splits, manifests, licences, negatives & Run Stage 1 validators; inspect five positive and five negative records. \\
+2 & Boxes, masks, IoU, COCO metrics & Read the dataset target format and evaluation code; draw one example manually. \\
+3 & Mask R-CNN and transfer learning & Reproduce a loader and learning smoke test; inspect one checkpoint configuration. \\
+4 & Detection and OCR specialists & Run each provider on a controlled image and inspect raw \file{Evidence}. \\
+5 & Thresholds and calibration & Build a precision-recall sweep for one class; select a threshold under explicit costs. \\
+6 & Fusion and manual review & Trace overlaps, provenance, and user edits through a mixed scene. \\
+7 & Destructive export and assurance & Redact a staged image, inspect metadata, rerun attackers, and verify fresh decoding. \\
+8 & Release engineering & Run tests, construct a candidate manifest, and evaluate every gate without opening locked tests. \\
+\bottomrule
+\end{longtable}
+
+The fastest way to learn this project is to connect every concept to an artifact. Avoid studying months of generic deep-learning theory before running a loader or inspecting a mask.

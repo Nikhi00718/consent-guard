@@ -1,0 +1,133 @@
+\chapter{Calibration and evidence fusion}
+
+\section{Why one global threshold must disappear}
+
+The old CLI used one score threshold for all Mask R-CNN classes. The unseen images show why that fails: 0.5 misses plates and handwriting, while lowering the global threshold can cover much of a crowd image. Each provider and class requires its own operating rule.
+
+\section{Threshold-sweep procedure}
+
+For each provider/class pair on frozen validation data:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item cache raw predictions before thresholding;
+  \item sweep score thresholds over the useful range;
+  \item sweep minimum area, expansion fraction, and dilation separately;
+  \item compute instance recall, sensitive-pixel recall, leakage, precision, over-redaction, negative false positives, and candidates per image;
+  \item stratify by general/India domain, size, and difficult condition;
+  \item plot reliability and precision-recall curves; and
+  \item choose the lowest-review-burden rule that satisfies the safety target with margin.
+\end{enumerate}
+
+Do not tune on the locked test set. If no threshold satisfies the target, improve the provider/data or mark the class experimental.
+
+\section{Candidate threshold profile}
+
+The repository contains a non-release candidate profile. Its intent is high recall and mandatory review. Representative rules include:
+
+\begin{tabularx}{\textwidth}{@{}L{31mm}L{31mm}L{22mm}L{23mm}Y@{}}
+\toprule
+\textbf{Provider} & \textbf{Class} & \textbf{Score} & \textbf{Expansion} & \textbf{Status} \\
+\midrule
+Mask R-CNN & Face & 0.25 & dilation 4 px & Candidate only \\
+Mask R-CNN & Plate & 0.20 & 8\% + 4 px & Candidate only \\
+Mask R-CNN & Body & 0.50 & dilation 3 px & Candidate only \\
+YuNet & Face & 0.35 & 12\% + 4 px & Uncalibrated \\
+Plate Faster R-CNN & Plate & 0.20 & 12\% + 4 px & Uncalibrated \\
+PaddleOCR & Printed text & 0.20 & 5\% + 3 px & Uncalibrated \\
+Handwriting provider & Handwriting & 0.20 & 5\% + 3 px & Placeholder until trained \\
+ZXing-C++ & Barcode & 0.00 & 8\% + 3 px & Review every decoded finding \\
+\bottomrule
+\end{tabularx}
+
+These numbers must never be presented as empirically safe. The frozen \file{threshold-profile-v1} will include generation code, validation hash, curves, selection criteria, and author/review timestamp.
+
+\section{Geometry transformations}
+
+After score and minimum-size filtering:
+
+\begin{itemize}[leftmargin=6mm]
+  \item boxes expand around their center by the rule fraction;
+  \item polygons expand through a defined buffer operation;
+  \item masks dilate by a defined pixel radius;
+  \item all geometry clips to image bounds; and
+  \item the original and transformed geometry remain available for audit.
+\end{itemize}
+
+Expansion values should scale sensibly with image resolution. A future profile may express both absolute and relative expansion, but V1 must keep the behavior deterministic and tested.
+
+\section{Fusion behavior}
+
+Accepted evidence overlaps are grouped by geometry and class compatibility. The fused candidate geometry is the union, while contributing evidence remains intact.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=8mm and 10mm,
+  ev/.style={rounded corners=1.5mm,draw=CGTide,fill=CGMist,minimum width=35mm,minimum height=10mm,align=center,font=\sffamily\small},
+  candidatebox/.style={rounded corners=1.5mm,draw=CGSaffron!80!black,fill=CGSaffron!10,minimum width=48mm,minimum height=12mm,align=center,font=\sffamily\small\bfseries},
+  a/.style={-{Stealth[length=2mm]},draw=CGSlate,line width=0.8pt}
+]
+\node[ev] (m) {Mask R-CNN\\plate, 0.22};
+\node[ev,below=of m] (p) {Plate specialist\\plate, 0.71};
+\node[ev,below=of p] (t) {OCR polygon\\text, 0.64};
+\node[ev,right=27mm of p] (rules) {Threshold + geometry rules\\class compatibility\\overlap grouping};
+\node[candidatebox,right=22mm of rules] (candidate) {Review candidate\\union geometry\\3 evidence records\\plate/text conflict flag};
+\draw[a] (m.east) -- (rules.west);
+\draw[a] (p.east) -- (rules.west);
+\draw[a] (t.east) -- (rules.west);
+\draw[a] (rules) -- (candidate);
+\end{tikzpicture}
+\caption{Fusion combines geometry without erasing provider provenance or cross-class conflict.}
+\end{figure}
+
+Examples:
+
+\begin{itemize}[leftmargin=6mm]
+  \item face evidence from Mask R-CNN and YuNet becomes one face candidate with two contributors;
+  \item a plate box overlapping OCR text becomes one review area with a plate/text conflict, not two invisible decisions;
+  \item handwriting and signature evidence may fuse geometrically while retaining both labels;
+  \item distant non-overlapping people remain separate candidates; and
+  \item rejected low-score evidence may be retained in audit diagnostics but never silently shown as accepted.
+\end{itemize}
+
+\section{Uncertainty and unavailable providers}
+
+Uncertainty flags include printed-versus-handwriting unresolved, class disagreement, truncation at image border, very small size, heavy occlusion, low calibration support, and provider disagreement. Any safety-critical provider unavailable state is visible in the review UI and influences release policy.
+
+``No detection'' and ``provider did not run'' are different states:
+
+\begin{itemize}[leftmargin=6mm]
+  \item \textbf{No detection:} provider ran successfully and returned no evidence above the raw backend floor.
+  \item \textbf{Unavailable:} weights, dependency, hardware feature, or initialization failed.
+  \item \textbf{Error:} provider started but inference or output parsing failed.
+\end{itemize}
+
+Unavailable or error states fail closed for required providers.
+
+\section{Measuring review burden}
+
+For every threshold profile, report:
+
+\begin{itemize}[leftmargin=6mm]
+  \item candidates per image and per positive/negative image;
+  \item fraction of candidates removed, expanded, or manually added;
+  \item median and 90th-percentile review time;
+  \item false-negative additions discovered by reviewers; and
+  \item percentage of images held due to unavailable/conflicting evidence.
+\end{itemize}
+
+The best profile is not the one with the fewest boxes. It is the profile that passes privacy gates with review effort acceptable for the intended workflow.
+
+\section{Calibration freeze}
+
+Freezing \file{threshold-profile-v1} requires:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item exact provider and checkpoint hashes;
+  \item exact validation manifest hash;
+  \item raw-prediction cache hash;
+  \item sweep code commit;
+  \item metric and subgroup reports;
+  \item chosen rules with written rationale; and
+  \item confirmation that locked test predictions were not inspected.
+\end{enumerate}

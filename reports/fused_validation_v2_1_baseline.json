@@ -1,0 +1,57 @@
+{
+  "device": "cuda",
+  "evaluated_images": 1,
+  "notes": [
+    "This is validation evidence, not a locked-test result.",
+    "A Visual Redactions V2 record does not carry the general/India domain labels required by the release gates.",
+    "Missing providers and provider errors are reported explicitly and never treated as empty scenes."
+  ],
+  "overall": {
+    "images_with_candidates": 0,
+    "mean_candidates_per_image": 0.0,
+    "negative_fpr_bootstrap_95": {
+      "count": 1,
+      "lower_95": 0.0,
+      "mean": 0.0,
+      "upper_95": 0.0
+    },
+    "negative_image_false_positive_rate": 0.0,
+    "pixel_recall": 0.0,
+    "pixel_recall_bootstrap_95": {
+      "count": 1,
+      "lower_95": 0.0,
+      "mean": 0.0,
+      "upper_95": 0.0
+    }
+  },
+  "per_class": {
+    "a26_handwriting": {
+      "covered_sensitive_pixels": 0,
+      "found_instances": 0,
+      "instance_recall": 0.0,
+      "instances": 3,
+      "pixel_leakage": 1.0,
+      "pixel_recall": 0.0,
+      "sensitive_pixels": 7472918
+    }
+  },
+  "provider_error_counts": {},
+  "provider_evidence_counts": {
+    "maskrcnn": 93
+  },
+  "providers": [
+    "maskrcnn"
+  ],
+  "records_path": "C:\\consentGuard\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\records_val2017.jsonl",
+  "records_sha256": "08094dadabf693b0efad47faac93d76a4d1576db5733460663f4f7fef4cd3c0d",
+  "schema_version": "fused-validation-evaluation-v1",
+  "split": "v2_validation_only",
+  "test_split_used": false,
+  "threshold_profile": {
+    "path": "C:\\consentGuard\\main_project\\configs\\stage_04_fusion_calibration\\threshold_profile_v2_validation_calibrated.yaml",
+    "profile_id": "threshold-profile-v2-validation-calibrated",
+    "release_ready": false,
+    "sha256": "822b21c04ac2e694f9b6c72d18e05866e8910f03195a74db72e1830cbe97205a"
+  },
+  "unavailable_provider_counts": {}
+}

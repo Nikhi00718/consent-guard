@@ -1,0 +1,169 @@
+\chapter{The end-to-end architecture}
+
+\section{The simple mental model}
+
+Think of ConsentGuard as a careful inspection line, not one all-knowing model:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item Prepare one trustworthy image representation.
+  \item Ask several specialists what they see.
+  \item Convert their answers into one evidence language.
+  \item Apply provider-specific safety thresholds and merge overlaps.
+  \item Show the proposals and uncertainty to a person.
+  \item Enforce consent and release rules.
+  \item Burn approved redactions into new pixels.
+  \item attack the exported result independently.
+  \item Export only if every required condition passes.
+\end{enumerate}
+
+\section{System flow}
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.96\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=5.5mm and 10mm,
+  block/.style={rounded corners=2mm,draw=CGInk!35,fill=CGPaper,minimum width=44mm,minimum height=10mm,align=center,font=\sffamily\small},
+  core/.style={block,draw=CGTide,fill=CGMist},
+  human/.style={block,draw=CGSaffron!80!black,fill=CGSaffron!10},
+  danger/.style={block,draw=CGRose,fill=CGRose!6},
+  arrow/.style={-{Stealth[length=2.2mm]},line width=0.8pt,draw=CGSlate}
+]
+\node[core] (input) {Local image input};
+\node[core,below=of input] (normal) {Normalize pixels\\apply orientation\\hash source};
+\node[core,below=of normal] (providers) {Sequential specialist analysis\\Mask R-CNN, face, plate, text, handwriting, barcode, metadata};
+\node[core,below=of providers] (evidence) {Typed evidence registry\\geometry + confidence + provenance + uncertainty};
+\node[core,below=of evidence] (fusion) {Threshold, expand, dilate, fuse\\preserve conflicts and unavailable providers};
+\node[human,below=of fusion] (review) {Mandatory human review\\add, remove, resize, approve};
+\node[human,below=of review] (policy) {Consent and release policy\\stable decision reasons};
+\node[core,below=of policy] (render) {Solid destructive renderer\\fresh encoding + metadata cleaning};
+\node[danger,below=of render] (assure) {Independent assurance attacks\\OCR, face, plate, barcode, metadata, fresh decode};
+\node[core,below left=8mm and 9mm of assure] (allow) {ALLOW REDACTED\\sanitized output + audit};
+\node[danger,below right=8mm and 9mm of assure] (hold) {HOLD / REJECT\\return to reviewer};
+
+\draw[arrow] (input) -- (normal);
+\draw[arrow] (normal) -- (providers);
+\draw[arrow] (providers) -- (evidence);
+\draw[arrow] (evidence) -- (fusion);
+\draw[arrow] (fusion) -- (review);
+\draw[arrow] (review) -- (policy);
+\draw[arrow] (policy) -- node[right,font=\scriptsize\sffamily]{approved path} (render);
+\draw[arrow] (render) -- (assure);
+\draw[arrow] (assure) -- node[above left,font=\scriptsize\sffamily]{all checks pass} (allow);
+\draw[arrow,CGRose] (assure) -- node[above right,font=\scriptsize\sffamily]{failure or uncertainty} (hold);
+\draw[arrow,CGRose,dashed] (policy.east) -- ++(16mm,0) |- node[pos=0.25,right,font=\scriptsize\sffamily]{unknown consent or unresolved review} (hold.east);
+\draw[arrow,CGSaffron!80!black,dashed] (hold.west) -- ++(-19mm,0) |- (review.west);
+\end{tikzpicture}}
+\caption{ConsentGuard V1 runtime. Every uncertain assurance outcome returns to review or blocks export.}
+\end{figure}
+
+\section{Input normalization}
+
+All providers analyze the same \file{NormalizedImage}. The ingest step should:
+
+\begin{itemize}[leftmargin=6mm]
+  \item reject unsupported or malformed files with explicit reason codes;
+  \item decode with resource limits to avoid decompression bombs;
+  \item apply EXIF orientation once;
+  \item convert to a fixed RGB pixel representation;
+  \item record original dimensions and normalized dimensions;
+  \item calculate a cryptographic pixel hash; and
+  \item retain metadata findings separately from the pixel tensor.
+\end{itemize}
+
+Providers must not independently rotate or resize without returning the inverse transform. In the current design they receive normalized pixels and report original normalized-image coordinates.
+
+\section{Framework-independent contracts}
+
+\begin{lstlisting}[language=Python,caption={Conceptual public contracts.}]
+EvidenceProvider.analyze(NormalizedImage) -> list[Evidence]
+ThresholdRegistry.get(provider, privacy_class) -> ThresholdRule
+EvidenceFusion.combine(list[Evidence]) -> ReviewCandidateSet
+AssuranceService.inspect(RenderedAsset) -> AssuranceReport
+ReleasePolicy.decide(candidates, consent, assurance) -> ReleaseDecision
+\end{lstlisting}
+
+An \file{Evidence} record requires:
+
+\begin{itemize}[leftmargin=6mm]
+  \item stable evidence ID and source detection ID;
+  \item provider name and provider version;
+  \item privacy class from the system ontology;
+  \item image width and height;
+  \item box, polygon, or mask geometry;
+  \item confidence bounded to $[0,1]$;
+  \item uncertainty flags; and
+  \item enough provenance to explain why a fused candidate exists.
+\end{itemize}
+
+A \file{ThresholdRule} records provider, class, score threshold, minimum size, geometry expansion, mask dilation, experimental status, and whether review is mandatory. Manual command-line overrides must appear in the audit record.
+
+\section{Logical parallelism, physical sequencing}
+
+The providers are logically independent branches, but the laptop implementation runs them one at a time. This avoids loading several GPU-heavy frameworks simultaneously on a 4 GB RTX 3050. The orchestrator records provider errors and unavailable states instead of turning them into empty detections.
+
+The execution order should be deterministic:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item broad Mask R-CNN;
+  \item face provider;
+  \item plate provider;
+  \item printed-text provider;
+  \item handwriting provider;
+  \item barcode provider; and
+  \item metadata provider.
+\end{enumerate}
+
+CPU-only providers may later overlap safely, but concurrency is an optimization, not part of the V1 correctness contract.
+
+\section{State and decision flow}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  node distance=9mm and 12mm,
+  state/.style={rounded corners=2mm,draw=CGTide,fill=CGMist,minimum width=35mm,minimum height=10mm,align=center,font=\sffamily\small},
+  stop/.style={state,draw=CGRose,fill=CGRose!6},
+  arrow/.style={-{Stealth[length=2mm]},draw=CGSlate,line width=0.8pt}
+]
+\node[state] (new) {INGESTED};
+\node[state,right=of new] (analysed) {ANALYSED};
+\node[state,right=of analysed] (review) {UNDER REVIEW};
+\node[state,below=of review] (approved) {REVIEW APPROVED};
+\node[state,left=of approved] (rendered) {RENDERED};
+\node[state,left=of rendered] (assured) {ASSURED};
+\node[state,below=of assured] (released) {RELEASED};
+\node[stop,below=of analysed] (hold) {HELD};
+\draw[arrow] (new) -- (analysed);
+\draw[arrow] (analysed) -- (review);
+\draw[arrow] (review) -- (approved);
+\draw[arrow] (approved) -- (rendered);
+\draw[arrow] (rendered) -- (assured);
+\draw[arrow] (assured) -- (released);
+\draw[arrow,CGRose] (analysed) -- node[right,font=\scriptsize]{provider unavailable} (hold);
+\draw[arrow,CGRose] (review) -- (hold);
+\draw[arrow,CGRose] (approved) -- (hold);
+\draw[arrow,CGRose] (rendered) -- (hold);
+\draw[arrow,CGSaffron!80!black,dashed] (hold) -- node[above,font=\scriptsize]{resolve and retry} (review);
+\end{tikzpicture}
+\caption{Simplified lifecycle. Release is reachable only through reviewed, rendered, and assured states.}
+\end{figure}
+
+\section{Release decisions}
+
+The public decision values are:
+
+\begin{description}[leftmargin=52mm,labelwidth=48mm,style=multiline]
+  \item[\file{ALLOW\_REDACTED}] Approved redacted pixels passed every required assurance check.
+  \item[\file{HOLD\_FOR\_REVIEW}] Candidates, uncertainty, conflicts, or assurance findings require correction.
+  \item[\file{HOLD\_FOR\_CONSENT}] Relevant consent state is unknown, absent, or inconsistent with the requested export.
+  \item[\file{REJECT\_EXPORT}] The requested output cannot satisfy the active policy, or a hard failure makes safe export impossible.
+\end{description}
+
+Every decision includes stable reason codes suitable for tests and audit. Human-readable wording may change; reason-code behavior must not change silently.
+
+\section{Why this architecture is safer than a monolith}
+
+One large model would simplify the marketing diagram but create several engineering problems: incompatible datasets, hidden trade-offs, difficult score calibration, expensive retraining, and reduced explanation. The evidence-provider architecture isolates failure domains and preserves the ability to compare alternatives.
+
+After V1, a shared-backbone or distilled model can be evaluated as an optimization. It must reproduce or improve the candidate recall and leakage gates of the specialist bundle, and it must retain uncertainty and provenance. Until then, the multi-model bundle is the model.

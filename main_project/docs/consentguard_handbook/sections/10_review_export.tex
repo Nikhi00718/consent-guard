@@ -1,0 +1,137 @@
+\chapter{Human review, policy, and safe export}
+
+\section{The reviewer is part of the safety system}
+
+Human review is not a temporary weakness to hide. It is the control that handles model uncertainty, unusual objects, unsupported classes, and consent information that pixels cannot contain.
+
+The interface should show the normalized image, candidate overlays, class/provider labels, confidence, uncertainty, contributing evidence, and provider availability. It should allow the reviewer to:
+
+\begin{itemize}[leftmargin=6mm]
+  \item add a rectangle, polygon, or brush mask;
+  \item remove an incorrect candidate;
+  \item resize/expand accepted geometry;
+  \item change the review label without changing raw evidence;
+  \item mark an unsupported concern for manual redaction;
+  \item inspect conflicts and unavailable providers; and
+  \item explicitly approve the final union mask.
+\end{itemize}
+
+Every edit records user/session ID, timestamp, action, affected geometry, and reason. Undo/redo should preserve an append-only audit event stream.
+
+\section{Consent is external state}
+
+A face or body detector can locate a person. It cannot know whether that person agreed to a particular publication. Consent records must therefore come from user input or an external record and include scope, purpose, asset, version, timestamp, and revocation state.
+
+The V1 policy supports conservative states such as:
+
+\begin{itemize}[leftmargin=6mm]
+  \item \file{CONSENT\_CONFIRMED};
+  \item \file{CONSENT\_DENIED};
+  \item \file{CONSENT\_UNKNOWN};
+  \item \file{NOT\_APPLICABLE}; and
+  \item \file{CONSENT\_REVOKED}.
+\end{itemize}
+
+Unknown is not equivalent to approved. If the policy requires consent for an unredacted region, unknown routes to \file{HOLD\_FOR\_CONSENT}.
+
+\section{Policy inputs and outputs}
+
+Policy inputs include review completion, required-provider availability, unresolved candidates/conflicts, consent state, requested output type, renderer report, and assurance report. Outputs use stable reason codes.
+
+\begin{table}[htbp]
+\centering
+\caption{Representative fail-closed policy cases.}
+\begin{tabularx}{\textwidth}{@{}Y L{48mm} Y@{}}
+\toprule
+\textbf{Condition} & \textbf{Decision} & \textbf{Reason} \\
+\midrule
+Review incomplete & \file{HOLD\_FOR\_REVIEW} & A proposal or manual concern is unresolved. \\
+Consent required but unknown & \file{HOLD\_FOR\_CONSENT} & Pixels cannot supply consent. \\
+Required face provider unavailable & \file{HOLD\_FOR\_REVIEW} & Safety evidence is missing, not negative. \\
+Renderer did not cover approved mask & \file{REJECT\_EXPORT} & Output pixels do not match reviewer approval. \\
+OCR or barcode attacker finds content & \file{HOLD\_FOR\_REVIEW} & Export assurance found possible leakage. \\
+All required conditions pass & \file{ALLOW\_REDACTED} & Release redacted output and audit report. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Destructive rendering}
+
+V1 uses solid pixel replacement for approved regions. Blur and pixelation may be offered only as non-assured previews, not as the default privacy mechanism. The renderer must:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item union all approved automatic and manual masks;
+  \item verify dimensions and non-empty geometry;
+  \item refuse to overwrite the source path;
+  \item paint every approved pixel with the configured opaque color/pattern;
+  \item encode a new JPEG or PNG from the normalized pixel array;
+  \item omit source metadata and embedded previews;
+  \item close and reopen the new file; and
+  \item compare decoded pixels against the approved mask and rendering contract.
+\end{enumerate}
+
+The renderer report records source hash, normalized pixel hash, approved mask hash, output hash, format, dimensions, pixel count changed, encoder settings, and verification result.
+
+\begin{warningbox}[Never trust appearance alone]
+An image that looks redacted in the UI may still contain source metadata, an old thumbnail, readable blurred text, a decodable barcode, or a mask-placement error. Assurance evaluates the newly encoded file, not the preview canvas.
+\end{warningbox}
+
+\section{Independent assurance}
+
+Assurance attacks the exported asset with tools/configurations independent from the main decision where possible:
+
+\begin{longtable}{@{}L{33mm}L{55mm}L{57mm}@{}}
+\toprule
+\textbf{Check} & \textbf{Method} & \textbf{Failure behavior} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Check} & \textbf{Method} & \textbf{Failure behavior} \\
+\midrule
+\endhead
+Fresh decode & Reopen output with strict decoder; verify dimensions/mode & Reject corrupted or ambiguous output \\
+Mask coverage & Compare approved mask with known replacement pixels & Reject any approved pixel not rendered \\
+Metadata & Inspect using ExifTool independent of the writer & Reject forbidden tags/thumbnails/GPS \\
+OCR & Run text detector/recognizer on output and redaction boundaries & Hold on readable sensitive text or uncertain boundary \\
+Barcode & Rescan supported formats under grayscale/resize variants & Hold on any decoded payload in protected region \\
+Face & Run independent/high-recall face detector & Hold when unapproved face evidence remains \\
+Plate & Run plate detector/OCR attacker & Hold when unapproved plate evidence remains \\
+File identity & Compare source/output hashes and paths & Reject accidental overwrite or unchanged output \\
+\bottomrule
+\end{longtable}
+
+An assurance check has three states: pass, fail, uncertain/unavailable. The last two both block release. A boolean API that maps ``tool unavailable'' to pass is unsafe.
+
+\section{Audit report}
+
+The per-export audit report contains:
+
+\begin{itemize}[leftmargin=6mm]
+  \item source and normalized hashes without embedding private source pixels;
+  \item model-bundle and threshold-profile identifiers;
+  \item provider success/error/unavailable state;
+  \item accepted/rejected evidence and fusion provenance;
+  \item reviewer edits and approval event;
+  \item consent/policy state and reason codes;
+  \item renderer output hash and mask hash;
+  \item every assurance result and tool version; and
+  \item final decision and timestamp.
+\end{itemize}
+
+Audit reports should avoid storing recognized private strings unless required. Prefer salted hashes, redacted previews, class labels, and geometry.
+
+\section{UI acceptance scenarios}
+
+The reviewer workflow is complete only when the following work end to end:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item no-sensitive image with zero candidates;
+  \item single face requiring expansion;
+  \item crowded image with missed-face manual addition;
+  \item distant plate with specialist/global overlap;
+  \item handwritten page with printed/handwriting uncertainty;
+  \item mixed document containing signature, printed text, barcode, and metadata;
+  \item provider unavailable state;
+  \item assurance failure returning to the same editable review state; and
+  \item approved re-export producing a new audit/output hash.
+\end{enumerate}

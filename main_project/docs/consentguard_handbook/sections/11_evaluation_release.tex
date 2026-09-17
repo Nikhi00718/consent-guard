@@ -1,0 +1,127 @@
+\chapter{Evaluation and release gates}
+
+\section{Evaluation layers}
+
+ConsentGuard needs evidence at four layers:
+
+\begin{enumerate}[leftmargin=7mm]
+  \item \textbf{Provider:} can each specialist localize its responsibility?
+  \item \textbf{Candidate bundle:} does fusion create high-recall review proposals?
+  \item \textbf{Human workflow:} can reviewers efficiently correct mistakes?
+  \item \textbf{Released asset:} does destructive export and assurance prevent known leakage?
+\end{enumerate}
+
+A strong provider score cannot compensate for a broken coordinate transform or renderer. End-to-end tests must therefore use real image files and final output pixels.
+
+\section{Required metrics}
+
+Every trained experiment reports COCO box and mask AP/AP50/AP75, size breakdowns, per-class AP and recall, and raw sample counts. Every candidate-bundle evaluation additionally reports:
+
+\begin{itemize}[leftmargin=6mm]
+  \item instance recall by class/domain/difficulty;
+  \item sensitive-pixel recall and leakage;
+  \item over-redaction fraction;
+  \item negative-image false-positive rate;
+  \item precision-recall and threshold curves;
+  \item calibration error and reliability plots;
+  \item candidates per image;
+  \item human correction operations and time; and
+  \item bootstrap 95\% confidence intervals.
+\end{itemize}
+
+\section{Release-candidate gates}
+
+\begin{longtable}{@{}L{51mm}L{31mm}L{53mm}@{}}
+\toprule
+\textbf{Gate} & \textbf{Requirement} & \textbf{Why it exists} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Gate} & \textbf{Requirement} & \textbf{Why it exists} \\
+\midrule
+\endhead
+Frozen baseline preservation & Mask mAP $\geq 0.223469$ & Prevent global provider regression beyond 0.01 \\
+General face recall & $\geq 0.95$ & Safety-critical target-domain coverage \\
+India face recall & $\geq 0.95$ & Prevent aggregate domain masking \\
+General plate recall & $\geq 0.95$ & Small-object and regional robustness \\
+India plate recall & $\geq 0.95$ & India-first deployment claim \\
+General text recall & $\geq 0.95$ & Printed/handwritten candidate safety \\
+India text recall & $\geq 0.95$ & Indic and mixed-script safety \\
+Overall sensitive-pixel recall & $\geq 0.95$ & Direct privacy coverage \\
+Overall sensitive-pixel leakage & $\leq 0.05$ & Complementary explicit leakage cap \\
+Every supported class pixel recall & $\geq 0.90$ & Aggregate score cannot hide a failed class \\
+Negative-image false-positive rate & $\leq 0.15$ & Bound unnecessary review burden \\
+Seed count & At least 3 & Reduce dependence on lucky initialization \\
+Assurance fail-closed & True in tests and runtime & Missing/uncertain checks cannot permit release \\
+\bottomrule
+\end{longtable}
+
+Use the lower confidence bound where applicable. A class below the evidence minimum or performance threshold stays visible as experimental and mandatory-review.
+
+\section{Test matrix}
+
+\subsection{Unit tests}
+
+\begin{itemize}[leftmargin=6mm]
+  \item valid empty targets and background-only batches;
+  \item exact/fallback threshold lookup and override audit;
+  \item box/polygon/mask conversions and clipping;
+  \item RLE mask round-trip;
+  \item fusion provenance and cross-class conflicts;
+  \item provider unavailable/error distinction;
+  \item checkpoint/config mismatch rejection;
+  \item consent/policy reason codes; and
+  \item renderer refusal to overwrite source.
+\end{itemize}
+
+\subsection{Integration tests}
+
+Use staged fixtures for no-sensitive, face, crowd, plate, handwriting, mixed document, barcode, and overlapping detections. Each test starts with an image file and ends with review candidates or a validated exported file.
+
+\subsection{Robustness tests}
+
+Apply JPEG recompression, resize, downscale/upscale, blur, low light, glare, perspective, rotation, partial crop, EXIF orientation, and repeated save. Report results by transformation severity rather than only pass/fail.
+
+\subsection{Export attacks}
+
+Run OCR, barcode rescanning, independent face/plate detection, metadata inspection, fresh decoding, and approved-mask pixel comparison. Include attacks near mask boundaries and across output formats.
+
+\subsection{Regression corpus}
+
+Keep the parked-car, crowd, and handwritten-note examples permanently outside training. Add target-domain failures only after their evaluation role and split are recorded. Never repair one regression by training directly on an unlabeled locked-test image.
+
+\section{Locked-test protocol}
+
+Before opening test labels/pixels to the release evaluator, freeze:
+
+\begin{itemize}[leftmargin=6mm]
+  \item repository commit and dependency lock;
+  \item dataset manifests and ontology;
+  \item provider code, checkpoints, and hashes;
+  \item threshold profile and fusion rules;
+  \item policy and assurance profiles;
+  \item evaluation scripts and metric definitions; and
+  \item the written acceptance gates above.
+\end{itemize}
+
+Run once, archive raw predictions and reports, and do not tune against failures. If a gate fails, mark the candidate failed, return to validation development, create a new version, and reserve a new honest final test if repeated iteration would contaminate the original.
+
+\section{Model card and release package}
+
+The release package includes:
+
+\begin{itemize}[leftmargin=6mm]
+  \item model/system card with intended use and forbidden claims;
+  \item data sheet and provenance summary;
+  \item provider/checkpoint/threshold/policy/assurance manifest;
+  \item validation and locked-test reports with confidence intervals;
+  \item per-class and per-domain failures;
+  \item latency, memory, and platform requirements;
+  \item review burden results;
+  \item known security and privacy limitations; and
+  \item exact local reproduction instructions.
+\end{itemize}
+
+\begin{warningbox}[Completion definition]
+ConsentGuard is complete only when the reviewed multi-model bundle passes every required gate. Completing one training run, obtaining a higher mAP, or making a good-looking demo does not satisfy the definition.
+\end{warningbox}

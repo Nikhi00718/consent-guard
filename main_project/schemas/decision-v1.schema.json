@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://consentguard.local/schemas/decision-v1.schema.json",
+  "title": "ConsentGuard release decision",
+  "type": "object",
+  "required": ["action", "reason_codes", "policy_version", "review_required", "export_allowed", "decision_digest"],
+  "additionalProperties": false,
+  "properties": {
+    "action": {"enum": ["ALLOW_PIXELS_UNCHANGED", "ALLOW_REDACTED", "HOLD_FOR_REVIEW", "HOLD_FOR_CONSENT", "REJECT_EXPORT"]},
+    "reason_codes": {"type": "array", "items": {"type": "string"}},
+    "policy_version": {"type": "string", "minLength": 1},
+    "review_required": {"type": "boolean"},
+    "export_allowed": {"type": "boolean"},
+    "decision_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

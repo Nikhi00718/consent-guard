@@ -1,0 +1,208 @@
+"""Run the local ConsentGuard evidence-to-policy pipeline on one still image."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+import numpy as np
+import torch
+
+from consentguard.shared.paths import project_path
+from consentguard.shared.runtime import atomic_json_dump, select_device
+from consentguard.stage_02_baseline_model.config import load_training_config
+from consentguard.stage_03_specialists.face_yunet import YuNetFaceProvider
+from consentguard.stage_03_specialists.plate_yunet import LPDYuNetPlateProvider
+from consentguard.stage_03_specialists.text_paddleocr import PaddleOCRTextProvider
+from consentguard.stage_03_specialists.barcode_zxing import ZXingBarcodeProvider
+from consentguard.stage_03_specialists.ppocr_onnx import PPOCRTextGeometryProvider
+from consentguard.stage_04_fusion_calibration.domain import AssuranceStatus, ConsentState
+from consentguard.stage_04_fusion_calibration.evidence import ThresholdRegistry
+from consentguard.stage_05_review_export.pipeline import ReviewExportService
+from consentguard.stage_05_review_export.provider_factory import load_torchvision_provider
+
+
+def _load_mask(path: Path, *, width: int, height: int) -> np.ndarray:
+    from PIL import Image
+
+    with Image.open(path) as image:
+        mask = np.asarray(image.convert("L"), dtype=np.uint8)
+    if mask.shape != (height, width):
+        raise ValueError(f"Approved mask must be {width}x{height}, received {mask.shape[1]}x{mask.shape[0]}")
+    return mask
+
+
+def _build_provider(
+    config,
+    checkpoint_path: Path,
+    device: torch.device,
+    *,
+    provider_name: str = "maskrcnn",
+) -> object:
+    return load_torchvision_provider(config, checkpoint_path, device, provider_name=provider_name)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", required=True)
+    parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--face-checkpoint", type=Path, help="Optional fine-tuned one-class face checkpoint.")
+    parser.add_argument(
+        "--face-config",
+        default="main_project/configs/stage_03_specialists/train_face_maskrcnn_5ep.yaml",
+    )
+    parser.add_argument("--plate-checkpoint", type=Path, help="Optional fine-tuned one-class plate checkpoint.")
+    parser.add_argument(
+        "--plate-config",
+        default="main_project/configs/stage_03_specialists/train_plate_maskrcnn_5ep.yaml",
+    )
+    parser.add_argument(
+        "--handwriting-checkpoint",
+        type=Path,
+        help="Optional fine-tuned one-class handwriting checkpoint.",
+    )
+    parser.add_argument(
+        "--handwriting-config",
+        default="main_project/configs/stage_03_specialists/train_handwriting_maskrcnn_5ep.yaml",
+    )
+    parser.add_argument("--input", required=True, type=Path)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--approved-mask", type=Path)
+    parser.add_argument("--report", type=Path)
+    parser.add_argument("--threshold-profile", default="main_project/configs/stage_04_fusion_calibration/threshold_profile_candidate_v1.yaml")
+    parser.add_argument("--yunet-model", type=Path, help="Optional MIT YuNet face model; provider is omitted when unset.")
+    parser.add_argument("--plate-yunet-model", type=Path, help="Optional Apache-2.0 LPD-YuNet model; provider is omitted when unset.")
+    parser.add_argument("--ppocr-model", type=Path, help="Optional Apache-2.0 PP-OCRv3 ONNX text detector.")
+    parser.add_argument("--with-ocr", action="store_true", help="Enable PaddleOCR provider; missing runtime stays explicit.")
+    parser.add_argument("--with-barcode", action="store_true", help="Enable ZXing-C++ provider; missing runtime stays explicit.")
+    parser.add_argument(
+        "--with-output-attacks",
+        action="store_true",
+        help="Run configured residual-content detectors on a newly encoded output; missing attacks stay uncertain.",
+    )
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
+    parser.add_argument("--consent-state", choices=[state.value for state in ConsentState], default=ConsentState.UNKNOWN.value)
+    parser.add_argument("--review-completed", action="store_true")
+    parser.add_argument("--allow-unchanged", action="store_true")
+    args = parser.parse_args()
+
+    config = load_training_config(args.config, require_validation_data=False)
+    input_path = project_path(args.input)
+    checkpoint_path = project_path(args.checkpoint)
+    device = select_device(args.device)
+    provider = _build_provider(config, checkpoint_path, device)
+    thresholds = ThresholdRegistry.load(project_path(args.threshold_profile))
+    # Normalize once to size the optional reviewer mask; the service repeats this
+    # bounded decode so its own source digest is authoritative.
+    from consentguard.stage_05_review_export.ingest import normalize_image
+
+    normalized = normalize_image(input_path)
+    approved_mask = (
+        _load_mask(project_path(args.approved_mask), width=normalized.width, height=normalized.height)
+        if args.approved_mask
+        else None
+    )
+    providers: list[object] = [provider]
+    for checkpoint_arg, config_arg, provider_name in (
+        (args.face_checkpoint, args.face_config, "face_maskrcnn"),
+        (args.plate_checkpoint, args.plate_config, "plate_maskrcnn"),
+        (args.handwriting_checkpoint, args.handwriting_config, "handwriting_maskrcnn"),
+    ):
+        if checkpoint_arg:
+            specialist_config = load_training_config(config_arg, require_validation_data=False)
+            providers.append(
+                _build_provider(
+                    specialist_config,
+                    project_path(checkpoint_arg),
+                    device,
+                    provider_name=provider_name,
+                )
+            )
+    if args.yunet_model:
+        yunet_path = project_path(args.yunet_model)
+        providers.append(
+            YuNetFaceProvider(
+                yunet_path,
+                version=f"{yunet_path.name}:{hashlib.sha256(yunet_path.read_bytes()).hexdigest()[:16]}",
+            )
+        )
+    if args.plate_yunet_model:
+        plate_path = project_path(args.plate_yunet_model)
+        providers.append(
+            LPDYuNetPlateProvider(
+                plate_path,
+                version=f"{plate_path.name}:{hashlib.sha256(plate_path.read_bytes()).hexdigest()[:16]}",
+            )
+        )
+    if args.ppocr_model:
+        ppocr_path = project_path(args.ppocr_model)
+        providers.append(
+            PPOCRTextGeometryProvider(
+                ppocr_path,
+                version=f"{ppocr_path.name}:{hashlib.sha256(ppocr_path.read_bytes()).hexdigest()[:16]}",
+            )
+        )
+    if args.with_ocr:
+        providers.append(PaddleOCRTextProvider())
+    if args.with_barcode:
+        providers.append(ZXingBarcodeProvider())
+    if args.with_output_attacks and not args.output:
+        parser.error("--with-output-attacks requires --output so an encoded asset can be inspected")
+    service = ReviewExportService(
+        tuple(providers),
+        thresholds,
+        attack_providers=tuple(providers) if args.with_output_attacks else (),
+    )
+    result = service.run(
+        input_path,
+        consent_state=ConsentState(args.consent_state),
+        review_completed=args.review_completed,
+        output_path=project_path(args.output) if args.output else None,
+        approved_mask=approved_mask,
+        allow_unchanged=args.allow_unchanged,
+    )
+    report = {
+        "schema_version": "analysis-report-v1",
+        "input": {
+            "source_sha256": result.image.source_sha256,
+            "pixel_sha256": result.image.pixel_sha256,
+            "width": result.image.width,
+            "height": result.image.height,
+            "source_format": result.image.source_format,
+            "metadata_categories": list(result.image.metadata_categories),
+        },
+        "evidence": {
+            "count": len(result.evidence.evidence),
+            "ids": [item.evidence_id for item in result.evidence.evidence],
+            "providers": sorted({item.provider for item in result.evidence.evidence}),
+            "unavailable_providers": list(result.evidence.unavailable_providers),
+        },
+        "candidates": {
+            "count": len(result.candidates.candidates),
+            "threshold_profile_id": result.candidates.threshold_profile_id,
+            "threshold_profile_release_ready": result.candidates.threshold_profile_release_ready,
+            "rejected_evidence_ids": list(result.candidates.rejected_evidence_ids),
+        },
+        "assurance": {
+            "status": result.assurance.status.value,
+            "checks": [
+                {"name": check.name, "status": check.status.value, "reason_code": check.reason_code}
+                for check in result.assurance.checks
+            ],
+        },
+        "decision": result.decision.to_dict(),
+        "provider_errors": result.provider_errors,
+        "export": result.export_report,
+    }
+    report_path = project_path(args.report) if args.report else (
+        project_path(args.output).with_suffix(project_path(args.output).suffix + ".analysis.json")
+        if args.output else input_path.with_suffix(input_path.suffix + ".analysis.json")
+    )
+    atomic_json_dump(report, report_path)
+    print(json.dumps({"report": str(report_path), "decision": report["decision"]}, indent=2, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

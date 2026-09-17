@@ -6,10 +6,23 @@ redactions. The verified training baseline is Mask R-CNN ResNet-50 FPN v2 for
 the nine official **visual** Visual Redactions attributes plus background.
 Textual and multimodal attributes require separate OCR/document branches.
 
+The executable codebase is organized for stage-by-stage review under
+[`main_project/`](main_project/README.md). Source modules, scripts, configs,
+and tests are physically grouped into six numbered stages there.
+
 This repository does **not** infer consent, intent, legality, or identity from
 pixels. The current milestone is the perception/localization model required by
 the broader consent-state-aware release policy in
 `ConsentGuard_Final_Research_Design.md`.
+
+## Latest plate experiment
+
+The grouped full-scene Indian plate candidate completed on Kaggle and greatly
+improved frozen validation and road-video results. It still missed the
+precommitted Deepak recall promotion floor (0.4118 versus 0.50), so the website
+default was deliberately left unchanged. See
+[`reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md`](reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md)
+for the data, training, checkpoint hashes, metrics, and next target.
 
 ## Architecture
 
@@ -46,13 +59,13 @@ them.
 
 ```powershell
 Set-Location C:\consentGuard
-powershell -ExecutionPolicy Bypass -File scripts\setup_environment.ps1
+powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1
 ```
 
 CPU-only setup is available for data/test development:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\setup_environment.ps1 -CpuOnly
+powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1 -CpuOnly
 ```
 
 Official references: [PyTorch installation](https://pytorch.org/get-started/locally/),
@@ -68,13 +81,13 @@ mismatch is accepted only when annotation and decoded image aspect ratios agree
 within 1%; crops, stitches, and rotations are quarantined.
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\finalize_vispr_data.py --split val --extract --rebuild-records
-.\.venv\Scripts\python.exe scripts\audit_visual_redactions_alignment.py
-.\.venv\Scripts\python.exe scripts\preprocess_visual_redactions_verified.py --profile visual
-.\.venv\Scripts\python.exe scripts\validate_processed_records.py `
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\finalize_vispr_data.py --split val --extract --rebuild-records
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\audit_visual_redactions_alignment.py
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\preprocess_visual_redactions_verified.py --profile visual
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\validate_processed_records.py `
   --data data\processed\visual_redactions_verified_visual `
   --report reports\processed_records_verified_visual_validation.json
-.\.venv\Scripts\python.exe scripts\audit_split_leakage.py
+.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\audit_split_leakage.py
 ```
 
 `data/processed/visual_redactions/` and the v1/v2 configs are retained only to
@@ -87,8 +100,8 @@ split remains locked until the final experiment.
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe scripts\preflight_environment.py
-.\.venv\Scripts\python.exe scripts\train_maskrcnn.py --config configs\train_smoke.yaml
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\preflight_environment.py
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_smoke.yaml
 ```
 
 The smoke run performs a real Mask R-CNN forward pass, backward pass, optimizer
@@ -100,20 +113,20 @@ real processed VISPR data.
 Laptop RTX 3050 (4 GB):
 
 ```powershell
-.\scripts\start_maskrcnn_verified_visual.ps1
+.\main_project\scripts\stage_02_baseline_model\start_maskrcnn_verified_visual.ps1
 ```
 
 Controlled 12–16 GB GPU baseline:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\train_maskrcnn.py --config configs\train_maskrcnn_baseline.yaml
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_maskrcnn_baseline.yaml
 ```
 
 Resume without losing optimizer, scheduler, scaler, epoch, loader/sampler RNG,
 or CUDA RNG state:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\train_maskrcnn.py --config configs\train_maskrcnn_4gb.yaml --resume artifacts\checkpoints\maskrcnn_4gb\last.pt
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml --resume artifacts\checkpoints\maskrcnn_4gb\last.pt
 ```
 
 Each run writes the resolved configuration, environment details, JSONL metrics,
@@ -124,12 +137,12 @@ available, avoiding repeated copies of the same large checkpoint.
 ## Evaluate and redact
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\evaluate_maskrcnn.py `
-  --config configs\train_maskrcnn_4gb.yaml `
+.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\evaluate_maskrcnn.py `
+  --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml `
   --checkpoint artifacts\checkpoints\maskrcnn_4gb\best.pt
 
-.\.venv\Scripts\python.exe scripts\infer_maskrcnn.py `
-  --config configs\train_maskrcnn_4gb.yaml `
+.\.venv\Scripts\python.exe main_project\scripts\stage_05_review_export\infer_maskrcnn.py `
+  --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml `
   --checkpoint artifacts\checkpoints\maskrcnn_4gb\best.pt `
   --input path\to\input.jpg `
   --output outputs\redacted\result.jpg
@@ -155,6 +168,31 @@ result, and writes a sidecar audit report containing hashes and geometry only.
 - `TRAINING_SETUP_REPORT.md` — measured readiness evidence and final commands.
 - `ConsentGuard_Final_Research_Design.md` — complete research and safety plan.
 
+For an automatic local research preview, install `.[app]` and run
+`main_project/scripts/stage_05_review_export/run_demo_app.py`. The UI accepts an
+uploaded/webcam image, lets the user select model branches and privacy groups,
+and shows fused detection and redaction previews. It is not a production-safe
+export path; the manual review and assurance gate remains authoritative.
+
+The React reviewer combines analysis, native-resolution mask correction,
+explicit consent, assurance results, and capability-gated export in one local
+workspace. Build it once, then launch the FastAPI host:
+
+```powershell
+npm --prefix main_project/frontend install
+npm --prefix main_project/frontend run build
+.\.venv\Scripts\python.exe main_project\scripts\stage_05_review_export\run_web_app.py
+```
+
+Open `http://127.0.0.1:7860`. The server stays localhost-only unless an explicit
+`--host` is supplied. Current research profiles and missing independent attack
+checks remain fail-closed, so a reviewed preview can exist while download is
+blocked.
+
 Dataset media, model checkpoints, and generated outputs are intentionally
 ignored by version control and must not be redistributed without their original
 licenses and research-use terms.
+
+The current all-model repository audit, dataset counts, limitations, and next
+training decision are recorded in
+[`reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md`](reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md).

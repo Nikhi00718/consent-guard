@@ -1,5 +1,7 @@
 .venv/
+.venv-specialists/
 .venv.setup.lock
+.tools/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -13,10 +15,12 @@ data/cache/
 data/downloads/
 data/download_logs/
 data/manifests/*.jsonl
+!data/manifests/roboflow_nivu_indian_plate_v1.jsonl
 
 artifacts/checkpoints/
 artifacts/metrics/
 artifacts/visualizations/
+artifacts/kaggle/
 outputs/
 runs/
 
@@ -24,6 +28,7 @@ runs/
 src/consentguard_research.egg-info/
 output/
 reports/full_audit/
+reports/full_audit_v2/
 reports/data_alignment_probe/
 reports/*.jpg
 reports/*.jpeg
@@ -31,6 +36,11 @@ reports/*.png
 reports/same_release_alignment_audit.json
 reports/visual_redactions_alignment_audit.json
 artifacts/logs/
+tmp/
+node_modules/
+main_project/frontend/dist/
+main_project/frontend/playwright-report/
+main_project/frontend/test-results/
 
 *.pt
 *.pth

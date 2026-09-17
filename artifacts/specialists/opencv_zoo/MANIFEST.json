@@ -1,0 +1,33 @@
+{
+  "source_repository": "https://github.com/opencv/opencv_zoo",
+  "source_mirror": "https://huggingface.co/opencv/opencv_zoo",
+  "assets": [
+    {
+      "file": "face_detection_yunet_2023mar.onnx",
+      "source": "https://huggingface.co/opencv/opencv_zoo/resolve/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx",
+      "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+      "license": "MIT",
+      "license_file": "face_detection_yunet_LICENSE.txt",
+      "provider": "yunet",
+      "scope": "face geometry only; no recognition or identity matching"
+    },
+    {
+      "file": "license_plate_detection_lpd_yunet_2023mar.onnx",
+      "source": "https://huggingface.co/opencv/opencv_zoo/resolve/main/models/license_plate_detection_yunet/license_plate_detection_lpd_yunet_2023mar.onnx",
+      "sha256": "6d4978a7b6d25514d5e24811b82bfb511d166bdd8ca3b03aa63c1623d4d039c7",
+      "license": "Apache-2.0",
+      "license_file": "license_plate_detection_lpd_yunet_LICENSE.txt",
+      "provider": "plate_yunet",
+      "scope": "plate geometry only; OpenCV Zoo documents Chinese-plate training, so India-target validation is required"
+    },
+    {
+      "file": "text_detection_en_ppocrv3_2023may.onnx",
+      "source": "https://huggingface.co/opencv/opencv_zoo/resolve/main/models/text_detection_ppocrv3/text_detection_en_ppocrv3_2023may.onnx",
+      "sha256": "03f550c6b406fda8bf54bd8327815f6c7e2edd98cea02348c93d879254366587",
+      "license": "Apache-2.0",
+      "license_file": "text_detection_ppocr_LICENSE.txt",
+      "provider": "paddleocr_onnx",
+      "scope": "printed-text geometry only; recognized text is discarded and handwriting remains unresolved"
+    }
+  ]
+}

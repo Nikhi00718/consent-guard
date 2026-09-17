@@ -1,0 +1,45 @@
+{
+  "bbox_map": 0.6277948521254976,
+  "bbox_map_50": 0.8788252969761661,
+  "bbox_map_75": 0.7120552805165221,
+  "bbox_map_large": 0.7412852980783237,
+  "bbox_map_medium": 0.694767646053955,
+  "bbox_map_small": 0.2985374778382874,
+  "bbox_mar_1": 0.37716049382716055,
+  "bbox_mar_10": 0.687962962962963,
+  "bbox_mar_100": 0.6929012345679013,
+  "bbox_mar_large": 0.8087500000000001,
+  "bbox_mar_medium": 0.7446327683615819,
+  "bbox_mar_small": 0.417910447761194,
+  "classes": [
+    1
+  ],
+  "evaluated_batches": 300,
+  "evaluated_images": 300,
+  "ground_truth_instances": 324,
+  "mask_storage": "coco_compressed_rle",
+  "max_detections_per_image": 100,
+  "per_class": {
+    "a105_face_all": {
+      "class_id": 1,
+      "map": 0.5842612932266942,
+      "mar_100": 0.6364197530864197
+    }
+  },
+  "primary_map": 0.5842612932266942,
+  "primary_metric": "segm_map",
+  "retained_predictions": 8084,
+  "score_threshold": 0.0,
+  "segm_map": 0.5842612932266942,
+  "segm_map_50": 0.8473474945500534,
+  "segm_map_75": 0.6680310059067636,
+  "segm_map_large": 0.6934096170390457,
+  "segm_map_medium": 0.6521123239442106,
+  "segm_map_small": 0.23350661875167106,
+  "segm_mar_1": 0.3469135802469136,
+  "segm_mar_10": 0.6274691358024691,
+  "segm_mar_100": 0.6364197530864197,
+  "segm_mar_large": 0.72,
+  "segm_mar_medium": 0.7011299435028249,
+  "segm_mar_small": 0.3656716417910448
+}

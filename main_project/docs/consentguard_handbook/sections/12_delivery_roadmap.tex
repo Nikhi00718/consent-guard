@@ -1,0 +1,138 @@
+\chapter{Delivery roadmap}
+
+\section{Dependencies between stages}
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=8mm,
+  done/.style={rounded corners=2mm,draw=CGGreen,fill=CGGreen!8,minimum width=30mm,minimum height=13mm,align=center,font=\sffamily\small\bfseries},
+  work/.style={rounded corners=2mm,draw=CGSaffron!85!black,fill=CGSaffron!10,minimum width=30mm,minimum height=13mm,align=center,font=\sffamily\small\bfseries},
+  block/.style={rounded corners=2mm,draw=CGRose,fill=CGRose!6,minimum width=30mm,minimum height=13mm,align=center,font=\sffamily\small\bfseries},
+  a/.style={-{Stealth[length=2mm]},draw=CGSlate,line width=0.85pt}
+]
+\node[done] (s1) {1. Data foundation\\implemented};
+\node[done,right=of s1] (s2) {2. Frozen baseline\\implemented};
+\node[work,right=of s2] (s3) {3. Specialists\\scaffolded};
+\node[work,right=of s3] (s4) {4. Calibration/fusion\\uncalibrated};
+\node[work,right=of s4] (s5) {5. Review/export\\prototype};
+\node[block,right=of s5] (s6) {6. Frozen release\\blocked};
+\draw[a] (s1) -- (s2);
+\draw[a] (s2) -- (s3);
+\draw[a] (s3) -- (s4);
+\draw[a] (s4) -- (s5);
+\draw[a] (s5) -- (s6);
+\end{tikzpicture}}
+\caption{The stages are organized, but later stages require trained and calibrated specialist evidence.}
+\end{figure}
+
+\section{Phase 1: baseline freeze and corrected data}
+
+\textbf{Status: mostly complete. Target duration: 3--5 working days.}
+
+\begin{itemize}[leftmargin=6mm]
+  \item Verify \file{baseline-v0.1} hashes and reproduce its evaluation command.
+  \item Regenerate current data reports from V2 and record generation timestamps/hashes.
+  \item Run all Stage 1 and Stage 2 tests.
+  \item Run the negative-inclusive global candidate locally as a smoke test, then on Kaggle.
+  \item Compare mAP, per-class recall, leakage, and negative false-positive rate on the same validation split.
+  \item Preserve class-agnostic, aggressive-balance, and crop experiments as negative results.
+\end{itemize}
+
+\textbf{Exit:} a validated negative-inclusive candidate report, or a documented rejection that leaves \file{baseline-v0.1} unchanged.
+
+\section{Phase 2: specialist detection}
+
+\textbf{Status: adapters exist. Target duration: 3--4 weeks.}
+
+\begin{enumerate}[leftmargin=7mm]
+  \item Acquire and hash YuNet weights; evaluate pretrained face detection.
+  \item Isolate and pin the PaddleOCR environment; evaluate printed text.
+  \item Verify plate dataset rights, build manifests, and train the plate detector.
+  \item Prepare handwriting data, implement a separate provider identity, and train the localization candidate.
+  \item Install/test ZXing-C++ and ExifTool adapters.
+  \item Add hard-negative evaluation and unavailable-provider integration tests.
+\end{enumerate}
+
+\textbf{Exit:} each required provider runs locally, returns typed evidence, has a version/hash, and has a validation report. Failed providers remain explicit blockers.
+
+\section{Phase 3: calibration and fusion}
+
+\textbf{Status: code foundation exists. Target duration: 1--2 weeks.}
+
+\begin{itemize}[leftmargin=6mm]
+  \item Cache raw validation predictions for every provider.
+  \item Run provider/class threshold, size, expansion, and dilation sweeps.
+  \item Generate precision-recall, coverage/leakage, over-redaction, calibration, and review-burden curves.
+  \item Validate geometry union and provenance on overlapping mixed scenes.
+  \item Freeze \file{threshold-profile-v1} with hashes and selection rationale.
+\end{itemize}
+
+\textbf{Exit:} the fused candidate generator reaches validation gates or clearly marks failed classes experimental.
+
+\section{Phase 4: review and safe export}
+
+\textbf{Status: prototype exists. Target duration: 1--2 weeks.}
+
+\begin{itemize}[leftmargin=6mm]
+  \item Complete the local reviewer interface and edit history.
+  \item Add consent/policy records without visual consent inference.
+  \item Verify solid rendering, source-overwrite refusal, and fresh encoding.
+  \item Integrate independent OCR, barcode, face, plate, metadata, and pixel attackers.
+  \item Run all UI and export-attack scenarios.
+\end{itemize}
+
+\textbf{Exit:} approved masks exactly match exported pixels, audit records are complete, and missing/failed assurance blocks export.
+
+\section{Phase 5: frozen evaluation and release}
+
+\textbf{Status: blocked. Target duration: 1--2 weeks after prior exits.}
+
+\begin{itemize}[leftmargin=6mm]
+  \item Run three seeds for trained finalists.
+  \item Complete robustness and domain-slice reports.
+  \item Freeze code, data manifests, checkpoints, thresholds, policy, and evaluation scripts.
+  \item Open locked tests once.
+  \item Evaluate all machine-readable gates.
+  \item Publish the system card, data sheet, limitations, and reproducibility package.
+  \item Tag the complete passing bundle as \file{ConsentGuard v1.0}.
+\end{itemize}
+
+\section{Part-time milestone calendar}
+
+\begin{longtable}{@{}L{19mm}L{47mm}L{91mm}@{}}
+\toprule
+\textbf{Weeks} & \textbf{Milestone} & \textbf{Reviewable outcome} \\
+\midrule
+1--2 & Baseline/data closure & Reproduced comparator, refreshed V2 reports, negative-inclusive result \\
+3--4 & Face/text runtime & YuNet and PaddleOCR evidence with validation failures documented \\
+5--7 & Plate specialist & Licensed manifest, trained three-seed candidates, plate validation report \\
+8--10 & Handwriting specialist & Separate handwriting detector, Indic/mobile results, hard negatives \\
+11--12 & Calibration/fusion & Frozen threshold profile and review-burden analysis \\
+13--14 & Review/export & End-to-end local workflow and independent assurance \\
+15--16 & Robustness/freeze & Full validation and release artifacts frozen \\
+17--18 & Locked test/release & One locked evaluation, model card, final demo/report \\
+\bottomrule
+\end{longtable}
+
+\section{Weekly working discipline}
+
+At the start of each week, select one exit condition. At the end, produce a reviewable artifact: a validation report, trained checkpoint, threshold curve, passing integration test, or documented negative result. Avoid weeks described only as ``worked on the model.''
+
+Every model change should answer a written question. Every data addition should declare which failure slice it targets. Every metric report should include counts and compare against the frozen reference.
+
+\section{When to stop or change direction}
+
+Stop a line of work when:
+
+\begin{itemize}[leftmargin=6mm]
+  \item three controlled trials fail to improve the intended validation slice;
+  \item the required data cannot be licensed ethically;
+  \item review burden becomes unacceptable despite calibration;
+  \item the provider cannot fit local deployment constraints; or
+  \item the class cannot meet evidence minimums within the project timeline.
+\end{itemize}
+
+Then mark the class experimental, require manual review, and document the limitation instead of weakening the gate.
+

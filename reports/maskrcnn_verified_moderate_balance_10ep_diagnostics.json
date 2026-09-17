@@ -1,0 +1,190 @@
+{
+  "checkpoint": "C:\\consentGuard\\artifacts\\checkpoints\\maskrcnn_verified_moderate_balance_10ep\\best.pt",
+  "config": "C:\\consentGuard\\configs\\train_maskrcnn_verified_moderate_balance_10ep.yaml",
+  "device": "cuda",
+  "privacy": {
+    "batches": 1271,
+    "covered_sensitive_pixels": 168436279,
+    "dilation_pixels": 0,
+    "gt_sensitive_pixels": 220487749,
+    "images": 1271,
+    "instance_coverage_threshold": 0.8,
+    "leakage_rate": 0.23607420473960206,
+    "mask_threshold": 0.5,
+    "over_redaction_fraction": 0.0279265646630526,
+    "over_redaction_pixels": 20375697,
+    "per_class": {
+      "a105_face_all": {
+        "class_id": 1,
+        "covered_gt_pixels": 24352407,
+        "gt_pixels": 25962068,
+        "instances": 1671,
+        "instances_coverage_at_least_threshold": 1609,
+        "leakage_rate": 0.06200049241069705,
+        "sensitive_pixel_recall": 0.937999507589303
+      },
+      "a108_license_plate_all": {
+        "class_id": 2,
+        "covered_gt_pixels": 147264,
+        "gt_pixels": 1084978,
+        "instances": 134,
+        "instances_coverage_at_least_threshold": 55,
+        "leakage_rate": 0.8642700589320705,
+        "sensitive_pixel_recall": 0.1357299410679295
+      },
+      "a109_person_body": {
+        "class_id": 3,
+        "covered_gt_pixels": 166122338,
+        "gt_pixels": 189399630,
+        "instances": 2442,
+        "instances_coverage_at_least_threshold": 1959,
+        "leakage_rate": 0.12290040904514965,
+        "sensitive_pixel_recall": 0.8770995909548503
+      },
+      "a110_nudity_all": {
+        "class_id": 4,
+        "covered_gt_pixels": 7939193,
+        "gt_pixels": 8998611,
+        "instances": 185,
+        "instances_coverage_at_least_threshold": 158,
+        "leakage_rate": 0.11773128097214114,
+        "sensitive_pixel_recall": 0.8822687190278589
+      },
+      "a26_handwriting": {
+        "class_id": 5,
+        "covered_gt_pixels": 646228,
+        "gt_pixels": 24135513,
+        "instances": 450,
+        "instances_coverage_at_least_threshold": 19,
+        "leakage_rate": 0.9732250149396038,
+        "sensitive_pixel_recall": 0.026774985060396272
+      },
+      "a39_disability_physical": {
+        "class_id": 6,
+        "covered_gt_pixels": 581817,
+        "gt_pixels": 809089,
+        "instances": 21,
+        "instances_coverage_at_least_threshold": 11,
+        "leakage_rate": 0.28089864032263445,
+        "sensitive_pixel_recall": 0.7191013596773655
+      },
+      "a43_medicine": {
+        "class_id": 7,
+        "covered_gt_pixels": 671422,
+        "gt_pixels": 4362346,
+        "instances": 121,
+        "instances_coverage_at_least_threshold": 6,
+        "leakage_rate": 0.8460869449603493,
+        "sensitive_pixel_recall": 0.1539130550396507
+      },
+      "a7_fingerprint": {
+        "class_id": 8,
+        "covered_gt_pixels": 1045512,
+        "gt_pixels": 1763914,
+        "instances": 11,
+        "instances_coverage_at_least_threshold": 7,
+        "leakage_rate": 0.4072772255336712,
+        "sensitive_pixel_recall": 0.5927227744663288
+      },
+      "a8_signature": {
+        "class_id": 9,
+        "covered_gt_pixels": 275850,
+        "gt_pixels": 953695,
+        "instances": 85,
+        "instances_coverage_at_least_threshold": 13,
+        "leakage_rate": 0.7107565836037727,
+        "sensitive_pixel_recall": 0.2892434163962273
+      }
+    },
+    "predicted_union_pixels": 188811976,
+    "score_threshold": 0.5,
+    "sensitive_pixel_recall": 0.7639257952603979
+  },
+  "rpn": {
+    "batches": 1271,
+    "by_size": {
+      "large": {
+        "gt_instances": 3302,
+        "mean_best_iou": 0.7500316500663757,
+        "recall_at_iou_0.50": 0.9406420588493347,
+        "recall_at_iou_0.75": 0.6062992215156555
+      },
+      "medium": {
+        "gt_instances": 1423,
+        "mean_best_iou": 0.6514486074447632,
+        "recall_at_iou_0.50": 0.8067463040351868,
+        "recall_at_iou_0.75": 0.4778636693954468
+      },
+      "small": {
+        "gt_instances": 395,
+        "mean_best_iou": 0.5019943714141846,
+        "recall_at_iou_0.50": 0.6253164410591125,
+        "recall_at_iou_0.75": 0.2278480976819992
+      }
+    },
+    "images": 1271,
+    "mean_proposals_per_image": 100.0,
+    "overall": {
+      "gt_instances": 5120,
+      "mean_best_iou": 0.7034968137741089,
+      "recall_at_iou_0.50": 0.879101574420929,
+      "recall_at_iou_0.75": 0.5414062738418579
+    },
+    "per_class": {
+      "a105_face_all": {
+        "gt_instances": 1671,
+        "mean_best_iou": 0.7566617727279663,
+        "recall_at_iou_0.50": 0.940155565738678,
+        "recall_at_iou_0.75": 0.6624775528907776
+      },
+      "a108_license_plate_all": {
+        "gt_instances": 134,
+        "mean_best_iou": 0.5122201442718506,
+        "recall_at_iou_0.50": 0.5970149040222168,
+        "recall_at_iou_0.75": 0.305970162153244
+      },
+      "a109_person_body": {
+        "gt_instances": 2442,
+        "mean_best_iou": 0.749629020690918,
+        "recall_at_iou_0.50": 0.9500409364700317,
+        "recall_at_iou_0.75": 0.6056510806083679
+      },
+      "a110_nudity_all": {
+        "gt_instances": 185,
+        "mean_best_iou": 0.6573270559310913,
+        "recall_at_iou_0.50": 0.8864864706993103,
+        "recall_at_iou_0.75": 0.28108108043670654
+      },
+      "a26_handwriting": {
+        "gt_instances": 450,
+        "mean_best_iou": 0.45268887281417847,
+        "recall_at_iou_0.50": 0.5244444608688354,
+        "recall_at_iou_0.75": 0.12666666507720947
+      },
+      "a39_disability_physical": {
+        "gt_instances": 21,
+        "mean_best_iou": 0.5973799228668213,
+        "recall_at_iou_0.50": 0.761904776096344,
+        "recall_at_iou_0.75": 0.190476194024086
+      },
+      "a43_medicine": {
+        "gt_instances": 121,
+        "mean_best_iou": 0.3941638171672821,
+        "recall_at_iou_0.50": 0.42148759961128235,
+        "recall_at_iou_0.75": 0.14049586653709412
+      },
+      "a7_fingerprint": {
+        "gt_instances": 11,
+        "mean_best_iou": 0.733113706111908,
+        "recall_at_iou_0.50": 0.9090909361839294,
+        "recall_at_iou_0.75": 0.5454545617103577
+      },
+      "a8_signature": {
+        "gt_instances": 85,
+        "mean_best_iou": 0.5255507826805115,
+        "recall_at_iou_0.50": 0.6235294342041016,
+        "recall_at_iou_0.75": 0.10588235408067703
+      }
+    }
+  }
+}

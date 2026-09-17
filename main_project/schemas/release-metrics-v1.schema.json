@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://consentguard.local/schemas/release-metrics-v1.schema.json",
+  "title": "ConsentGuard frozen release metrics v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "confidence_level",
+    "baseline_mask_map",
+    "sensitive_pixel_recall",
+    "sensitive_pixel_leakage",
+    "negative_image_false_positive_rate",
+    "seed_count",
+    "assurance_fail_closed",
+    "supported_classes",
+    "domain_instance_recall",
+    "class_sensitive_pixel_recall",
+    "confidence_bounds"
+  ],
+  "properties": {
+    "schema_version": {"const": "release-metrics-v1"},
+    "confidence_level": {"const": 0.95},
+    "baseline_mask_map": {"$ref": "#/$defs/rate"},
+    "sensitive_pixel_recall": {"$ref": "#/$defs/rate"},
+    "sensitive_pixel_leakage": {"$ref": "#/$defs/rate"},
+    "negative_image_false_positive_rate": {"$ref": "#/$defs/rate"},
+    "seed_count": {"type": "integer", "minimum": 0},
+    "assurance_fail_closed": {"type": "boolean"},
+    "supported_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "domain_instance_recall": {"$ref": "#/$defs/domainRates"},
+    "class_sensitive_pixel_recall": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"$ref": "#/$defs/rate"}
+    },
+    "confidence_bounds": {
+      "type": "object",
+      "required": [
+        "sensitive_pixel_recall",
+        "sensitive_pixel_leakage",
+        "negative_image_false_positive_rate",
+        "domain_instance_recall",
+        "class_sensitive_pixel_recall"
+      ],
+      "properties": {
+        "sensitive_pixel_recall": {"$ref": "#/$defs/interval"},
+        "sensitive_pixel_leakage": {"$ref": "#/$defs/interval"},
+        "negative_image_false_positive_rate": {"$ref": "#/$defs/interval"},
+        "domain_instance_recall": {"$ref": "#/$defs/domainIntervals"},
+        "class_sensitive_pixel_recall": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/interval"}
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "interval": {
+      "type": "object",
+      "required": ["lower", "upper"],
+      "properties": {
+        "lower": {"$ref": "#/$defs/rate"},
+        "upper": {"$ref": "#/$defs/rate"}
+      },
+      "additionalProperties": false
+    },
+    "domainRates": {
+      "type": "object",
+      "required": ["general", "india"],
+      "properties": {
+        "general": {"$ref": "#/$defs/safetyCriticalRates"},
+        "india": {"$ref": "#/$defs/safetyCriticalRates"}
+      },
+      "additionalProperties": false
+    },
+    "safetyCriticalRates": {
+      "type": "object",
+      "required": ["face", "license_plate", "text"],
+      "properties": {
+        "face": {"$ref": "#/$defs/rate"},
+        "license_plate": {"$ref": "#/$defs/rate"},
+        "text": {"$ref": "#/$defs/rate"}
+      },
+      "additionalProperties": false
+    },
+    "domainIntervals": {
+      "type": "object",
+      "required": ["general", "india"],
+      "properties": {
+        "general": {"$ref": "#/$defs/safetyCriticalIntervals"},
+        "india": {"$ref": "#/$defs/safetyCriticalIntervals"}
+      },
+      "additionalProperties": false
+    },
+    "safetyCriticalIntervals": {
+      "type": "object",
+      "required": ["face", "license_plate", "text"],
+      "properties": {
+        "face": {"$ref": "#/$defs/interval"},
+        "license_plate": {"$ref": "#/$defs/interval"},
+        "text": {"$ref": "#/$defs/interval"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "evaluation": {
+    "deepak_vid1": {
+      "candidate": {
+        "f1": 0.5436893203883495,
+        "false_negatives": 40,
+        "false_positives": 7,
+        "false_positives_per_image": 0.16279069767441862,
+        "precision": 0.8,
+        "recall": 0.4117647058823529,
+        "true_positives": 28
+      },
+      "current": {
+        "f1": 0.017699115044247787,
+        "false_negatives": 67,
+        "false_positives": 44,
+        "false_positives_per_image": 1.0232558139534884,
+        "precision": 0.022222222222222223,
+        "recall": 0.014705882352941176,
+        "true_positives": 1
+      },
+      "ground_truth_boxes": 68,
+      "images": 43
+    },
+    "merged_validation": {
+      "candidate": {
+        "f1": 0.5841584158415842,
+        "false_negatives": 87,
+        "false_positives": 333,
+        "false_positives_per_image": 0.1825657894736842,
+        "precision": 0.4697452229299363,
+        "recall": 0.7722513089005235,
+        "true_positives": 295
+      },
+      "current": {
+        "f1": 0.2838499184339315,
+        "false_negatives": 121,
+        "false_positives": 1196,
+        "false_positives_per_image": 0.6557017543859649,
+        "precision": 0.17913520933424845,
+        "recall": 0.6832460732984293,
+        "true_positives": 261
+      },
+      "ground_truth_boxes": 382,
+      "images": 1824
+    }
+  },
+  "generated_at_utc": "2026-08-30T11:27:01.476340+00:00",
+  "iou_threshold": 0.5,
+  "kaggle": {
+    "kernel": "nikhil00718/consentguard-plate-full-scene-training",
+    "kernel_version": 4,
+    "observed_status": "COMPLETE"
+  },
+  "promotion_gate": {
+    "checks": {
+      "cross_split_hash_leakage_zero": true,
+      "deepak_fppi": true,
+      "deepak_recall": false,
+      "kaggle_complete": true,
+      "merged_validation_fppi": true,
+      "merged_validation_recall": true,
+      "test_split_locked": true
+    },
+    "decision": "retain_current_website_default",
+    "failed_checks": [
+      "deepak_recall"
+    ],
+    "requirements": {
+      "deepak_vid1_max_fppi": 1.0233,
+      "deepak_vid1_min_recall": 0.5,
+      "merged_validation_max_fppi": 0.6557,
+      "merged_validation_min_recall": 0.6832
+    },
+    "website_promotion_allowed": false
+  },
+  "schema_version": "consentguard-plate-kaggle-verification-v1",
+  "score_threshold": 0.5,
+  "training": {
+    "best_map": 0.5809665695766744,
+    "checkpoint": "artifacts\\kaggle\\remote-runs\\plate-full-scene-v4\\consentguard\\artifacts\\checkpoints\\specialist_plate_full_scene_research_v1_highres_5ep\\best.pt",
+    "checkpoint_bytes": 346511469,
+    "checkpoint_sha256": "45181310c47940361128aa2478da523829e7b3a9fa5f24d6a2b5335884ec6bcd",
+    "completed_epoch": 4,
+    "cuda_memory": {
+      "peak_allocated_bytes": 10657472512,
+      "peak_reserved_bytes": 10806624256,
+      "peak_reserved_fraction": 0.6334649722636262,
+      "total_bytes": 17059545088
+    },
+    "environment": {
+      "cuda_available": true,
+      "cudnn": 90100,
+      "cudnn_benchmark": true,
+      "deterministic_algorithms": false,
+      "gpu_memory_bytes": 17059545088,
+      "gpu_name": "Tesla P100-PCIE-16GB",
+      "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+      "python": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+      "torch": "2.7.1+cu118",
+      "torch_cuda": "11.8"
+    },
+    "global_step": 2380,
+    "initialization_checkpoint_sha256": "d8a7a551fe3a9f264bb1ad34066f583d92ae9344503112a582554e29975a81b8",
+    "last_evaluation": {
+      "bbox_map": 0.5809665695766744,
+      "bbox_map_50": 0.7394163305917257,
+      "bbox_map_75": 0.7074993258686524,
+      "bbox_map_large": 0.7681559028832019,
+      "bbox_map_medium": 0.5332447015175515,
+      "bbox_map_small": 0.05666582148445464,
+      "bbox_mar_1": 0.6403141361256545,
+      "bbox_mar_10": 0.6756544502617801,
+      "bbox_mar_100": 0.6769633507853403,
+      "bbox_mar_large": 0.8367647058823529,
+      "bbox_mar_medium": 0.6870689655172415,
+      "bbox_mar_small": 0.13225806451612904,
+      "classes": [
+        1
+      ],
+      "evaluated_batches": 1824,
+      "evaluated_images": 1824,
+      "ground_truth_instances": 382,
+      "mask_storage": "not_applicable_box_detector",
+      "max_detections_per_image": 100,
+      "per_class": {
+        "a108_license_plate_all": {
+          "class_id": 1,
+          "map": 0.5809665695766744,
+          "mar_100": 0.6769633507853403
+        }
+      },
+      "primary_map": 0.5809665695766744,
+      "primary_metric": "bbox_map",
+      "retained_predictions": 90354,
+      "score_threshold": 0.0
+    },
+    "resolved_experiment": {
+      "cudnn_benchmark": true,
+      "deterministic": false,
+      "name": "specialist_plate_full_scene_research_v1_highres_5ep",
+      "output_dir": "artifacts/checkpoints/specialist_plate_full_scene_research_v1_highres_5ep",
+      "seed": 1337
+    },
+    "resolved_model": {
+      "box_batch_size_per_image": 128,
+      "class_agnostic_mask": false,
+      "detections_per_image": 100,
+      "name": "fasterrcnn_resnet50_fpn_v2",
+      "pretrained": true,
+      "rpn_post_nms_top_n_test": 200,
+      "rpn_post_nms_top_n_train": 350,
+      "rpn_pre_nms_top_n_test": 500,
+      "rpn_pre_nms_top_n_train": 750,
+      "small_object_anchors": true,
+      "trainable_backbone_layers": 3
+    },
+    "resolved_training": {
+      "amp": true,
+      "batch_size": 1,
+      "device": "cuda",
+      "epochs": 5,
+      "evaluate_every_epochs": 1,
+      "gradient_accumulation_steps": 4,
+      "log_every_steps": 20,
+      "max_steps": null,
+      "resume_from": null,
+      "save_every_epochs": 1
+    }
+  },
+  "transport": {
+    "cross_split_hash_leakage": 0,
+    "image_bytes": 4674069651,
+    "manifest": "artifacts\\kaggle\\consentguard-plate-full-scene-v1\\transport_manifest.json",
+    "manifest_sha256": "3dca0e91cd0552035c47abc86ee14f61674030ada38ddb73e83ff5bb4ea70d6e",
+    "record_sha256": {
+      "train": "91e9f28fe2e99f6dace2f4ae3feb5a4ced973f3f4671969bfbffafb435993ced",
+      "val": "d0e9c5969201f15a7cc0a0a5c473ed6ae731748700e105cab77295a9625ccc5f"
+    },
+    "records": {
+      "train": 1904,
+      "val": 1824
+    },
+    "test_split_used": false,
+    "unique_images": 3728
+  }
+}

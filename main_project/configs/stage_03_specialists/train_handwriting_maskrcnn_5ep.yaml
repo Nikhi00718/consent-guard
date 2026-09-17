@@ -1,0 +1,62 @@
+# One-class handwriting-region localizer fine-tune from COCO Mask R-CNN weights.
+experiment:
+  name: specialist_handwriting_maskrcnn_5ep
+  seed: 1337
+  output_dir: artifacts/checkpoints/specialist_handwriting_maskrcnn_5ep
+  deterministic: false
+  cudnn_benchmark: false
+
+data:
+  train_records: data/processed/specialists/handwriting/records_train.jsonl
+  val_records: data/processed/specialists/handwriting/records_val.jsonl
+  class_map: data/processed/specialists/handwriting/class_map.json
+  short_side: 512
+  max_long_side: 768
+  crop_size: 512
+  crop_probability: 0.75
+  crop_context_factor: 5.0
+  min_crop_visibility: 0.25
+  horizontal_flip_probability: 0.0
+  brightness_contrast_probability: 0.10
+  num_workers: 0
+  sampling: class_balanced
+  class_balance_power: 0.25
+  max_class_balance_ratio: 5.0
+  negative_sampling_weight: 0.50
+
+model:
+  name: maskrcnn_resnet50_fpn_v2
+  pretrained: true
+  trainable_backbone_layers: 3
+  small_object_anchors: true
+  class_agnostic_mask: true
+  detections_per_image: 100
+  rpn_pre_nms_top_n_train: 500
+  rpn_post_nms_top_n_train: 250
+  rpn_pre_nms_top_n_test: 250
+  rpn_post_nms_top_n_test: 100
+  box_batch_size_per_image: 128
+
+optimizer:
+  name: sgd
+  learning_rate: 0.0025
+  momentum: 0.9
+  weight_decay: 0.0005
+  gradient_clip_norm: 10.0
+  warmup_steps: 50
+  warmup_start_factor: 0.05
+
+training:
+  device: cuda
+  epochs: 5
+  batch_size: 1
+  gradient_accumulation_steps: 4
+  amp: true
+  log_every_steps: 10
+  save_every_epochs: 1
+  evaluate_every_epochs: 1
+  max_steps: null
+  resume_from: null
+
+scheduler: {name: step, step_size: 3, gamma: 0.1}
+evaluation: {enabled: true, score_threshold: 0.0, class_metrics: true, max_batches: null}
