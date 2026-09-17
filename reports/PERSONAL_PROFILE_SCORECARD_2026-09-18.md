@@ -88,3 +88,21 @@ gates.
   --with-barcode --device cuda --max-images 120 `
   --output reports\personal_profile_validation_scorecard.json
 ```
+
+## The tiled second pass, measured on road photos
+
+`measure_mask_coverage.py` drives the running app over 20 Indian road frames
+(Deepak `vid-2` **training** side; the `vid-1` challenge stays locked) holding 40
+annotated number plates. A plate counts as covered when at least half of its
+box ends up under the mask the user is about to burn in.
+
+| Configuration | Plates covered | Rate | Mean image erased |
+|---|---:|---:|---:|
+| All providers, tiled second pass on | 33 / 40 | **0.825** | 10.9% |
+| Single pass only | 24 / 40 | 0.600 | 9.2% |
+
+Tiling buys 22 percentage points of plate coverage for 1.7 points of extra
+erasure, on the failure mode the single pass is worst at. It costs seconds per
+photo, which is the trade this tool was configured to take.
+
+Source: `reports/plate_mask_coverage_2026-09-18.json`.

@@ -1,0 +1,27 @@
+{
+  "records": "data\\processed\\external\\deepakat_indian_vehicle_number_plate_yolo_grouped\\records_train.jsonl",
+  "coverage_threshold": 0.5,
+  "requested_images": 20,
+  "runs": [
+    {
+      "providers": "all (includes tiled second pass)",
+      "images_measured": 20,
+      "annotated_regions": 40,
+      "regions_covered": 33,
+      "coverage_rate": 0.825,
+      "median_region_coverage": 1.0,
+      "mean_image_erased_fraction": 0.1094,
+      "failures": []
+    },
+    {
+      "providers": "single pass only",
+      "images_measured": 20,
+      "annotated_regions": 40,
+      "regions_covered": 24,
+      "coverage_rate": 0.6,
+      "median_region_coverage": 1.0,
+      "mean_image_erased_fraction": 0.092,
+      "failures": []
+    }
+  ]
+}

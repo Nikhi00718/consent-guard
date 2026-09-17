@@ -65,8 +65,12 @@ photos** get anything erased by mistake. Full report:
 
 "Whole regions caught" counts regions where a mask of that type covered at least
 half the region, which is the number that matters when one small plate is the
-thing you needed hidden. Those figures are from the single-pass configuration;
-the app also runs a tiled second pass, which does better on small regions.
+thing you needed hidden. Those figures are from the single-pass configuration.
+
+The app also runs a **tiled second pass**, which is what rescues small regions.
+Measured on 20 real road photos holding 40 annotated number plates: it covers
+**33 of 40 plates (82.5%)** against 24 of 40 (60%) single-pass, for 1.7 points
+more of the image erased.
 
 Reproduce them:
 
