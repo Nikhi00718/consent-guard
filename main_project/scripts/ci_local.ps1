@@ -22,7 +22,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
-$repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 Set-Location $repo
 
 $python = Join-Path $repo '.venv\Scripts\python.exe'
