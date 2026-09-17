@@ -15,7 +15,13 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 class IngestLimits:
     max_bytes: int = 25 * 1024 * 1024
     max_pixels: int = 40_000_000
-    allowed_formats: tuple[str, ...] = ("JPEG", "PNG", "WEBP")
+    #: MPO is a JPEG container holding more than one frame, produced by many
+    #: phone and camera modes. Rejecting it makes ordinary photos unopenable,
+    #: so the primary frame is used and the extra frames are dropped by the
+    #: re-encode, which removes whatever they contained.
+    allowed_formats: tuple[str, ...] = ("JPEG", "PNG", "WEBP", "MPO")
+    #: Formats where extra frames mean animation rather than a second still.
+    multi_frame_formats: tuple[str, ...] = ("MPO",)
 
 
 @dataclass(frozen=True)
@@ -49,8 +55,11 @@ def normalize_image(path: str | Path, limits: IngestLimits = IngestLimits()) -> 
             source_format = str(source.format or "").upper()
             if source_format not in limits.allowed_formats:
                 raise ValueError(f"Unsupported image format: {source_format or 'unknown'}")
-            if getattr(source, "n_frames", 1) != 1:
-                raise ValueError("Animated or multi-frame images are not supported")
+            frames = int(getattr(source, "n_frames", 1))
+            if frames != 1:
+                if source_format not in limits.multi_frame_formats:
+                    raise ValueError("Animated or multi-frame images are not supported")
+                source.seek(0)
             if source.width * source.height > limits.max_pixels:
                 raise ValueError(f"Decoded image exceeds {limits.max_pixels} pixels")
             exif = source.getexif()
@@ -58,6 +67,8 @@ def normalize_image(path: str | Path, limits: IngestLimits = IngestLimits()) -> 
             metadata_categories = []
             if exif:
                 metadata_categories.append("exif")
+            if frames != 1:
+                metadata_categories.append("extra_frames_dropped")
             for key in ("icc_profile", "xmp", "comment", "dpi"):
                 if key in source.info:
                     metadata_categories.append(key)

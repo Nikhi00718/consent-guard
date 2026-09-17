@@ -82,3 +82,37 @@ def test_pipeline_renders_and_requires_independent_attacks(tmp_path: Path) -> No
     assert output.is_file()
     assert result.assurance.status is AssuranceStatus.PASS
     assert result.decision.export_allowed
+
+
+def test_multi_frame_mpo_photos_are_accepted_and_flattened(tmp_path) -> None:
+    """Phone cameras emit MPO; rejecting it made ordinary photos unopenable."""
+
+    import numpy as np
+    from PIL import Image
+
+    from consentguard.stage_05_review_export.ingest import normalize_image
+
+    primary = Image.fromarray(np.full((8, 10, 3), 90, dtype=np.uint8))
+    secondary = Image.fromarray(np.full((8, 10, 3), 200, dtype=np.uint8))
+    path = tmp_path / "burst.mpo"
+    primary.save(path, format="MPO", append_images=[secondary])
+
+    normalized = normalize_image(path)
+    assert normalized.source_format == "MPO"
+    assert normalized.pixels_rgb.shape == (8, 10, 3)
+    assert int(normalized.pixels_rgb.mean()) == 90, "must use the primary frame"
+    assert "extra_frames_dropped" in normalized.metadata_categories
+
+
+def test_animated_images_are_still_rejected(tmp_path) -> None:
+    import numpy as np
+    import pytest
+    from PIL import Image
+
+    from consentguard.stage_05_review_export.ingest import normalize_image
+
+    frames = [Image.fromarray(np.full((8, 8, 3), value, dtype=np.uint8)) for value in (10, 240)]
+    path = tmp_path / "animated.webp"
+    frames[0].save(path, format="WEBP", save_all=True, append_images=frames[1:], duration=100)
+    with pytest.raises(ValueError, match="multi-frame"):
+        normalize_image(path)

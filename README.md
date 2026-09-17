@@ -1,198 +1,116 @@
-# From Detection to Safe Release
+# ConsentGuard
 
-ConsentGuard is the working folder for a research prototype that localizes
-privacy-sensitive visual evidence and produces destructive, newly encoded
-redactions. The verified training baseline is Mask R-CNN ResNet-50 FPN v2 for
-the nine official **visual** Visual Redactions attributes plus background.
-Textual and multimodal attributes require separate OCR/document branches.
+A local tool that erases private content from a photo before you share it.
 
-The executable codebase is organized for stage-by-stage review under
-[`main_project/`](main_project/README.md). Source modules, scripts, configs,
-and tests are physically grouped into six numbered stages there.
+Drop in a photo or screenshot. It finds faces, number plates, text, handwriting,
+QR codes and barcodes, covers them with solid black, strips the GPS/camera data,
+and gives you a clean copy. Nothing leaves your machine.
 
-This repository does **not** infer consent, intent, legality, or identity from
-pixels. The current milestone is the perception/localization model required by
-the broader consent-state-aware release policy in
-`ConsentGuard_Final_Research_Design.md`.
+**It will miss things.** Detection is automatic but never complete, so look at
+the result before you share it, and fix anything it missed with the brush. The
+app labels the content types it is bad at instead of pretending otherwise.
 
-## Latest plate experiment
-
-The grouped full-scene Indian plate candidate completed on Kaggle and greatly
-improved frozen validation and road-video results. It still missed the
-precommitted Deepak recall promotion floor (0.4118 versus 0.50), so the website
-default was deliberately left unchanged. See
-[`reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md`](reports/PLATE_FULL_SCENE_KAGGLE_V4_EVALUATION_2026-08-30.md)
-for the data, training, checkpoint hashes, metrics, and next target.
-
-## Architecture
-
-- Primary reproducible baseline: TorchVision `maskrcnn_resnet50_fpn_v2`.
-- Local 4 GB profile: 640/1024 aspect-preserving images, small-object anchors,
-  batch size 1, gradient accumulation, AMP, and reduced RPN proposals.
-- Controlled 12–16 GB profile: 800/1333 full images and standard anchors.
-- Optional comparison after the baseline: Mask2Former on a larger GPU.
-- Engineering evaluation: pycocotools box and mask AP@[.50:.95]/AR, with
-  compressed-RLE accumulation and object-size breakdowns. The paper's official
-  thresholded pixel precision-recall AP is a separate metric and must be used
-  for direct comparison with published results.
-
-The loader transforms polygons before rasterization, so large source images do
-not allocate one full-resolution bitmap per annotation.
-
-## Environment (Windows)
-
-When restoring the project from GitHub, use Git LFS and recursive submodules so
-the versioned best checkpoint and optional third-party reference code are
-available:
+## Run it
 
 ```powershell
-git lfs install
-git clone --recurse-submodules https://github.com/Nikhi00718/consent-guard.git
-git lfs pull
+powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_05_review_export\start_consentguard.ps1
 ```
 
-Use Python 3.11. The setup script installs a matched CUDA 12.6 PyTorch pair,
-all evaluation/test dependencies, the editable package, and runs a preflight.
-Large wheels and the official COCO Mask R-CNN initialization are downloaded
-resumably into `data/cache`, with size/hash checks where the publisher provides
-them.
+That loads the detectors (about a minute) and opens `http://127.0.0.1:7860`.
+For a desktop shortcut, run
+`main_project\scripts\stage_05_review_export\create_desktop_shortcut.ps1` once.
+
+First-time setup, if the Python environment does not exist yet:
 
 ```powershell
-Set-Location C:\consentGuard
 powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1
 ```
 
-CPU-only setup is available for data/test development:
+## How it works
 
-```powershell
-powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1 -CpuOnly
+```text
+photo  ->  normalize (fix orientation, drop metadata, isolated session)
+       ->  detectors: 9-class Mask R-CNN, face, plate, text, QR/barcode, EXIF
+       ->  second pass over overlapping tiles, so small regions are found
+       ->  fuse: per-class thresholds, area sanity caps, merge overlaps
+       ->  solid black fill of the mask shape, grown a few pixels
+       ->  encode a fresh file, re-open it, re-scan it for leftovers
+       ->  download (same format as the input)
 ```
 
-Official references: [PyTorch installation](https://pytorch.org/get-started/locally/),
-[TorchVision detection tutorial](https://docs.pytorch.org/tutorials/intermediate/torchvision_tutorial.html),
-and [Mask R-CNN v2](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.detection.maskrcnn_resnet50_fpn_v2.html).
+You either press **Erase and save** and get the file, or open the review screen
+first to paint over misses and un-erase anything covered by mistake. Working
+copies are deleted when you close the page; your original is never modified.
 
-## Data lifecycle
+## What it catches
 
-Raw archives are never modified. A split is usable only after exact-size and
-full gzip/tar validation, safe extraction, manifest rebuilding, preprocessing,
-geometry verification, modality filtering, and record validation. A dimension
-mismatch is accepted only when annotation and decoded image aspect ratios agree
-within 1%; crops, stitches, and rotations are quarantined.
+| Content | How well it works |
+|---|---|
+| Faces | Good |
+| Whole people | Good, and switched **off** by default because it erases most of a photo |
+| QR codes and barcodes | Reliable (a decoder, not a model) |
+| GPS/camera metadata | Always removed; the output is written from scratch |
+| Printed text | Decent, and it erases signs and logos too |
+| Number plates | Catches many, misses small and distant ones |
+| Handwriting, signatures, fingerprints, medicine, documents | Weak — the app says "check manually" |
 
-```powershell
-.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\finalize_vispr_data.py --split val --extract --rebuild-records
-.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\audit_visual_redactions_alignment.py
-.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\preprocess_visual_redactions_verified.py --profile visual
-.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\validate_processed_records.py `
-  --data data\processed\visual_redactions_verified_visual `
-  --report reports\processed_records_verified_visual_validation.json
-.\.venv\Scripts\python.exe main_project\scripts\stage_01_data\audit_split_leakage.py
-```
-
-`data/processed/visual_redactions/` and the v1/v2 configs are retained only to
-reproduce the failed legacy runs. Do not use them for new training.
-
-Never tune on `records_test2017.jsonl`; the official Visual Redactions test
-split remains locked until the final experiment.
-
-## Verification
+Measured evidence lives in `reports/`. Reproduce the per-class numbers:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\preflight_environment.py
-.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_smoke.yaml
+.\.venv\Scripts\python.exe main_project\scripts\stage_06_evaluation_release\evaluate_fused_validation.py `
+  --config main_project\configs\stage_02_baseline_model\train_maskrcnn_moderate_v2_negatives_10ep.yaml `
+  --checkpoint artifacts\checkpoints\maskrcnn_moderate_v2_negatives_10ep\last.pt `
+  --threshold-profile main_project\configs\stage_04_fusion_calibration\threshold_profile_personal_max_coverage.yaml `
+  --device cuda --max-images 120 --output reports\personal_profile_validation_scorecard.json
 ```
 
-The smoke run performs a real Mask R-CNN forward pass, backward pass, optimizer
-step, validation inference, COCO metric update, and atomic checkpoint write on
-real processed VISPR data.
+`measure_mask_coverage.py` answers the narrower question of whether annotated
+regions actually end up under the burnt-in mask, by driving the running app.
 
-## Train
+## What it will not do
 
-Laptop RTX 3050 (4 GB):
+- Guarantee anything. It reduces risk; it does not certify a photo as safe.
+- Decide whether anyone consented. You decide what to keep.
+- Work on video, or help with a photo you already shared.
+- Send anything anywhere. There is no server and no telemetry.
+
+## Checks
 
 ```powershell
-.\main_project\scripts\stage_02_baseline_model\start_maskrcnn_verified_visual.ps1
+powershell -ExecutionPolicy Bypass -File main_project\scripts\ci_local.ps1
 ```
 
-Controlled 12–16 GB GPU baseline:
+Python tests, the frozen baseline hash check, the frontend build, frontend unit
+tests, and the browser end-to-end flow. Add `-IncludeModels` for a real
+one-photo run through every detector. There is no hosted CI: the tests need the
+local GPU, the checkpoints and the dataset records, none of which leave this
+machine.
 
-```powershell
-.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_maskrcnn_baseline.yaml
-```
+## Layout
 
-Resume without losing optimizer, scheduler, scaler, epoch, loader/sampler RNG,
-or CUDA RNG state:
+- `main_project/` — the code, in six numbered stages (data, baseline model,
+  specialist detectors, fusion, review/export, evaluation and release).
+- `main_project/scripts/stage_05_review_export/` — the app and its launcher.
+- `main_project/configs/stage_04_fusion_calibration/` — threshold profiles. The
+  personal profile is what the app uses; the validation-calibrated one is
+  stricter and precision-oriented.
+- `reports/` — measured evidence, one file per run.
+- `docs/archive/` — earlier research reports, failure registers and download
+  guides, with an index explaining what is still true.
+- `research/` — training and Kaggle machinery. Not needed for the app.
 
-```powershell
-.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\train_maskrcnn.py --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml --resume artifacts\checkpoints\maskrcnn_4gb\last.pt
-```
+Datasets, checkpoints and outputs stay out of version control and must not be
+redistributed without their original licences.
 
-Each run writes the resolved configuration, environment details, JSONL metrics,
-TensorBoard events, `last.pt`, per-epoch checkpoints, and `best.pt` selected by
-segmentation mAP. Immutable checkpoint aliases use NTFS hard links when
-available, avoiding repeated copies of the same large checkpoint.
+## Honest status
 
-## Evaluate and redact
+The detectors are single-seed research checkpoints. The threshold profile is
+tuned, not certified: `release_ready: false` is in that file on purpose, and the
+app shows it as a warning rather than blocking the download. The strict release
+gates in `main_project/stage_06_evaluation_release/` (95% recall in two domains,
+three seeds, independent attackers, a 2,000-photo target set) are **not met**
+and are not being pursued. A person reviewing the result is the safety net
+instead.
 
-```powershell
-.\.venv\Scripts\python.exe main_project\scripts\stage_02_baseline_model\evaluate_maskrcnn.py `
-  --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml `
-  --checkpoint artifacts\checkpoints\maskrcnn_4gb\best.pt
-
-.\.venv\Scripts\python.exe main_project\scripts\stage_05_review_export\infer_maskrcnn.py `
-  --config main_project\configs\stage_02_baseline_model\train_maskrcnn_4gb.yaml `
-  --checkpoint artifacts\checkpoints\maskrcnn_4gb\best.pt `
-  --input path\to\input.jpg `
-  --output outputs\redacted\result.jpg
-```
-
-Inference unions accepted masks, dilates boundaries, applies solid replacement,
-encodes a fresh JPEG/PNG/WebP without copying source metadata, reopens the
-result, and writes a sidecar audit report containing hashes and geometry only.
-
-## Main files
-
-- `configs/train_maskrcnn_verified_visual.yaml` - corrected local profile.
-- `configs/train_maskrcnn_verified_overfit.yaml` - mandatory learning gate.
-- `scripts/preprocess_visual_redactions_verified.py` - geometry-safe visual records.
-- `docs/V3_PREPROCESSING_FIX_AND_TRAINING_REPORT.md` - root cause and fix evidence.
-
-- `configs/train_maskrcnn_4gb.yaml` — runnable local profile.
-- `configs/train_maskrcnn_baseline.yaml` — scientific baseline.
-- `configs/train_smoke.yaml` — one-step end-to-end verification.
-- `src/consentguard/perception/dataset.py` — polygon-aware data pipeline.
-- `src/consentguard/perception/trainer.py` — AMP/checkpoint/resume loop.
-- `docs/TRAINING_ARCHITECTURE.md` — architecture rationale and constraints.
-- `TRAINING_SETUP_REPORT.md` — measured readiness evidence and final commands.
-- `ConsentGuard_Final_Research_Design.md` — complete research and safety plan.
-
-For an automatic local research preview, install `.[app]` and run
-`main_project/scripts/stage_05_review_export/run_demo_app.py`. The UI accepts an
-uploaded/webcam image, lets the user select model branches and privacy groups,
-and shows fused detection and redaction previews. It is not a production-safe
-export path; the manual review and assurance gate remains authoritative.
-
-The React reviewer combines analysis, native-resolution mask correction,
-explicit consent, assurance results, and capability-gated export in one local
-workspace. Build it once, then launch the FastAPI host:
-
-```powershell
-npm --prefix main_project/frontend install
-npm --prefix main_project/frontend run build
-.\.venv\Scripts\python.exe main_project\scripts\stage_05_review_export\run_web_app.py
-```
-
-Open `http://127.0.0.1:7860`. The server stays localhost-only unless an explicit
-`--host` is supplied. Current research profiles and missing independent attack
-checks remain fail-closed, so a reviewed preview can exist while download is
-blocked.
-
-Dataset media, model checkpoints, and generated outputs are intentionally
-ignored by version control and must not be redistributed without their original
-licenses and research-use terms.
-
-The current all-model repository audit, dataset counts, limitations, and next
-training decision are recorded in
-[`reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md`](reports/PROJECT_AUDIT_AND_EXECUTION_PLAN_2026-08-30.md).
+The research background, including why the project is scoped this way, is in
+[`ConsentGuard_Final_Research_Design.md`](ConsentGuard_Final_Research_Design.md).

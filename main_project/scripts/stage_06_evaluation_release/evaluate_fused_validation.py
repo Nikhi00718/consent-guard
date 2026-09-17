@@ -196,9 +196,17 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     provider_errors: Counter[str] = Counter()
     processed = 0
 
+    skipped: list[dict[str, str]] = []
+
     for record in records:
         image_path = project_path(record["image_path"])
-        image = normalize_image(image_path)
+        try:
+            image = normalize_image(image_path)
+        except ValueError as error:
+            # One unreadable file must not discard a multi-hour measurement run;
+            # the skip is reported so the count is never silently short.
+            skipped.append({"image_id": str(record.get("image_id", image_path.name)), "reason": str(error)})
+            continue
         analysis = orchestrator.analyze(image)
         snapshot_evidence = list(analysis.evidence)
         fused = fusion.combine(
@@ -267,6 +275,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "records_path": str(records_path),
         "records_sha256": _sha256(records_path),
         "evaluated_images": processed,
+        "skipped_images": skipped,
         "sampling": sampling,
         "device": str(device),
         "threshold_profile": {

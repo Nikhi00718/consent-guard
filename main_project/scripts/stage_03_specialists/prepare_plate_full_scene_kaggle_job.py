@@ -220,7 +220,7 @@ def stage_code_and_kernel(username: str, code: dict[str, Any]) -> None:
         description="Deterministic code/config bundle for the private full-scene plate adaptation run.",
     )
     KERNEL_STAGE.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(ROOT / "notebooks/kaggle/consentguard_plate_full_scene_train.py", KERNEL_STAGE / "train.py")
+    shutil.copy2(ROOT / "research/notebooks/kaggle/consentguard_plate_full_scene_train.py", KERNEL_STAGE / "train.py")
     metadata = {
         "id": f"{username}/{KERNEL_SLUG}",
         "title": "ConsentGuard plate full-scene training",

@@ -47,7 +47,7 @@ def _write_metadata(path: Path, *, dataset_id: str, title: str, description: str
 
 def stage_assets(username: str) -> tuple[Path, Path]:
     code_archive = ROOT / "artifacts/kaggle/consentguard-training-code-ccpd2020.zip"
-    kernel_source = ROOT / "notebooks/kaggle"
+    kernel_source = ROOT / "research/notebooks/kaggle"
     if not code_archive.is_file():
         raise FileNotFoundError(
             "Build consentguard-training-code-ccpd2020.zip with prepare_kaggle_bundle.py first"
