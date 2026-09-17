@@ -30,10 +30,12 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ provider_keys: providerKeys, privacy_groups: privacyGroups }),
     }),
+  autoRedact: (sessionId: string) =>
+    request<RenderResult>(`/v1/sessions/${sessionId}/auto-redact`, { method: "POST" }),
   render: (
     sessionId: string,
     mask: Blob,
-    review: {
+    review?: {
       consentState: ConsentState;
       subjectRef: string;
       operation: string;
@@ -44,13 +46,24 @@ export const api = {
   ) => {
     const form = new FormData();
     form.append("mask", mask, "approved-mask.png");
-    form.append("consent_state", review.consentState);
-    form.append("subject_ref", review.subjectRef);
-    form.append("operation", review.operation);
-    form.append("audience", review.audience);
-    form.append("purpose", review.purpose);
-    form.append("review_completed", String(review.reviewCompleted));
+    if (review) {
+      form.append("consent_state", review.consentState);
+      form.append("subject_ref", review.subjectRef);
+      form.append("operation", review.operation);
+      form.append("audience", review.audience);
+      form.append("purpose", review.purpose);
+      form.append("review_completed", String(review.reviewCompleted));
+    }
     return request<RenderResult>(`/v1/sessions/${sessionId}/render`, { method: "POST", body: form });
   },
   deleteSession: (sessionId: string) => request<void>(`/v1/sessions/${sessionId}`, { method: "DELETE" }),
+  // Fire-and-forget delete for page unload: the working copy of a private photo
+  // must not outlive the tab that opened it.
+  abandonSession: (sessionId: string) => {
+    try {
+      void fetch(`/v1/sessions/${sessionId}`, { method: "DELETE", keepalive: true });
+    } catch {
+      // The TTL cleanup in the session store is the backstop.
+    }
+  },
 };

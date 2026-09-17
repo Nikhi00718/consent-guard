@@ -4,12 +4,17 @@ export type ProviderOption = {
   available: boolean;
 };
 
+export type PolicyMode = "personal" | "research";
+
 export type AppConfig = {
   providers: ProviderOption[];
   privacy_groups: string[];
   upload_max_bytes: number;
   upload_max_pixels: number;
   session_ttl_seconds: number;
+  policy_mode?: PolicyMode;
+  default_privacy_groups?: string[];
+  group_reliability?: Record<string, string>;
 };
 
 export type Session = {
@@ -53,6 +58,8 @@ export type Analysis = {
   initial_mask_url: string;
   mask_overlay_url: string;
   overlay_url: string;
+  auto_mask_pixels?: number;
+  unreliable_groups?: string[];
 };
 
 export type AssuranceCheck = {
@@ -78,6 +85,8 @@ export type RenderResult = {
   export_report: Record<string, unknown>;
   rendered_url: string;
   export_available: boolean;
+  export_filename?: string;
+  warnings?: string[];
 };
 
 export type ConsentState = "UNKNOWN" | "PENDING" | "GRANTED" | "DENIED" | "REVOKED" | "EXPIRED";

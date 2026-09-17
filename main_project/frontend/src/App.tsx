@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Check, CheckCircle, CircleNotch, DownloadSimple, FileImage, Fingerprint, Info, LockKey, Pulse, SlidersHorizontal, Trash, UploadSimple, Warning, XCircle } from "@phosphor-icons/react";
+import { ArrowRight, Check, CheckCircle, CircleNotch, DownloadSimple, FileImage, Fingerprint, Info, LockKey, PencilSimple, Pulse, SlidersHorizontal, Trash, UploadSimple, Warning, XCircle } from "@phosphor-icons/react";
 import { api } from "./api";
 import type { MaskEditorHandle } from "./MaskEditor";
-import type { Analysis, AppConfig, Asset, ConsentState, RenderResult, Session } from "./types";
+import type { Analysis, AppConfig, Asset, ConsentState, PolicyMode, RenderResult, Session } from "./types";
 
 type Phase = "upload" | "ready" | "analyzing" | "review" | "verifying" | "result";
 
@@ -43,6 +43,16 @@ export function reviewValidationMessage(fields: ReviewFields): string {
   return "";
 }
 
+/** Plain-language summary of a reason code, so the result screen never shows bare enums. */
+export function warningMessage(code: string): string {
+  if (code === "WARNING_EXPERIMENTAL_DETECTION_PROFILE") return "Detection settings are experimental, not calibrated for guarantees.";
+  if (code === "WARNING_DETECTED_REGIONS_LEFT_VISIBLE") return "You left detected regions visible in this export.";
+  if (code.startsWith("WARNING_RESIDUAL_")) return `Something was still detectable in the saved file: ${readable(code.replace("WARNING_RESIDUAL_", "").replace("_DETECTED", ""))}.`;
+  if (code.startsWith("WARNING_PROVIDER_UNAVAILABLE_")) return `A detector did not run: ${readable(code.replace("WARNING_PROVIDER_UNAVAILABLE_", ""))}.`;
+  if (code.endsWith("_NOT_VERIFIED")) return `Could not re-check the saved file for ${readable(code.replace("WARNING_", "").replace("_NOT_VERIFIED", ""))}.`;
+  return readable(code.replace("WARNING_", ""));
+}
+
 export default function App() {
   const editorRef = useRef<MaskEditorHandle>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -72,12 +82,15 @@ export default function App() {
   const [reviewCompleted, setReviewCompleted] = useState(false);
   const [reviewError, setReviewError] = useState("");
 
+  const mode: PolicyMode = config?.policy_mode ?? "research";
+  const personal = mode === "personal";
+
   useEffect(() => {
     api.config()
       .then((next) => {
         setConfig(next);
         setProviderKeys(next.providers.filter((provider) => provider.available).map((provider) => provider.key));
-        setPrivacyGroups(next.privacy_groups);
+        setPrivacyGroups(next.default_privacy_groups?.length ? next.default_privacy_groups : next.privacy_groups);
       })
       .catch((reason: Error) => setError(`Could not connect to the local reviewer API. ${reason.message}`));
   }, []);
@@ -86,8 +99,22 @@ export default function App() {
     if (phase === "result") resultHeading.current?.focus();
   }, [phase]);
 
+  // The staged copy of a private photo should not survive the tab.
+  useEffect(() => {
+    if (!session) return undefined;
+    const sessionId = session.session_id;
+    const abandon = () => api.abandonSession(sessionId);
+    window.addEventListener("pagehide", abandon);
+    return () => window.removeEventListener("pagehide", abandon);
+  }, [session]);
+
   const progress = activeStep(phase);
   const selectedProviders = useMemo(() => config?.providers.filter((provider) => providerKeys.includes(provider.key)) ?? [], [config, providerKeys]);
+  const reliability = config?.group_reliability ?? {};
+  const unreliableSelected = useMemo(
+    () => privacyGroups.filter((group) => (reliability[group] ?? "reliable") !== "reliable"),
+    [privacyGroups, reliability],
+  );
 
   const reset = async () => {
     if (session) await api.deleteSession(session.session_id).catch(() => undefined);
@@ -126,17 +153,37 @@ export default function App() {
     }
   };
 
-  const analyze = async () => {
-    if (!session || !providerKeys.length) return;
+  const runAnalysis = async (): Promise<Analysis | null> => {
+    if (!session || !providerKeys.length) return null;
     setPhase("analyzing");
     setError("");
     try {
       const next = await api.analyze(session.session_id, providerKeys, privacyGroups);
       setAnalysis(next);
-      setPhase("review");
+      return next;
     } catch (reason) {
       setPhase("ready");
       setError(reason instanceof Error ? reason.message : "Analysis failed.");
+      return null;
+    }
+  };
+
+  const analyze = async () => {
+    const next = await runAnalysis();
+    if (next) setPhase("review");
+  };
+
+  /** One click: detect everything, erase it, verify the file, offer the download. */
+  const eraseAndSave = async () => {
+    const next = await runAnalysis();
+    if (!next || !session) return;
+    setPhase("verifying");
+    try {
+      setResult(await api.autoRedact(session.session_id));
+      setPhase("result");
+    } catch (reason) {
+      setPhase("review");
+      setError(reason instanceof Error ? reason.message : "Redaction failed.");
     }
   };
 
@@ -146,29 +193,26 @@ export default function App() {
       setReviewError("Review tools are still loading. Try again in a moment.");
       return;
     }
-    const validationMessage = reviewValidationMessage({ consentState, subjectRef, audience, purpose, reviewCompleted });
-    if (validationMessage) {
-      setReviewError(validationMessage);
-      if (consentState !== "GRANTED") consentInput.current?.focus();
-      else if (!subjectRef.trim()) subjectInput.current?.focus();
-      else if (!audience.trim()) audienceInput.current?.focus();
-      else if (!purpose.trim()) purposeInput.current?.focus();
-      else reviewInput.current?.focus();
-      return;
+    if (!personal) {
+      const validationMessage = reviewValidationMessage({ consentState, subjectRef, audience, purpose, reviewCompleted });
+      if (validationMessage) {
+        setReviewError(validationMessage);
+        if (consentState !== "GRANTED") consentInput.current?.focus();
+        else if (!subjectRef.trim()) subjectInput.current?.focus();
+        else if (!audience.trim()) audienceInput.current?.focus();
+        else if (!purpose.trim()) purposeInput.current?.focus();
+        else reviewInput.current?.focus();
+        return;
+      }
     }
     setReviewError("");
     setPhase("verifying");
     setError("");
     try {
       const mask = await editorRef.current.exportMask();
-      const next = await api.render(session.session_id, mask, {
-        consentState,
-        subjectRef,
-        operation,
-        audience,
-        purpose,
-        reviewCompleted,
-      });
+      const next = personal
+        ? await api.render(session.session_id, mask)
+        : await api.render(session.session_id, mask, { consentState, subjectRef, operation, audience, purpose, reviewCompleted });
       setResult(next);
       setPhase("result");
     } catch (reason) {
@@ -186,7 +230,7 @@ export default function App() {
       <header className="topbar">
         <div className="brand-lockup">
           <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
-          <div><strong>ConsentGuard</strong><small>review workspace</small></div>
+          <div><strong>ConsentGuard</strong><small>{personal ? "erase what you don't want to share" : "review workspace"}</small></div>
         </div>
         <div className="runtime-badge"><Pulse weight="fill" /> local runtime <span>127.0.0.1</span></div>
         <button className="icon-text-button" onClick={reset} disabled={!session}><Trash /> Clear session</button>
@@ -202,15 +246,29 @@ export default function App() {
       </nav>
 
       <main id="main-content" className="workspace">
-        <div className="research-notice"><Info weight="fill" /><p><strong>Research configuration.</strong> Every result requires human review. Download stays blocked unless consent, release profile, and independent assurance checks all pass.</p></div>
+        {personal ? (
+          <div className="research-notice"><Info weight="fill" /><p><strong>It will miss things.</strong> Detection is automatic but never complete, so look at the result before you share it. Nothing leaves this machine, and the saved file is written fresh with GPS and camera data removed.</p></div>
+        ) : (
+          <div className="research-notice"><Info weight="fill" /><p><strong>Research configuration.</strong> Every result requires human review. Download stays blocked unless consent, release profile, and independent assurance checks all pass.</p></div>
+        )}
         {error && <div className="error-banner" role="alert"><XCircle weight="fill" /><span>{error}</span><button onClick={() => setError("")} aria-label="Dismiss error">×</button></div>}
+        {analysis && analysis.unavailable_providers.length > 0 && (
+          <div className="error-banner" role="alert">
+            <Warning weight="fill" />
+            <span>
+              {analysis.unavailable_providers.length} detector{analysis.unavailable_providers.length === 1 ? "" : "s"} did not run: {analysis.unavailable_providers.map(readable).join(", ")}. Those kinds of content were not checked at all.
+            </span>
+          </div>
+        )}
 
         {(phase === "upload" || phase === "ready") && (
           <section className="ingest-layout">
             <div className="ingest-copy">
-              <span className="eyebrow">human-controlled release</span>
-              <h1>Inspect the pixels.<br /><em>Decide the boundary.</em></h1>
-              <p>ConsentGuard combines local privacy detectors with a reviewer-approved mask. Originals never become public web assets.</p>
+              <span className="eyebrow">{personal ? "local privacy eraser" : "human-controlled release"}</span>
+              <h1>{personal ? <>Erase the private parts.<br /><em>Keep the photo.</em></> : <>Inspect the pixels.<br /><em>Decide the boundary.</em></>}</h1>
+              <p>{personal
+                ? "Faces, number plates, text, handwriting, QR codes and hidden file data are found automatically and covered with solid black. You can fix anything it missed."
+                : "ConsentGuard combines local privacy detectors with a reviewer-approved mask. Originals never become public web assets."}</p>
               <div className="constraint-row"><span><LockKey /> Local processing</span><span><Fingerprint /> Metadata removed</span></div>
             </div>
             <div className="ingest-panel">
@@ -238,15 +296,25 @@ export default function App() {
                 )}
               </div>
 
-              <button className="advanced-toggle" onClick={() => setAdvanced((value) => !value)} aria-expanded={advanced}><SlidersHorizontal /> Analysis controls <span>{advanced ? "−" : "+"}</span></button>
+              <button className="advanced-toggle" onClick={() => setAdvanced((value) => !value)} aria-expanded={advanced}><SlidersHorizontal /> {personal ? "What to erase" : "Analysis controls"} <span>{advanced ? "−" : "+"}</span></button>
               {advanced && config && (
                 <div className="advanced-panel">
                   <fieldset><legend>Model providers</legend>{config.providers.map((provider) => <label key={provider.key} className={!provider.available ? "disabled" : ""}><input type="checkbox" checked={providerKeys.includes(provider.key)} disabled={!provider.available} onChange={() => toggle(provider.key, providerKeys, setProviderKeys)} /><span>{provider.label}</span><small>{provider.available ? "ready" : "unavailable"}</small></label>)}</fieldset>
-                  <fieldset><legend>Privacy regions</legend><div className="chip-grid">{config.privacy_groups.map((group) => <label key={group} className="filter-chip"><input type="checkbox" checked={privacyGroups.includes(group)} onChange={() => toggle(group, privacyGroups, setPrivacyGroups)} /><span>{group}</span></label>)}</div></fieldset>
+                  <fieldset><legend>Privacy regions</legend><div className="chip-grid">{config.privacy_groups.map((group) => <label key={group} className="filter-chip"><input type="checkbox" checked={privacyGroups.includes(group)} onChange={() => toggle(group, privacyGroups, setPrivacyGroups)} /><span>{group}</span>{(reliability[group] ?? "reliable") !== "reliable" && <small className="warning-text"> check manually</small>}</label>)}</div></fieldset>
                 </div>
               )}
-              <button className="primary-button analyze-button" onClick={analyze} disabled={!asset || !providerKeys.length}>Run local analysis <ArrowRight /></button>
+              {personal ? (
+                <>
+                  <button className="primary-button analyze-button" onClick={eraseAndSave} disabled={!asset || !providerKeys.length}>Erase and save <ArrowRight /></button>
+                  <button className="secondary-button full-width" onClick={analyze} disabled={!asset || !providerKeys.length}>Check it myself first</button>
+                </>
+              ) : (
+                <button className="primary-button analyze-button" onClick={analyze} disabled={!asset || !providerKeys.length}>Run local analysis <ArrowRight /></button>
+              )}
               {asset && <p className="asset-note">SHA-256 <code>{asset.pixel_sha256.slice(0, 18)}…</code>{asset.metadata_categories.length ? ` · ${asset.metadata_categories.length} metadata categor${asset.metadata_categories.length === 1 ? "y" : "ies"} detected` : " · no listed metadata"}</p>}
+              {personal && unreliableSelected.length > 0 && (
+                <p className="asset-note warning-text">Weak on: {unreliableSelected.join(", ")} — check these yourself.</p>
+              )}
             </div>
           </section>
         )}
@@ -256,7 +324,7 @@ export default function App() {
             <div className="radar"><span /><span /><span /><Fingerprint weight="duotone" /></div>
             <span className="eyebrow">sequential provider run</span>
             <h1>Mapping privacy evidence</h1>
-            <p>GPU providers run one at a time. The source remains inside this session.</p>
+            <p>Detectors run one at a time, including a second pass over image tiles for small regions. The photo stays inside this session.</p>
             <div className="provider-queue">{selectedProviders.map((provider, index) => <div key={provider.key} style={{ animationDelay: `${index * 90}ms` }}><CircleNotch className="spin" /><span>{provider.label}</span><small>queued</small></div>)}</div>
           </section>
         )}
@@ -264,7 +332,7 @@ export default function App() {
         {(phase === "review" || phase === "verifying" || phase === "result") && analysis && session && (
           <section className="review-layout">
             <div className="review-main">
-              <div className="section-heading"><div><span className="eyebrow">native-resolution review</span><h1 ref={resultHeading} tabIndex={phase === "result" ? -1 : undefined}>{phase === "result" ? "Verification result" : "Correct the redaction boundary"}</h1></div><div className={`profile-status ${analysis.threshold_profile_release_ready ? "pass" : "warning"}`}><span />{analysis.threshold_profile_release_ready ? "Release profile" : "Research profile"}</div></div>
+              <div className="section-heading"><div><span className="eyebrow">native-resolution review</span><h1 ref={resultHeading} tabIndex={phase === "result" ? -1 : undefined}>{phase === "result" ? (personal ? "Your redacted image" : "Verification result") : "Correct the redaction boundary"}</h1></div><div className={`profile-status ${analysis.threshold_profile_release_ready ? "pass" : "warning"}`}><span />{analysis.threshold_profile_release_ready ? "Release profile" : "Research profile"}</div></div>
               {phase === "result" && result ? (
                 <div className="rendered-frame"><img src={`${result.rendered_url}?v=${result.decision.decision_digest}`} alt="Newly encoded image with the approved redaction mask applied" /><div className="rendered-label"><span>newly encoded output</span><code>{String(result.export_report.output_sha256 || "").slice(0, 18)}…</code></div></div>
               ) : (
@@ -282,20 +350,30 @@ export default function App() {
                     <div className="metric-row"><span>Raw evidence</span><code>{analysis.raw_evidence_count}</code></div>
                     <div className="metric-row"><span>Providers run</span><code>{analysis.selected_provider_keys.length}</code></div>
                     <div className="metric-row"><span>Unavailable</span><code className={analysis.unavailable_providers.length ? "warning-text" : ""}>{analysis.unavailable_providers.length}</code></div>
-                    <div className="candidate-list">{analysis.candidates.slice(0, 6).map((candidate) => <article key={candidate.candidate_id}><span className="candidate-mark" /><div><strong>{candidate.privacy_classes.map(readable).join(", ")}</strong><small>{candidate.providers.join(" + ")}</small></div><code>{candidate.mask_pixels.toLocaleString()}</code></article>)}{!analysis.candidates.length && <p className="empty-evidence">No regions met the selected thresholds. The reviewer must still inspect the full image.</p>}</div>
+                    <div className="candidate-list">{analysis.candidates.slice(0, 6).map((candidate) => <article key={candidate.candidate_id}><span className="candidate-mark" /><div><strong>{candidate.privacy_classes.map(readable).join(", ")}</strong><small>{candidate.providers.join(" + ")}</small></div><code>{candidate.mask_pixels.toLocaleString()}</code></article>)}{!analysis.candidates.length && <p className="empty-evidence">No regions met the selected thresholds. Look over the whole image yourself before sharing it.</p>}</div>
                   </section>
 
-                  <section className="inspector-section consent-section">
-                    <div className="inspector-title"><span>Consent assertion</span><LockKey /></div>
-                    <label>Consent state<select ref={consentInput} value={consentState} onChange={(event) => { setConsentState(event.target.value as ConsentState); setReviewError(""); }}><option value="UNKNOWN">Unknown</option><option value="PENDING">Pending</option><option value="GRANTED">Granted</option><option value="DENIED">Denied</option><option value="REVOKED">Revoked</option><option value="EXPIRED">Expired</option></select></label>
-                    {consentState !== "GRANTED" && <p className="inline-warning"><Warning weight="fill" /> Only an explicit, current grant can proceed to verification.</p>}
-                    <label>Subject reference<input ref={subjectInput} value={subjectRef} onChange={(event) => { setSubjectRef(event.target.value); setReviewError(""); }} placeholder="Non-PII alias, e.g. subject-01" /></label>
-                    <div className="field-pair"><label>Operation<select value={operation} onChange={(event) => setOperation(event.target.value)}><option value="share">Share</option><option value="publish">Publish</option><option value="archive">Archive</option></select></label><label>Audience<input ref={audienceInput} value={audience} onChange={(event) => { setAudience(event.target.value); setReviewError(""); }} placeholder="Project team" /></label></div>
-                    <label><span className="field-label">Purpose <small>Required</small></span><textarea ref={purposeInput} value={purpose} onChange={(event) => { setPurpose(event.target.value); setReviewError(""); }} rows={2} placeholder="Why this image needs to be released" aria-invalid={Boolean(reviewError && !purpose.trim())} aria-describedby={reviewError ? "review-error" : undefined} /></label>
-                    <label className="review-check"><input ref={reviewInput} type="checkbox" checked={reviewCompleted} onChange={(event) => { setReviewCompleted(event.target.checked); setReviewError(""); }} /><span><strong>I inspected the full image</strong><small>I approve the visible redaction boundary for this share context.</small></span></label>
-                    {reviewError && <p className="review-error" id="review-error" role="alert"><Warning weight="fill" /> {reviewError}</p>}
-                  </section>
-                  <button className="primary-button verify-button" onClick={render} disabled={phase === "verifying"}>{phase === "verifying" ? <><CircleNotch className="spin" /> Running assurance checks</> : <>Render and verify <ArrowRight /></>}</button>
+                  {personal ? (
+                    <section className="inspector-section consent-section">
+                      <div className="inspector-title"><span>Before you save</span><PencilSimple /></div>
+                      <p className="asset-note">Paint over anything it missed, or erase the mask where it covered too much. Then save.</p>
+                      {(analysis.unreliable_groups?.length ?? 0) > 0 && (
+                        <p className="inline-warning"><Warning weight="fill" /> Known weak here: {analysis.unreliable_groups?.join(", ")}. Check those areas yourself.</p>
+                      )}
+                    </section>
+                  ) : (
+                    <section className="inspector-section consent-section">
+                      <div className="inspector-title"><span>Consent assertion</span><LockKey /></div>
+                      <label>Consent state<select ref={consentInput} value={consentState} onChange={(event) => { setConsentState(event.target.value as ConsentState); setReviewError(""); }}><option value="UNKNOWN">Unknown</option><option value="PENDING">Pending</option><option value="GRANTED">Granted</option><option value="DENIED">Denied</option><option value="REVOKED">Revoked</option><option value="EXPIRED">Expired</option></select></label>
+                      {consentState !== "GRANTED" && <p className="inline-warning"><Warning weight="fill" /> Only an explicit, current grant can proceed to verification.</p>}
+                      <label>Subject reference<input ref={subjectInput} value={subjectRef} onChange={(event) => { setSubjectRef(event.target.value); setReviewError(""); }} placeholder="Non-PII alias, e.g. subject-01" /></label>
+                      <div className="field-pair"><label>Operation<select value={operation} onChange={(event) => setOperation(event.target.value)}><option value="share">Share</option><option value="publish">Publish</option><option value="archive">Archive</option></select></label><label>Audience<input ref={audienceInput} value={audience} onChange={(event) => { setAudience(event.target.value); setReviewError(""); }} placeholder="Project team" /></label></div>
+                      <label><span className="field-label">Purpose <small>Required</small></span><textarea ref={purposeInput} value={purpose} onChange={(event) => { setPurpose(event.target.value); setReviewError(""); }} rows={2} placeholder="Why this image needs to be released" aria-invalid={Boolean(reviewError && !purpose.trim())} aria-describedby={reviewError ? "review-error" : undefined} /></label>
+                      <label className="review-check"><input ref={reviewInput} type="checkbox" checked={reviewCompleted} onChange={(event) => { setReviewCompleted(event.target.checked); setReviewError(""); }} /><span><strong>I inspected the full image</strong><small>I approve the visible redaction boundary for this share context.</small></span></label>
+                      {reviewError && <p className="review-error" id="review-error" role="alert"><Warning weight="fill" /> {reviewError}</p>}
+                    </section>
+                  )}
+                  <button className="primary-button verify-button" onClick={render} disabled={phase === "verifying"}>{phase === "verifying" ? <><CircleNotch className="spin" /> {personal ? "Saving and checking the file" : "Running assurance checks"}</> : <>{personal ? "Save my version" : "Render and verify"} <ArrowRight /></>}</button>
                 </>
               ) : result && (
                 <>
@@ -303,22 +381,33 @@ export default function App() {
                     <span className="decision-icon">{result.export_available ? <CheckCircle weight="fill" /> : <LockKey weight="fill" />}</span>
                     <span className="eyebrow">release decision</span>
                     <h2>{readable(result.decision.action)}</h2>
-                    <p>{result.export_available ? "Required checks passed for this prototype configuration. Residual limitations remain." : "The reviewed preview exists, but no export capability was issued."}</p>
+                    <p>{result.export_available
+                      ? (personal ? "The file was written fresh, re-opened, and checked. Look at it before you share it." : "Required checks passed for this prototype configuration. Residual limitations remain.")
+                      : "The reviewed preview exists, but no export capability was issued."}</p>
                   </section>
+                  {personal && (result.warnings?.length ?? 0) > 0 && (
+                    <section className="inspector-section">
+                      <div className="inspector-title"><span>Worth knowing</span><Warning /></div>
+                      {result.warnings?.map((code) => <p key={code} className="inline-warning"><Warning weight="fill" /> {warningMessage(code)}</p>)}
+                    </section>
+                  )}
                   <section className="inspector-section assurance-list">
                     <div className="inspector-title"><span>Assurance checks</span><code>{result.assurance_status}</code></div>
                     {result.assurance_checks.map((check) => <article key={check.name} className={check.status.toLowerCase()}>{statusIcon(check.status)}<div><strong>{readable(check.name)}</strong><small>{readable(check.reason_code)}</small></div><code>{check.status}</code></article>)}
                   </section>
-                  {result.decision.reason_codes.length > 0 && <section className="reason-box"><strong>Decision reasons</strong>{result.decision.reason_codes.map((reason) => <code key={reason}>{reason}</code>)}</section>}
-                  {result.export_available ? <a className="primary-button download-button" href={`/v1/sessions/${session.session_id}/export`} download><DownloadSimple /> Download sanitized export</a> : <button className="primary-button download-button" disabled><LockKey /> Download blocked</button>}
-                  <button className="secondary-button full-width" onClick={() => setPhase("review")}>Return to mask review</button>
+                  {!personal && result.decision.reason_codes.length > 0 && <section className="reason-box"><strong>Decision reasons</strong>{result.decision.reason_codes.map((reason) => <code key={reason}>{reason}</code>)}</section>}
+                  {result.export_available
+                    ? <a className="primary-button download-button" href={`/v1/sessions/${session.session_id}/export`} download={result.export_filename ?? "consentguard-redacted.png"}><DownloadSimple /> {personal ? "Download the clean image" : "Download sanitized export"}</a>
+                    : <button className="primary-button download-button" disabled><LockKey /> Download blocked</button>}
+                  <button className="secondary-button full-width" onClick={() => setPhase("review")}>{personal ? "Fix the mask myself" : "Return to mask review"}</button>
+                  {personal && <button className="icon-text-button full-width" onClick={reset}><Trash /> Delete this photo from the app</button>}
                 </>
               )}
             </aside>
           </section>
         )}
       </main>
-      <footer><span>ConsentGuard research prototype</span><span>Images stay session-local · no telemetry · automatic expiry</span></footer>
+      <footer><span>ConsentGuard{personal ? "" : " research prototype"}</span><span>Images stay session-local · no telemetry · deleted when you close the page</span></footer>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import uvicorn
 from consentguard.stage_04_fusion_calibration.domain import Evidence, EvidenceGeometry
 from consentguard.stage_04_fusion_calibration.evidence import ThresholdRegistry
 from consentguard.stage_05_review_export.api import create_app
+from consentguard.stage_05_review_export.policy import PERSONAL_MODE, RESEARCH_MODE
 
 
 class _DetectionProvider:
@@ -63,6 +64,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=7861)
+    parser.add_argument(
+        "--policy-mode",
+        choices=(PERSONAL_MODE, RESEARCH_MODE),
+        default=PERSONAL_MODE,
+        help="Match the shipped app by default so browser tests exercise the real flow.",
+    )
     return parser
 
 
@@ -81,8 +88,11 @@ def main() -> None:
             providers,
             _thresholds(root),
             provider_labels={key: key.replace("-", " ").title() for key in providers},
-            privacy_groups={"Faces": {"face"}},
+            privacy_groups={"Faces": {"face"}, "Text / handwriting": {"printed_text"}},
             session_root=root / "sessions",
+            policy_mode=args.policy_mode,
+            default_privacy_groups=("Faces", "Text / handwriting"),
+            group_reliability={"Faces": "reliable", "Text / handwriting": "check_manually"},
         )
         uvicorn.run(app, host=args.host, port=args.port, access_log=False)
 
