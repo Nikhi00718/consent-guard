@@ -11,6 +11,7 @@ import torch
 
 from consentguard.stage_03_specialists.common import stable_evidence_id
 from consentguard.stage_04_fusion_calibration.domain import Evidence, EvidenceGeometry
+from consentguard.stage_04_fusion_calibration.evidence.geometry import encode_binary_mask
 from consentguard.stage_05_review_export.ingest import NormalizedImage
 from consentguard.stage_05_review_export.redaction.prediction_renderer import resize_for_inference
 
@@ -20,24 +21,12 @@ def _binary_mask_rle(mask: np.ndarray) -> tuple[int, ...]:
 
     if mask.ndim != 2 or mask.dtype != np.bool_:
         raise ValueError("mask must be a two-dimensional boolean array")
-    flat = mask.reshape(-1, order="C").astype(np.uint8, copy=False)
-    if flat.size == 0:
+    if mask.size == 0:
         raise ValueError("mask must not be empty")
-    runs: list[int] = []
-    current = 0
-    count = 0
-    for value in flat.tolist():
-        value = int(value)
-        if value != current:
-            runs.append(count)
-            current = value
-            count = 1
-        else:
-            count += 1
-    runs.append(count)
-    if sum(runs) != int(flat.size):
+    runs = encode_binary_mask(mask)
+    if sum(runs) != int(mask.size):
         raise RuntimeError("mask RLE does not cover the complete mask")
-    return tuple(runs)
+    return runs
 
 
 class MaskRCNNEvidenceProvider:

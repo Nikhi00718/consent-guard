@@ -19,7 +19,13 @@ from consentguard.stage_04_fusion_calibration.domain import ConsentState
 from consentguard.stage_04_fusion_calibration.evidence.geometry import decode_binary_mask
 from consentguard.stage_05_review_export.ingest import IngestLimits, NormalizedImage, SessionHandle, SessionStore, normalize_image
 from consentguard.stage_05_review_export.pipeline import AnalysisSnapshot, ReviewExportService
-from consentguard.stage_05_review_export.policy import ConsentRecord, ConsentRequest
+from consentguard.stage_05_review_export.policy import (
+    PERSONAL_MODE,
+    RESEARCH_MODE,
+    ConsentRecord,
+    ConsentRequest,
+    ReleasePolicy,
+)
 
 from consentguard.stage_05_review_export.api.models import (
     AnalysisResponse,
@@ -43,6 +49,11 @@ _COLORS = (
 )
 
 
+#: Suffix used for the newly encoded output, keyed by decoded source format, so
+#: a JPEG photo comes back as a JPEG and a PNG screenshot stays lossless.
+_OUTPUT_SUFFIX = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
+
+
 @dataclass
 class ReviewSession:
     handle: SessionHandle
@@ -54,6 +65,8 @@ class ReviewSession:
     analysis: AnalysisSnapshot | None = None
     export_path: Path | None = None
     export_available: bool = False
+    auto_mask: np.ndarray | None = None
+    export_filename: str = "consentguard-redacted.png"
 
 
 class ReviewSessionManager:
@@ -69,6 +82,9 @@ class ReviewSessionManager:
         privacy_groups: dict[str, set[str]] | None = None,
         ttl_seconds: int = 3600,
         ingest_limits: IngestLimits = IngestLimits(),
+        policy_mode: str = RESEARCH_MODE,
+        default_privacy_groups: tuple[str, ...] | None = None,
+        group_reliability: dict[str, str] | None = None,
     ) -> None:
         self.store = SessionStore(root, ttl_seconds=ttl_seconds)
         self.providers = dict(providers)
@@ -76,6 +92,9 @@ class ReviewSessionManager:
         self.provider_labels = provider_labels or {key: key.replace("-", " ").title() for key in providers}
         self.privacy_groups = privacy_groups or {}
         self.ingest_limits = ingest_limits
+        self.policy_mode = policy_mode
+        self.default_privacy_groups = tuple(default_privacy_groups or self.privacy_groups.keys())
+        self.group_reliability = dict(group_reliability or {})
         self._sessions: dict[str, ReviewSession] = {}
         self._lock = threading.RLock()
         self._inference_lock = threading.Lock()
@@ -99,6 +118,11 @@ class ReviewSessionManager:
             upload_max_bytes=self.ingest_limits.max_bytes,
             upload_max_pixels=self.ingest_limits.max_pixels,
             session_ttl_seconds=self.store.ttl_seconds,
+            policy_mode=self.policy_mode,
+            default_privacy_groups=[
+                group for group in self.default_privacy_groups if group in self.privacy_groups
+            ],
+            group_reliability=dict(self.group_reliability),
         )
 
     def create(self) -> SessionResponse:
@@ -155,7 +179,7 @@ class ReviewSessionManager:
             raise ValueError(f"Unknown or unavailable providers: {', '.join(unknown_providers)}")
         if not resolved_provider_keys:
             raise ValueError("Select at least one available provider")
-        resolved_groups = tuple(privacy_groups if privacy_groups is not None else self.privacy_groups.keys())
+        resolved_groups = tuple(privacy_groups if privacy_groups is not None else self.default_privacy_groups)
         unknown_groups = sorted(set(resolved_groups) - set(self.privacy_groups))
         if unknown_groups:
             raise ValueError(f"Unknown privacy groups: {', '.join(unknown_groups)}")
@@ -164,6 +188,7 @@ class ReviewSessionManager:
         service = ReviewExportService(
             selected,
             self.thresholds,
+            policy=ReleasePolicy(mode=self.policy_mode),
             attack_providers=tuple(self.providers.values()),
         )
         with self._inference_lock:
@@ -219,8 +244,10 @@ class ReviewSessionManager:
             session.selected_privacy_groups = resolved_groups
             session.service = service
             session.analysis = analysis
+            session.auto_mask = union
             session.export_path = None
             session.export_available = False
+            session.export_filename = f"consentguard-redacted{self._output_suffix(session)}"
 
         return AnalysisResponse(
             width=analysis.image.width,
@@ -237,33 +264,80 @@ class ReviewSessionManager:
             initial_mask_url=f"/v1/sessions/{session_id}/masks/initial",
             mask_overlay_url=f"/v1/sessions/{session_id}/assets/mask-overlay",
             overlay_url=f"/v1/sessions/{session_id}/assets/overlay",
+            auto_mask_pixels=int(np.count_nonzero(union)),
+            unreliable_groups=[
+                group
+                for group in resolved_groups
+                if self.group_reliability.get(group, "reliable") != "reliable"
+            ],
         )
+
+    def auto_redact(self, session_id: str) -> RenderResponse:
+        """One-click path: erase every detected region without a review pass.
+
+        The automatic mask is the same union the review screen starts from, so
+        accepting it here and accepting it after editing follow one code path.
+        Only available in personal policy mode; research mode requires the
+        explicit consent and review inputs.
+        """
+
+        session = self._get(session_id)
+        if self.policy_mode != PERSONAL_MODE:
+            raise PermissionError("One-click redaction requires personal policy mode")
+        if session.analysis is None or session.auto_mask is None:
+            raise ValueError("Analyze the image before rendering")
+        return self._render_mask(session, session.auto_mask, review_completed=True)
 
     def render(
         self,
         session_id: str,
         mask_payload: bytes,
         *,
-        consent_state: ConsentState,
-        subject_ref: str,
-        operation: str,
-        audience: str,
-        purpose: str,
-        review_completed: bool,
+        consent_state: ConsentState = ConsentState.UNKNOWN,
+        subject_ref: str | None = None,
+        operation: str | None = None,
+        audience: str | None = None,
+        purpose: str | None = None,
+        review_completed: bool = True,
     ) -> RenderResponse:
         session = self._get(session_id)
         if session.analysis is None or session.service is None:
             raise ValueError("Analyze the image before rendering")
-        for name, value in {
+        context = {
             "subject_ref": subject_ref,
             "operation": operation,
             "audience": audience,
             "purpose": purpose,
-        }.items():
-            if not value.strip():
-                raise ValueError(f"{name} is required")
+        }
+        if self.policy_mode == RESEARCH_MODE:
+            for name, value in context.items():
+                if not (value or "").strip():
+                    raise ValueError(f"{name} is required")
         mask = self._decode_mask(mask_payload, session.analysis.image.width, session.analysis.image.height)
-        output = session.handle.root / "reviewed-redaction.png"
+        return self._render_mask(
+            session,
+            mask,
+            consent_state=consent_state,
+            review_completed=review_completed,
+            **{name: value for name, value in context.items()},
+        )
+
+    def _render_mask(
+        self,
+        session: ReviewSession,
+        mask: np.ndarray,
+        *,
+        consent_state: ConsentState = ConsentState.UNKNOWN,
+        subject_ref: str | None = None,
+        operation: str | None = None,
+        audience: str | None = None,
+        purpose: str | None = None,
+        review_completed: bool = True,
+    ) -> RenderResponse:
+        if session.analysis is None or session.service is None:
+            raise ValueError("Analyze the image before rendering")
+        session_id = session.handle.session_id
+        output = session.handle.root / f"reviewed-redaction{self._output_suffix(session)}"
         with self._inference_lock:
             result = session.service.render_review(
                 session.analysis,
@@ -273,30 +347,22 @@ class ReviewSessionManager:
                 approved_mask=mask,
             )
 
-        context_payload = json.dumps(
-            {"operation": operation.strip(), "audience": audience.strip(), "purpose": purpose.strip()},
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        request = ConsentRequest(
-            media_version_digest=session.analysis.image.pixel_sha256,
-            share_context_digest=hashlib.sha256(context_payload).hexdigest(),
-            operation=operation.strip(),
-            audience=audience.strip(),
-            purpose=purpose.strip(),
+        consent_record = self._consent_record(
+            session,
+            consent_state=consent_state,
+            subject_ref=subject_ref,
+            operation=operation,
+            audience=audience,
+            purpose=purpose,
         )
-        bound_refs = tuple(candidate.candidate_id for candidate in session.analysis.candidates.candidates) + ("review-mask",)
-        consent_record = ConsentRecord.create(
-            subject_ref=subject_ref.strip(),
-            bound_region_refs=bound_refs,
-            request=request,
-            state=consent_state,
-            issued_at=datetime.now(timezone.utc),
-        )
-        export_available = bool(result.decision.export_allowed and consent_state is ConsentState.GRANTED)
+        if self.policy_mode == PERSONAL_MODE:
+            export_available = bool(result.decision.export_allowed)
+        else:
+            export_available = bool(result.decision.export_allowed and consent_state is ConsentState.GRANTED)
         audit = {
             "session_id": session_id,
-            "consent": consent_record.canonical_dict(),
+            "consent": consent_record.canonical_dict() if consent_record is not None else None,
+            "policy_mode": self.policy_mode,
             "review_completed": review_completed,
             "assurance_status": result.assurance.status.value,
             "assurance_checks": [
@@ -334,6 +400,8 @@ class ReviewSessionManager:
             export_report=result.export_report or {},
             rendered_url=f"/v1/sessions/{session_id}/assets/rendered",
             export_available=export_available,
+            export_filename=session.export_filename,
+            warnings=[reason for reason in result.decision.reason_codes if reason.startswith("WARNING_")],
         )
 
     def asset_path(self, session_id: str, asset: str) -> Path:
@@ -343,7 +411,7 @@ class ReviewSessionManager:
             "initial-mask": session.handle.root / "initial-mask.png",
             "mask-overlay": session.handle.root / "mask-overlay.png",
             "overlay": session.handle.root / "overlay.png",
-            "rendered": session.handle.root / "reviewed-redaction.png",
+            "rendered": session.handle.root / f"reviewed-redaction{self._output_suffix(session)}",
         }
         if asset not in mapping or not mapping[asset].is_file():
             raise FileNotFoundError(asset)
@@ -354,6 +422,62 @@ class ReviewSessionManager:
         if not session.export_available or session.export_path is None or not session.export_path.is_file():
             raise PermissionError("No verified export capability exists for this session")
         return session.export_path
+
+    def export_filename(self, session_id: str) -> str:
+        return self._get(session_id).export_filename
+
+    @staticmethod
+    def _output_suffix(session: ReviewSession) -> str:
+        source_format = session.normalized.source_format if session.normalized is not None else "PNG"
+        return _OUTPUT_SUFFIX.get(source_format.upper(), ".png")
+
+    def _consent_record(
+        self,
+        session: ReviewSession,
+        *,
+        consent_state: ConsentState,
+        subject_ref: str | None,
+        operation: str | None,
+        audience: str | None,
+        purpose: str | None,
+    ) -> ConsentRecord | None:
+        """Record a scoped consent assertion only when the caller supplied one.
+
+        Personal mode does not collect consent fields, so there is nothing to
+        assert and the audit file stores ``null`` rather than an invented
+        record.
+        """
+
+        fields = {
+            "subject_ref": (subject_ref or "").strip(),
+            "operation": (operation or "").strip(),
+            "audience": (audience or "").strip(),
+            "purpose": (purpose or "").strip(),
+        }
+        if not all(fields.values()):
+            return None
+        context_payload = json.dumps(
+            {key: fields[key] for key in ("operation", "audience", "purpose")},
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        request = ConsentRequest(
+            media_version_digest=session.analysis.image.pixel_sha256,
+            share_context_digest=hashlib.sha256(context_payload).hexdigest(),
+            operation=fields["operation"],
+            audience=fields["audience"],
+            purpose=fields["purpose"],
+        )
+        bound_refs = tuple(
+            candidate.candidate_id for candidate in session.analysis.candidates.candidates
+        ) + ("review-mask",)
+        return ConsentRecord.create(
+            subject_ref=fields["subject_ref"],
+            bound_region_refs=bound_refs,
+            request=request,
+            state=consent_state,
+            issued_at=datetime.now(timezone.utc),
+        )
 
     def delete(self, session_id: str) -> None:
         session = self._get(session_id)

@@ -17,6 +17,9 @@ class AppConfigResponse(BaseModel):
     upload_max_bytes: int
     upload_max_pixels: int
     session_ttl_seconds: int
+    policy_mode: str = "research"
+    default_privacy_groups: list[str] = Field(default_factory=list)
+    group_reliability: dict[str, str] = Field(default_factory=dict)
 
 
 class SessionResponse(BaseModel):
@@ -65,6 +68,8 @@ class AnalysisResponse(BaseModel):
     initial_mask_url: str
     mask_overlay_url: str
     overlay_url: str
+    auto_mask_pixels: int = 0
+    unreliable_groups: list[str] = Field(default_factory=list)
 
 
 class AssuranceCheckResponse(BaseModel):
@@ -90,6 +95,8 @@ class RenderResponse(BaseModel):
     export_report: dict[str, object]
     rendered_url: str
     export_available: bool
+    export_filename: str = "consentguard-redacted.png"
+    warnings: list[str] = Field(default_factory=list)
 
 
 class HealthResponse(BaseModel):

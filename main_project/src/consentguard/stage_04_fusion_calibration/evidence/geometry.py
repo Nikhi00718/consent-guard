@@ -9,34 +9,36 @@ from consentguard.stage_04_fusion_calibration.domain import EvidenceGeometry, Th
 
 
 def encode_binary_mask(mask: np.ndarray) -> tuple[int, ...]:
+    """Encode as row-major alternating zero/one run lengths.
+
+    Vectorized on purpose: a per-pixel Python loop costs minutes on a
+    full-resolution phone photo, and the tiled analyzer encodes one mask per
+    detection per tile.
+    """
+
     if mask.ndim != 2:
         raise ValueError("mask must be two-dimensional")
     flat = np.asarray(mask > 0, dtype=np.uint8).reshape(-1)
-    runs: list[int] = []
-    current = 0
-    length = 0
-    for value in flat.tolist():
-        if value == current:
-            length += 1
-        else:
-            runs.append(length)
-            current = value
-            length = 1
-    runs.append(length)
-    return tuple(runs)
+    if flat.size == 0:
+        return (0,)
+    boundaries = np.flatnonzero(np.diff(flat)) + 1
+    edges = np.concatenate(([0], boundaries, [flat.size]))
+    runs = np.diff(edges).tolist()
+    if flat[0]:
+        runs = [0, *runs]
+    return tuple(int(run) for run in runs)
 
 
 def decode_binary_mask(runs: tuple[int, ...], height: int, width: int) -> np.ndarray:
-    if any(run < 0 for run in runs) or sum(runs) != height * width:
+    lengths = np.asarray(runs, dtype=np.int64)
+    if lengths.size and (lengths < 0).any():
         raise ValueError("Invalid row-major mask RLE")
-    values: list[np.ndarray] = []
-    bit = 0
-    for run in runs:
-        if run:
-            values.append(np.full(run, bit, dtype=np.uint8))
-        bit = 1 - bit
-    flat = np.concatenate(values) if values else np.zeros(height * width, dtype=np.uint8)
-    return flat.reshape(height, width)
+    if int(lengths.sum()) != height * width:
+        raise ValueError("Invalid row-major mask RLE")
+    if lengths.size == 0:
+        return np.zeros((height, width), dtype=np.uint8)
+    values = np.resize(np.array([0, 1], dtype=np.uint8), lengths.size)
+    return np.repeat(values, lengths).reshape(height, width)
 
 
 def geometry_to_mask(geometry: EvidenceGeometry, rule: ThresholdRule) -> np.ndarray:

@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from consentguard.stage_04_fusion_calibration.domain import ConsentState
 from consentguard.stage_05_review_export.api.models import AnalyzeRequest, HealthResponse
 from consentguard.stage_05_review_export.api.sessions import ReviewSessionManager
+from consentguard.stage_05_review_export.policy import RESEARCH_MODE
 
 
 def _http_error(error: Exception) -> HTTPException:
@@ -43,6 +44,9 @@ def create_app(
     session_root: str | Path | None = None,
     frontend_dist: str | Path | None = None,
     ttl_seconds: int = 3600,
+    policy_mode: str = RESEARCH_MODE,
+    default_privacy_groups: tuple[str, ...] | None = None,
+    group_reliability: dict[str, str] | None = None,
 ) -> FastAPI:
     root = Path(session_root) if session_root is not None else Path(tempfile.mkdtemp(prefix="consentguard-web-"))
     manager = ReviewSessionManager(
@@ -52,6 +56,9 @@ def create_app(
         provider_labels=provider_labels,
         privacy_groups=privacy_groups,
         ttl_seconds=ttl_seconds,
+        policy_mode=policy_mode,
+        default_privacy_groups=default_privacy_groups,
+        group_reliability=group_reliability,
     )
     app = FastAPI(
         title="ConsentGuard reviewer API",
@@ -117,16 +124,25 @@ def create_app(
         except Exception as error:
             raise _http_error(error) from error
 
+    @app.post("/v1/sessions/{session_id}/auto-redact")
+    def auto_redact(session_id: str):
+        """Erase every detected region and verify the output in one call."""
+
+        try:
+            return manager.auto_redact(session_id)
+        except Exception as error:
+            raise _http_error(error) from error
+
     @app.post("/v1/sessions/{session_id}/render")
     def render(
         session_id: str,
         mask: UploadFile = File(...),
-        consent_state: ConsentState = Form(...),
-        subject_ref: str = Form(...),
-        operation: str = Form(...),
-        audience: str = Form(...),
-        purpose: str = Form(...),
-        review_completed: bool = Form(...),
+        consent_state: ConsentState = Form(ConsentState.UNKNOWN),
+        subject_ref: str | None = Form(None),
+        operation: str | None = Form(None),
+        audience: str | None = Form(None),
+        purpose: str | None = Form(None),
+        review_completed: bool = Form(True),
     ):
         try:
             payload = mask.file.read(manager.ingest_limits.max_bytes + 1)
@@ -153,7 +169,10 @@ def create_app(
     @app.get("/v1/sessions/{session_id}/export")
     def download_export(session_id: str):
         try:
-            return _private_file(manager.export_path(session_id), filename="consentguard-redacted.png")
+            return _private_file(
+                manager.export_path(session_id),
+                filename=manager.export_filename(session_id),
+            )
         except Exception as error:
             raise _http_error(error) from error
 
