@@ -20,9 +20,12 @@ from consentguard.stage_05_review_export.policy import PERSONAL_MODE, RESEARCH_M
 from run_demo_app import PRIVACY_GROUPS, PROVIDER_LABELS, build_runtime
 
 
-#: Honest per-group reliability, from sensitive-pixel recall at score 0.5 on the
-#: V2 validation split (see reports/ and the handbook). Anything below the
-#: "reliable" bar is surfaced in the interface as "check this yourself".
+#: Honest per-group reliability, from the 120-image validation scorecard in
+#: reports/PERSONAL_PROFILE_SCORECARD_2026-09-18.md. "reliable" needs both a
+#: high pixel recall and a high instance recall; plates cover 95% of plate
+#: pixels but only 56% of individual plates, which is why they are not
+#: "reliable" here. Fingerprint detection never fires at all (0% instance
+#: recall). Anything not "reliable" is surfaced as "check this yourself".
 GROUP_RELIABILITY = {
     "Face": "reliable",
     "Person / body": "reliable",

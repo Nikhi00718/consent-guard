@@ -1,0 +1,178 @@
+{
+  "device": "cuda",
+  "evaluated_images": 120,
+  "notes": [
+    "This is validation evidence, not a locked-test result.",
+    "A Visual Redactions V2 record does not carry the general/India domain labels required by the release gates.",
+    "Missing providers and provider errors are reported explicitly and never treated as empty scenes."
+  ],
+  "overall": {
+    "images_with_candidates": 120,
+    "mean_candidates_per_image": 7.158333333333333,
+    "negative_fpr_bootstrap_95": {
+      "count": 120,
+      "lower_95": 0.016666666666666666,
+      "mean": 0.058333333333333334,
+      "upper_95": 0.1
+    },
+    "negative_image_false_positive_rate": 0.058333333333333334,
+    "pixel_recall": 0.8300305253563877,
+    "pixel_recall_bootstrap_95": {
+      "count": 120,
+      "lower_95": 0.7835530071852026,
+      "mean": 0.8300305253563877,
+      "upper_95": 0.8727755573321482
+    }
+  },
+  "per_class": {
+    "a105_face_all": {
+      "covered_sensitive_pixels": 4485018,
+      "found_instances": 63,
+      "instance_recall": 0.9545454545454546,
+      "instances": 66,
+      "pixel_leakage": 0.001962021302517769,
+      "pixel_recall": 0.9980379786974822,
+      "sensitive_pixels": 4493835
+    },
+    "a108_license_plate_all": {
+      "covered_sensitive_pixels": 491547,
+      "found_instances": 19,
+      "instance_recall": 0.5588235294117647,
+      "instances": 34,
+      "pixel_leakage": 0.0464304212958383,
+      "pixel_recall": 0.9535695787041617,
+      "sensitive_pixels": 515481
+    },
+    "a109_person_body": {
+      "covered_sensitive_pixels": 78227942,
+      "found_instances": 128,
+      "instance_recall": 0.8311688311688312,
+      "instances": 154,
+      "pixel_leakage": 0.052075194432089966,
+      "pixel_recall": 0.94792480556791,
+      "sensitive_pixels": 82525472
+    },
+    "a110_nudity_all": {
+      "covered_sensitive_pixels": 8161113,
+      "found_instances": 9,
+      "instance_recall": 0.3333333333333333,
+      "instances": 27,
+      "pixel_leakage": 0.06643395520638029,
+      "pixel_recall": 0.9335660447936197,
+      "sensitive_pixels": 8741870
+    },
+    "a26_handwriting": {
+      "covered_sensitive_pixels": 10252461,
+      "found_instances": 64,
+      "instance_recall": 0.49612403100775193,
+      "instances": 129,
+      "pixel_leakage": 0.5149220527280434,
+      "pixel_recall": 0.4850779472719567,
+      "sensitive_pixels": 21135698
+    },
+    "a39_disability_physical": {
+      "covered_sensitive_pixels": 5678555,
+      "found_instances": 10,
+      "instance_recall": 0.6666666666666666,
+      "instances": 15,
+      "pixel_leakage": 0.4377481827367541,
+      "pixel_recall": 0.5622518172632459,
+      "sensitive_pixels": 10099665
+    },
+    "a43_medicine": {
+      "covered_sensitive_pixels": 7214071,
+      "found_instances": 7,
+      "instance_recall": 0.07142857142857142,
+      "instances": 98,
+      "pixel_leakage": 0.479401076100725,
+      "pixel_recall": 0.520598923899275,
+      "sensitive_pixels": 13857253
+    },
+    "a7_fingerprint": {
+      "covered_sensitive_pixels": 22309012,
+      "found_instances": 0,
+      "instance_recall": 0.0,
+      "instances": 11,
+      "pixel_leakage": 0.04627135435721952,
+      "pixel_recall": 0.9537286456427805,
+      "sensitive_pixels": 23391362
+    },
+    "a8_signature": {
+      "covered_sensitive_pixels": 2020508,
+      "found_instances": 11,
+      "instance_recall": 0.23404255319148937,
+      "instances": 47,
+      "pixel_leakage": 0.341854714799953,
+      "pixel_recall": 0.658145285200047,
+      "sensitive_pixels": 3070003
+    }
+  },
+  "provider_error_counts": {},
+  "provider_evidence_counts": {
+    "face_maskrcnn": 2652,
+    "handwriting_maskrcnn": 4429,
+    "maskrcnn": 11633,
+    "paddleocr_onnx": 1752,
+    "plate_maskrcnn": 6024,
+    "plate_yunet": 161,
+    "yunet": 10468,
+    "zxingcpp": 1
+  },
+  "providers": [
+    "face_maskrcnn",
+    "handwriting_maskrcnn",
+    "maskrcnn",
+    "paddleocr_onnx",
+    "plate_maskrcnn",
+    "plate_yunet",
+    "yunet",
+    "zxingcpp"
+  ],
+  "records_path": "C:\\consentGuard\\.claude\\worktrees\\workflow-review-planning-7fbc29\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\records_val2017.jsonl",
+  "records_sha256": "08094dadabf693b0efad47faac93d76a4d1576db5733460663f4f7fef4cd3c0d",
+  "sampling": {
+    "bucket_counts": {
+      "classes:1": 1,
+      "classes:1,2,3": 7,
+      "classes:1,3": 7,
+      "classes:1,3,4": 7,
+      "classes:1,3,4,6": 1,
+      "classes:1,3,5": 3,
+      "classes:1,3,5,9": 3,
+      "classes:1,3,6": 7,
+      "classes:1,3,9": 7,
+      "classes:2": 7,
+      "classes:2,3": 7,
+      "classes:3": 7,
+      "classes:3,4": 7,
+      "classes:3,6": 1,
+      "classes:3,7": 1,
+      "classes:3,8": 6,
+      "classes:3,9": 1,
+      "classes:4": 1,
+      "classes:5": 7,
+      "classes:5,7": 1,
+      "classes:5,7,9": 2,
+      "classes:5,9": 7,
+      "classes:7": 7,
+      "classes:8,9": 1,
+      "classes:9": 7,
+      "negative": 7
+    },
+    "requested": 120,
+    "seed": 1337,
+    "selected": 120,
+    "strategy": "stratified_ground_truth_class_and_negative"
+  },
+  "schema_version": "fused-validation-evaluation-v1",
+  "skipped_images": [],
+  "split": "v2_validation_only",
+  "test_split_used": false,
+  "threshold_profile": {
+    "path": "C:\\consentGuard\\.claude\\worktrees\\workflow-review-planning-7fbc29\\main_project\\configs\\stage_04_fusion_calibration\\threshold_profile_personal_max_coverage.yaml",
+    "profile_id": "threshold-profile-personal-max-coverage",
+    "release_ready": false,
+    "sha256": "611dd7fff12b4151b60728aa7519e448bf2574aeaea7ca04bb921a431932c794"
+  },
+  "unavailable_provider_counts": {}
+}

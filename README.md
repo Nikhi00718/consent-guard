@@ -44,17 +44,31 @@ copies are deleted when you close the page; your original is never modified.
 
 ## What it catches
 
-| Content | How well it works |
-|---|---|
-| Faces | Good |
-| Whole people | Good, and switched **off** by default because it erases most of a photo |
-| QR codes and barcodes | Reliable (a decoder, not a model) |
-| GPS/camera metadata | Always removed; the output is written from scratch |
-| Printed text | Decent, and it erases signs and logos too |
-| Number plates | Catches many, misses small and distant ones |
-| Handwriting, signatures, fingerprints, medicine, documents | Weak — the app says "check manually" |
+Measured on 120 validation photos the models never trained on. **83% of all
+labelled private pixels get covered** (95% CI 78–87%), and only **5.8% of clean
+photos** get anything erased by mistake. Full report:
+[`reports/PERSONAL_PROFILE_SCORECARD_2026-09-18.md`](reports/PERSONAL_PROFILE_SCORECARD_2026-09-18.md).
 
-Measured evidence lives in `reports/`. Reproduce the per-class numbers:
+| Content | Private pixels covered | Whole regions caught | Verdict |
+|---|---:|---:|---|
+| Faces | 99.8% | 95% | Good |
+| Whole people | 94.8% | 83% | Good, and **off** by default — it erases most of a photo |
+| Number plates | 95.4% | 56% | Catches many; small and distant ones are missed |
+| Nudity | 93.4% | 33% | Check manually |
+| Signatures | 65.8% | 23% | Weak |
+| Disability evidence | 56.2% | 67% | Weak |
+| Medicine and documents | 52.1% | 7% | Weak |
+| Handwriting | 48.5% | 50% | Weak |
+| Fingerprints | 95.4% | 0% | No working detector — those pixels were only covered incidentally |
+| QR codes and barcodes | — | — | Reliable: a decoder, not a model |
+| GPS/camera metadata | — | — | Always removed; the file is written from scratch |
+
+"Whole regions caught" counts regions where a mask of that type covered at least
+half the region, which is the number that matters when one small plate is the
+thing you needed hidden. Those figures are from the single-pass configuration;
+the app also runs a tiled second pass, which does better on small regions.
+
+Reproduce them:
 
 ```powershell
 .\.venv\Scripts\python.exe main_project\scripts\stage_06_evaluation_release\evaluate_fused_validation.py `
