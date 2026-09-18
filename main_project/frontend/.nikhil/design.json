@@ -1,0 +1,390 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-18T05:25:36+00:00",
+  "title": "Design System: ConsentGuard",
+  "extensions": {
+    "colorMeta": {
+      "marker": {
+        "role": "primary",
+        "displayName": "China Marker",
+        "canonical": "oklch(70.4% 0.192 37.1)",
+        "tonalRamp": [
+          "oklch(15% 0.192 37.1)",
+          "oklch(25% 0.192 37.1)",
+          "oklch(35% 0.192 37.1)",
+          "oklch(48% 0.192 37.1)",
+          "oklch(60% 0.192 37.1)",
+          "oklch(72% 0.192 37.1)",
+          "oklch(84% 0.192 37.1)",
+          "oklch(95% 0.192 37.1)"
+        ]
+      },
+      "table": {
+        "role": "neutral",
+        "displayName": "Table",
+        "canonical": "oklch(18.7% 0.003 67.7)",
+        "tonalRamp": [
+          "oklch(15% 0.003 67.7)",
+          "oklch(25% 0.003 67.7)",
+          "oklch(35% 0.003 67.7)",
+          "oklch(48% 0.003 67.7)",
+          "oklch(60% 0.003 67.7)",
+          "oklch(72% 0.003 67.7)",
+          "oklch(84% 0.003 67.7)",
+          "oklch(95% 0.003 67.7)"
+        ]
+      },
+      "rebate": {
+        "role": "neutral",
+        "displayName": "Rebate",
+        "canonical": "oklch(15.0% 0.003 67.5)",
+        "tonalRamp": [
+          "oklch(15% 0.003 67.5)",
+          "oklch(25% 0.003 67.5)",
+          "oklch(35% 0.003 67.5)",
+          "oklch(48% 0.003 67.5)",
+          "oklch(60% 0.003 67.5)",
+          "oklch(72% 0.003 67.5)",
+          "oklch(84% 0.003 67.5)",
+          "oklch(95% 0.003 67.5)"
+        ]
+      },
+      "light-box": {
+        "role": "neutral",
+        "displayName": "Light Box",
+        "canonical": "oklch(16.0% 0.003 67.6)",
+        "tonalRamp": [
+          "oklch(15% 0.003 67.6)",
+          "oklch(25% 0.003 67.6)",
+          "oklch(35% 0.003 67.6)",
+          "oklch(48% 0.003 67.6)",
+          "oklch(60% 0.003 67.6)",
+          "oklch(72% 0.003 67.6)",
+          "oklch(84% 0.003 67.6)",
+          "oklch(95% 0.003 67.6)"
+        ]
+      },
+      "tray": {
+        "role": "neutral",
+        "displayName": "Tray",
+        "canonical": "oklch(21.9% 0.005 67.6)",
+        "tonalRamp": [
+          "oklch(15% 0.005 67.6)",
+          "oklch(25% 0.005 67.6)",
+          "oklch(35% 0.005 67.6)",
+          "oklch(48% 0.005 67.6)",
+          "oklch(60% 0.005 67.6)",
+          "oklch(72% 0.005 67.6)",
+          "oklch(84% 0.005 67.6)",
+          "oklch(95% 0.005 67.6)"
+        ]
+      },
+      "tray-raised": {
+        "role": "neutral",
+        "displayName": "Tray Raised",
+        "canonical": "oklch(25.4% 0.007 67.5)",
+        "tonalRamp": [
+          "oklch(15% 0.007 67.5)",
+          "oklch(25% 0.007 67.5)",
+          "oklch(35% 0.007 67.5)",
+          "oklch(48% 0.007 67.5)",
+          "oklch(60% 0.007 67.5)",
+          "oklch(72% 0.007 67.5)",
+          "oklch(84% 0.007 67.5)",
+          "oklch(95% 0.007 67.5)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "oklch(33.5% 0.010 73.6)",
+        "tonalRamp": [
+          "oklch(15% 0.010 73.6)",
+          "oklch(25% 0.010 73.6)",
+          "oklch(35% 0.010 73.6)",
+          "oklch(48% 0.010 73.6)",
+          "oklch(60% 0.010 73.6)",
+          "oklch(72% 0.010 73.6)",
+          "oklch(84% 0.010 73.6)",
+          "oklch(95% 0.010 73.6)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(94.2% 0.016 82.8)",
+        "tonalRamp": [
+          "oklch(15% 0.016 82.8)",
+          "oklch(25% 0.016 82.8)",
+          "oklch(35% 0.016 82.8)",
+          "oklch(48% 0.016 82.8)",
+          "oklch(60% 0.016 82.8)",
+          "oklch(72% 0.016 82.8)",
+          "oklch(84% 0.016 82.8)",
+          "oklch(95% 0.016 82.8)"
+        ]
+      },
+      "text-2": {
+        "role": "neutral",
+        "displayName": "Text 2",
+        "canonical": "oklch(75.1% 0.019 78.2)",
+        "tonalRamp": [
+          "oklch(15% 0.019 78.2)",
+          "oklch(25% 0.019 78.2)",
+          "oklch(35% 0.019 78.2)",
+          "oklch(48% 0.019 78.2)",
+          "oklch(60% 0.019 78.2)",
+          "oklch(72% 0.019 78.2)",
+          "oklch(84% 0.019 78.2)",
+          "oklch(95% 0.019 78.2)"
+        ]
+      },
+      "text-3": {
+        "role": "neutral",
+        "displayName": "Text 3",
+        "canonical": "oklch(63.0% 0.018 79.3)",
+        "tonalRamp": [
+          "oklch(15% 0.018 79.3)",
+          "oklch(25% 0.018 79.3)",
+          "oklch(35% 0.018 79.3)",
+          "oklch(48% 0.018 79.3)",
+          "oklch(60% 0.018 79.3)",
+          "oklch(72% 0.018 79.3)",
+          "oklch(84% 0.018 79.3)",
+          "oklch(95% 0.018 79.3)"
+        ]
+      },
+      "safelight": {
+        "role": "status",
+        "displayName": "Safelight",
+        "canonical": "oklch(80.8% 0.132 83.3)",
+        "tonalRamp": [
+          "oklch(15% 0.132 83.3)",
+          "oklch(25% 0.132 83.3)",
+          "oklch(35% 0.132 83.3)",
+          "oklch(48% 0.132 83.3)",
+          "oklch(60% 0.132 83.3)",
+          "oklch(72% 0.132 83.3)",
+          "oklch(84% 0.132 83.3)",
+          "oklch(95% 0.132 83.3)"
+        ]
+      },
+      "fixer": {
+        "role": "status",
+        "displayName": "Fixer",
+        "canonical": "oklch(78.6% 0.089 150.8)",
+        "tonalRamp": [
+          "oklch(15% 0.089 150.8)",
+          "oklch(25% 0.089 150.8)",
+          "oklch(35% 0.089 150.8)",
+          "oklch(48% 0.089 150.8)",
+          "oklch(60% 0.089 150.8)",
+          "oklch(72% 0.089 150.8)",
+          "oklch(84% 0.089 150.8)",
+          "oklch(95% 0.089 150.8)"
+        ]
+      },
+      "stop": {
+        "role": "status",
+        "displayName": "Stop",
+        "canonical": "oklch(70.5% 0.157 10.2)",
+        "tonalRamp": [
+          "oklch(15% 0.157 10.2)",
+          "oklch(25% 0.157 10.2)",
+          "oklch(35% 0.157 10.2)",
+          "oklch(48% 0.157 10.2)",
+          "oklch(60% 0.157 10.2)",
+          "oklch(72% 0.157 10.2)",
+          "oklch(84% 0.157 10.2)",
+          "oklch(95% 0.157 10.2)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The single upload-screen headline; its second sentence in Text 2 at weight 480."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Review, result and scanning screen titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel titles, list item names, check names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Panel copy and controls; the intro paragraph runs larger at 1.0625rem."
+      },
+      "label": {
+        "displayName": "Film-edge label",
+        "purpose": "Uppercase condensed step labels and check status words only."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Measurements, sizes, zoom, hashes and keyboard keys."
+      }
+    },
+    "shadows": [
+      {
+        "name": "print",
+        "value": "0 2px 3px rgb(0 0 0 / 0.4), 0 22px 44px -18px rgb(0 0 0 / 0.85)",
+        "purpose": "Only under the finished print on the result screen."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All state transitions, 120 to 260ms."
+      },
+      {
+        "name": "scan",
+        "value": "2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite",
+        "purpose": "The marker scan line crossing the photo while detectors run; the one authored motion."
+      },
+      {
+        "name": "print-in",
+        "value": "420ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The finished print fading up onto the table."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "68.75em"
+      },
+      {
+        "name": "stack",
+        "value": "53.75em"
+      },
+      {
+        "name": "phone",
+        "value": "35em"
+      },
+      {
+        "name": "touch",
+        "value": "(pointer: coarse): 44px minimum targets"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one marker-filled action per screen.",
+      "html": "<button class=\"ds-btn-primary\">Erase and save</button>",
+      "css": ".ds-btn-primary{min-height:48px;padding:12px 20px;border:0;border-radius:4px;background:#ff6a3d;color:#1d0b04;font:650 16px/1.2 'Archivo Variable',system-ui,sans-serif;cursor:pointer;transition:background-color 160ms cubic-bezier(0.16,1,0.3,1),transform 120ms cubic-bezier(0.16,1,0.3,1)}.ds-btn-primary:hover{background:#ff8360}.ds-btn-primary:active{background:#ef5a2d;transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid #ff6a3d;outline-offset:2px}.ds-btn-primary:disabled{background:#25221f;color:#8f887d;cursor:not-allowed}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "The alternative action beside the primary.",
+      "html": "<button class=\"ds-btn-secondary\">Check it myself first</button>",
+      "css": ".ds-btn-secondary{min-height:48px;padding:12px 20px;border:1px solid #3a3631;border-radius:4px;background:#25221f;color:#eee8de;font:650 16px/1.2 'Archivo Variable',system-ui,sans-serif;cursor:pointer;transition:background-color 160ms cubic-bezier(0.16,1,0.3,1),border-color 160ms cubic-bezier(0.16,1,0.3,1)}.ds-btn-secondary:hover{background:#2f2c28;border-color:#4d4842}.ds-btn-secondary:focus-visible{outline:2px solid #ff6a3d;outline-offset:2px}"
+    },
+    {
+      "name": "Marked Chip",
+      "kind": "chip",
+      "refersTo": "chip-on",
+      "description": "A thing to look for; the filled square means it will be covered.",
+      "html": "<label class=\"ds-chip\"><input type=\"checkbox\" checked><span>Faces</span></label> <label class=\"ds-chip\"><input type=\"checkbox\"><span>Person / body</span></label>",
+      "css": ".ds-chip{position:relative;display:inline-flex;cursor:pointer}.ds-chip input{position:absolute;inset:0;margin:0;opacity:0}.ds-chip span{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:5px 12px 5px 10px;border:1px solid #292623;border-radius:4px;color:#8f887d;font:400 14px 'Archivo Variable',system-ui,sans-serif;transition:background-color 160ms cubic-bezier(0.16,1,0.3,1),border-color 160ms cubic-bezier(0.16,1,0.3,1),color 160ms cubic-bezier(0.16,1,0.3,1)}.ds-chip span::before{content:'';width:10px;height:10px;border:1.5px solid currentColor;border-radius:1px}.ds-chip:hover span{border-color:#3a3631;color:#b5ada1}.ds-chip input:checked+span{border-color:#3a3631;background:#1c1a18;color:#eee8de}.ds-chip input:checked+span::before{border-color:#ff6a3d;background:#ff6a3d}.ds-chip input:focus-visible+span{outline:2px solid #ff6a3d;outline-offset:2px}"
+    },
+    {
+      "name": "Tool Button",
+      "kind": "button",
+      "refersTo": "tool",
+      "description": "Icon-only editor tool; the active tool is marked.",
+      "html": "<button class=\"ds-tool\" aria-pressed=\"true\" aria-label=\"Brush\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M232 32a8 8 0 0 0-8-8c-44.08 0-89.31 49.71-114.43 82.63A60 60 0 0 0 32 164c0 30.88-19.54 44.73-20.47 45.37A8 8 0 0 0 16 224h76a60 60 0 0 0 57.37-77.57C182.3 121.31 232 76.08 232 32z\"/></svg></button><button class=\"ds-tool\" aria-label=\"Eraser\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M225 80.4 183.6 39a24 24 0 0 0-33.94 0L31 157.66a24 24 0 0 0 0 33.94l30.06 30.06A8 8 0 0 0 66.74 224H216a8 8 0 0 0 0-16h-84.7l93.7-93.66a24 24 0 0 0 0-33.94z\"/></svg></button>",
+      "css": ".ds-tool{display:inline-grid;width:36px;height:36px;place-items:center;border:0;border-radius:4px;background:none;color:#b5ada1;cursor:pointer;transition:background-color 140ms cubic-bezier(0.16,1,0.3,1),color 140ms cubic-bezier(0.16,1,0.3,1)}.ds-tool:hover{background:#2f2c28;color:#eee8de}.ds-tool[aria-pressed=true]{background:rgb(255 106 61 / .14);color:#ff6a3d;box-shadow:inset 0 0 0 1px rgb(255 106 61 / .5)}.ds-tool:focus-visible{outline:2px solid #ff6a3d;outline-offset:2px}"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Inspector section on Tray; flat, one line border.",
+      "html": "<section class=\"ds-panel\"><h2>Found 1 area</h2><p>Face <small>25% of the photo</small></p></section>",
+      "css": ".ds-panel{padding:16px 18px 18px;border:1px solid #292623;border-radius:6px;background:#1c1a18;color:#eee8de;font:400 14px/1.5 'Archivo Variable',system-ui,sans-serif}.ds-panel h2{margin:0 0 12px;font-size:15px;font-weight:650}.ds-panel p{margin:0;font-weight:600}.ds-panel small{display:block;color:#b5ada1;font-weight:400;font-size:13px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form field on Light Box with a marker focus ring.",
+      "html": "<label class=\"ds-field\">Audience<input placeholder=\"Project team\"></label>",
+      "css": ".ds-field{display:grid;gap:6px;color:#b5ada1;font:400 13px 'Archivo Variable',system-ui,sans-serif}.ds-field input{min-height:40px;padding:0 12px;border:1px solid #3a3631;border-radius:4px;outline:none;background:#0e0d0c;color:#eee8de;font-size:15px;caret-color:#ff6a3d;transition:border-color 160ms cubic-bezier(0.16,1,0.3,1),box-shadow 160ms cubic-bezier(0.16,1,0.3,1)}.ds-field input::placeholder{color:#8f887d}.ds-field input:focus-visible{border-color:#ff6a3d;box-shadow:0 0 0 3px rgb(255 106 61 / .14)}"
+    },
+    {
+      "name": "Film Rebate Steps",
+      "kind": "nav",
+      "refersTo": "rebate",
+      "description": "Header strip with frame-numbered steps and a film-edge arrow on the current one.",
+      "html": "<ol class=\"ds-frames\"><li class=\"done\">Add photo</li><li class=\"current\">2 Find</li><li>3 Check</li><li>4 Save</li></ol>",
+      "css": ".ds-frames{display:flex;gap:28px;margin:0;padding:18px 28px;list-style:none;background:#0c0b0a;border-bottom:1px solid #292623}.ds-frames li{position:relative;color:#8f887d;font:600 13px 'Archivo Variable',system-ui,sans-serif;font-stretch:78%;letter-spacing:.08em;text-transform:uppercase}.ds-frames .done{color:#b5ada1}.ds-frames .current{color:#ff6a3d}.ds-frames .current::before{content:'';position:absolute;left:-14px;top:50%;width:7px;height:9px;margin-top:-4.5px;background:#ff6a3d;clip-path:polygon(0 0,100% 50%,0 100%)}"
+    },
+    {
+      "name": "Easel",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Upload target held by four marker crop corners that close in on drag.",
+      "html": "<div class=\"ds-easel\"><i class=\"tl\"></i><i class=\"tr\"></i><i class=\"br\"></i><i class=\"bl\"></i><strong>Drop a photo here</strong><span>or paste one with Ctrl+V</span></div>",
+      "css": ".ds-easel{position:relative;display:grid;place-content:center;gap:6px;min-height:220px;border-radius:6px;background:#0e0d0c;text-align:center;font:400 15px 'Archivo Variable',system-ui,sans-serif;color:#b5ada1}.ds-easel strong{color:#f1ebe0;font-size:22px;font-weight:680;font-stretch:92%}.ds-easel i{position:absolute;width:28px;height:28px;border:0 solid #ff6a3d;transition:inset 260ms cubic-bezier(0.16,1,0.3,1)}.ds-easel .tl{top:16px;left:16px;border-top-width:2px;border-left-width:2px}.ds-easel .tr{top:16px;right:16px;border-top-width:2px;border-right-width:2px}.ds-easel .br{bottom:16px;right:16px;border-bottom-width:2px;border-right-width:2px}.ds-easel .bl{bottom:16px;left:16px;border-bottom-width:2px;border-left-width:2px}.ds-easel:hover .tl{top:32px;left:32px}.ds-easel:hover .tr{top:32px;right:32px}.ds-easel:hover .br{bottom:32px;right:32px}.ds-easel:hover .bl{bottom:32px;left:32px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Darkroom Light Table",
+    "overview": "ConsentGuard is a light table for one photo. The owner lays a print on a warm charcoal table, marks what must be hidden the way a photographer marks a contact sheet with a china marker, inspects the edges through a loupe, and leaves with a finished print. The interface is photo-editor familiar: standard controls, one task per screen, nothing that competes with the picture.\n\nThe table is dark because the subject is a photograph, and a neutral surround keeps its colour honest. It is warm-neutral, not blue-black. Chrome recedes into tonal layers of the same charcoal. Colour is spent almost entirely on one china-marker red-orange, which means \"marked\" everywhere it appears. Density is moderate: generous around the photo, compact and legible in the side panels.\n\nThe system rejects the navy dashboard with neon glow, eyebrow labels over headings, stat cards, and decorative texture or gradients. Motion is limited to state changes plus one authored moment, the marker scan line that crosses the photo while detectors run.",
+    "keyCharacteristics": [
+      "Warm-neutral charcoal table, near-black film-rebate header, paper-white prints.",
+      "One accent, china-marker red-orange, reserved for marks, the current step and the primary action.",
+      "The cover is true black with marker hatching: what you edit is what you save.",
+      "Archivo on its width axis is the only UI face; semi-condensed for headings, condensed caps for film-edge labels.",
+      "Status speaks in darkroom lights: safelight amber warns, fixer green clears, stop red fails."
+    ],
+    "rules": [
+      {
+        "name": "The One Marker Rule",
+        "body": "Red-orange means \"marked\" or \"do this next\". It never decorates, never tints a background larger than a tool button, and never appears on two competing buttons at once.",
+        "section": "colors"
+      },
+      {
+        "name": "The Honest Table Rule",
+        "body": "Grounds stay warm-neutral charcoal. No blue-black, no gradients, no noise texture behind the photo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Stretch, Don't Swap Rule",
+        "body": "Hierarchy comes from width, weight and size inside Archivo. Never add a second display family.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mono Means Measured Rule",
+        "body": "Monospace is for numbers you might compare or copy. Never for labels, headings or mood.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only the Print Casts a Shadow Rule",
+        "body": "Panels, buttons and chips stay flat. No glows, no coloured halos, no offset shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep China Marker (#ff6a3d) for marks, the current step and the single primary action on a screen.",
+      "Do show the cover as black with marker hatching wherever the user edits it, so the preview matches the saved file.",
+      "Do write every status, check and warning as a plain sentence; keep system codes out of personal mode.",
+      "Do put limits where the decision happens: the look-before-you-share reminder sits beside Download.",
+      "Do keep readable text at Text 3 (#8f887d) or brighter and at least 0.75rem."
+    ],
+    "donts": [
+      "Don't put small tracked capitals above headings; the heading speaks for itself.",
+      "Don't add glows, gradients, glass, noise textures or coloured halos.",
+      "Don't use a coloured left or right border thicker than 1px on alerts, panels or list items.",
+      "Don't use monospace for anything that is not a measurement, size, hash or key.",
+      "Don't use a teal or blue accent; the previous navy-and-teal look is retired."
+    ]
+  }
+}

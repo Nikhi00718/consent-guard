@@ -1,7 +1,7 @@
-export type Tool = "brush" | "erase" | "pan";
+export type Tool = "brush" | "erase" | "pan" | "loupe";
 
 export type Stroke = {
-  tool: Exclude<Tool, "pan">;
+  tool: Extract<Tool, "brush" | "erase">;
   points: number[];
   width: number;
 };

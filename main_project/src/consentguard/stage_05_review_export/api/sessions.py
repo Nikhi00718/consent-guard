@@ -40,12 +40,14 @@ from consentguard.stage_05_review_export.api.models import (
 )
 
 
+#: Per-candidate tints for the reviewer's "Found" view, drawn from the
+#: interface palette: marker, safelight, fixer, paper, stop.
 _COLORS = (
-    (48, 183, 166),
-    (222, 126, 96),
-    (111, 151, 201),
-    (215, 172, 83),
-    (129, 170, 143),
+    (255, 106, 61),
+    (233, 184, 81),
+    (143, 202, 156),
+    (241, 235, 224),
+    (240, 113, 137),
 )
 
 
@@ -235,7 +237,7 @@ class ReviewSessionManager:
 
         Image.fromarray(union, mode="L").save(session.handle.root / "initial-mask.png", format="PNG")
         mask_overlay = np.zeros((analysis.image.height, analysis.image.width, 4), dtype=np.uint8)
-        mask_overlay[:, :, :3] = np.asarray((49, 183, 166), dtype=np.uint8)
+        mask_overlay[:, :, :3] = 0
         mask_overlay[:, :, 3] = np.where(union > 0, 168, 0).astype(np.uint8)
         Image.fromarray(mask_overlay, mode="RGBA").save(session.handle.root / "mask-overlay.png", format="PNG")
         Image.fromarray(overlay).save(session.handle.root / "overlay.png", format="PNG")

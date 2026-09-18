@@ -11,7 +11,7 @@ async function upload(page: import("@playwright/test").Page) {
     mimeType: "image/png",
     buffer: tinyPng,
   });
-  await expect(page.getByText("staged-review.png")).toBeVisible();
+  await expect(page.getByText("staged-review.png", { exact: true })).toBeVisible();
 }
 
 test("one click erases the detected regions and offers the file", async ({ page }) => {
@@ -23,7 +23,7 @@ test("one click erases the detected regions and offers the file", async ({ page 
   page.on("pageerror", (error) => consoleErrors.push(error.message));
 
   await page.goto("/");
-  await expect(page).toHaveTitle("ConsentGuard reviewer");
+  await expect(page).toHaveTitle("ConsentGuard");
   await expect(page.getByRole("heading", { name: /Erase the private parts/i })).toBeVisible();
   await expect(page.getByText(/It will miss things/i)).toBeVisible();
   await expect(page.locator("vite-error-overlay, .vite-error-overlay")).toHaveCount(0);
@@ -32,8 +32,8 @@ test("one click erases the detected regions and offers the file", async ({ page 
   await page.screenshot({ path: "../../outputs/consentguard-home.png", fullPage: true });
   await page.getByRole("button", { name: /Erase and save/i }).click();
 
-  await expect(page.getByRole("heading", { name: "Your redacted image" })).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByRole("heading", { name: "Your redacted image" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "Your cleaned-up photo" })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("heading", { name: "Your cleaned-up photo" })).toBeFocused();
   const download = page.getByRole("link", { name: /Download the clean image/i });
   await expect(download).toBeVisible();
   await expect(download).toHaveAttribute("download", "consentguard-redacted.png");
@@ -49,21 +49,22 @@ test("the reviewer can correct the mask before saving", async ({ page }) => {
   await upload(page);
   await page.getByRole("button", { name: /Check it myself first/i }).click();
 
-  await expect(page.getByRole("heading", { name: /Correct the redaction boundary/i })).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByText("Preparing native-resolution canvas")).toHaveCount(0, { timeout: 10_000 });
-  await expect(page.getByTitle("Brush")).toBeVisible();
-  await expect(page.getByText(/Known weak here/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Check what gets covered/i })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("Loading your photo")).toHaveCount(0, { timeout: 10_000 });
+  await expect(page.getByRole("button", { name: "Brush" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(/Hit and miss here/i)).toBeVisible();
   await page.screenshot({ path: "../../outputs/consentguard-review.png", fullPage: true });
 
   await page.getByRole("button", { name: /Save my version/i }).click();
-  await expect(page.getByRole("heading", { name: "Your redacted image" })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("heading", { name: "Your cleaned-up photo" })).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("link", { name: /Download the clean image/i })).toBeVisible();
 });
 
 test("upload workspace remains usable on a phone viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "Choose image" })).toBeVisible();
-  await expect(page.getByText("local runtime")).toBeHidden();
+  await expect(page.getByRole("button", { name: "Choose photo" })).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
   await page.screenshot({ path: "../../outputs/consentguard-mobile.png", fullPage: true });
 });
