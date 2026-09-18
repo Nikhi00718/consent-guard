@@ -128,7 +128,7 @@
     "yunet",
     "zxingcpp"
   ],
-  "records_path": "C:\\consentGuard\\.claude\\worktrees\\workflow-review-planning-7fbc29\\data\\processed\\visual_redactions_verified_visual_v2_negatives\\records_val2017.jsonl",
+  "records_path": "data/processed/visual_redactions_verified_visual_v2_negatives/records_val2017.jsonl",
   "records_sha256": "08094dadabf693b0efad47faac93d76a4d1576db5733460663f4f7fef4cd3c0d",
   "sampling": {
     "bucket_counts": {
@@ -169,7 +169,7 @@
   "split": "v2_validation_only",
   "test_split_used": false,
   "threshold_profile": {
-    "path": "C:\\consentGuard\\.claude\\worktrees\\workflow-review-planning-7fbc29\\main_project\\configs\\stage_04_fusion_calibration\\threshold_profile_personal_max_coverage.yaml",
+    "path": "main_project/configs/stage_04_fusion_calibration/threshold_profile_personal_max_coverage.yaml",
     "profile_id": "threshold-profile-personal-max-coverage",
     "release_ready": false,
     "sha256": "611dd7fff12b4151b60728aa7519e448bf2574aeaea7ca04bb921a431932c794"
