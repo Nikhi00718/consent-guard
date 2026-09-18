@@ -19,6 +19,9 @@ upstream terms with the institution before training or publication.
 - OpenCV — Apache 2.0.
 - pycocotools — BSD-style license.
 - Hugging Face Transformers (optional Mask2Former comparison) — Apache 2.0.
+- NudeNet (optional intimate-content detector, off unless installed) —
+  **AGPL-3.0**. Local personal use is fine; enabling it in a hosted service
+  extends the AGPL source-offer obligation to that service.
 
 Exact installed versions are captured in each run's `environment.json`; retain
 the corresponding upstream license notices when distributing software.

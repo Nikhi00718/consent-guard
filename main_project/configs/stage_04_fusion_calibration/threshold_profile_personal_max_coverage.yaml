@@ -69,6 +69,16 @@ rules:
   dilation_pixels: 4
   max_area_fraction: 0.95
   mandatory_review: true
+# NudeNet reports intimate regions with its own score distribution; the trained
+# a110 head above stays enabled so the two corroborate each other.
+- provider: '*'
+  privacy_class: nudity
+  score_threshold: 0.35
+  min_area_pixels: 24
+  expansion_fraction: 0.12
+  dilation_pixels: 8
+  max_area_fraction: 0.6
+  mandatory_review: true
 - provider: '*'
   privacy_class: a110_nudity_all
   score_threshold: 0.15

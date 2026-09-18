@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 from pathlib import Path
 
 import cv2
@@ -20,6 +21,7 @@ from consentguard.shared.runtime import select_device
 from consentguard.stage_02_baseline_model.config import load_training_config
 from consentguard.stage_03_specialists.barcode_zxing import ZXingBarcodeProvider
 from consentguard.stage_03_specialists.face_yunet import YuNetFaceProvider
+from consentguard.stage_03_specialists.nudity_nudenet import NudeNetIntimateContentProvider
 from consentguard.stage_03_specialists.plate_yunet import LPDYuNetPlateProvider
 from consentguard.stage_03_specialists.ppocr_onnx import PPOCRTextGeometryProvider
 from consentguard.stage_04_fusion_calibration.domain import ConsentState
@@ -38,13 +40,14 @@ PROVIDER_LABELS = {
     "lpd-yunet": "LPD-YuNet plate safety net",
     "ppocr-text": "PP-OCR text geometry",
     "zxing-barcode": "ZXing barcode / QR",
+    "nudenet-intimate": "NudeNet intimate content",
 }
 
 PRIVACY_GROUPS = {
     "Face": {"a105_face_all", "face"},
     "License plate": {"a108_license_plate_all", "license_plate"},
     "Person / body": {"a109_person_body"},
-    "Nudity": {"a110_nudity_all"},
+    "Nudity": {"a110_nudity_all", "nudity"},
     "Text / handwriting": {"a26_handwriting", "handwriting", "printed_text"},
     "Physical disability": {"a39_disability_physical"},
     "Medicine": {"a43_medicine"},
@@ -61,6 +64,15 @@ COLORS = (
     (47, 190, 220),
     (50, 184, 120),
 )
+
+
+def _nudenet_version() -> str:
+    try:
+        from importlib.metadata import version
+
+        return f"nudenet-{version('nudenet')}"
+    except Exception:  # noqa: BLE001 - version metadata is best effort
+        return "nudenet-unknown"
 
 
 def _version(path: Path) -> str:
@@ -232,6 +244,13 @@ def build_runtime(args: argparse.Namespace) -> DemoRuntime:
                 providers[key] = factory(path)
     if args.with_barcode:
         providers["zxing-barcode"] = ZXingBarcodeProvider()
+    if getattr(args, "nudenet", False):
+        # AGPL-3.0 and optional: registered only when actually installed, so an
+        # uninstalled extra never shows up as a failing provider.
+        if importlib.util.find_spec("nudenet") is not None:
+            providers["nudenet-intimate"] = NudeNetIntimateContentProvider(version=_nudenet_version())
+        else:
+            print("[providers] nudenet is not installed; intimate-content detection is OFF")
     return DemoRuntime(providers, ThresholdRegistry.load(project_path(args.threshold_profile)))
 
 

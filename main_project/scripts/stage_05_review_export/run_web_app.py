@@ -93,6 +93,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ppocr-model", default="artifacts/specialists/opencv_zoo/text_detection_en_ppocrv3_2023may.onnx")
     parser.add_argument("--with-barcode", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument(
+        "--nudenet",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use the pretrained NudeNet detector for intimate content when it is installed (AGPL-3.0).",
+    )
+    parser.add_argument(
         "--policy-mode",
         choices=(PERSONAL_MODE, RESEARCH_MODE),
         default=PERSONAL_MODE,

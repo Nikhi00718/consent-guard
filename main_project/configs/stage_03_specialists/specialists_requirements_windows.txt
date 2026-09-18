@@ -4,3 +4,9 @@
 zxing-cpp==3.0.0
 paddlepaddle==3.3.0
 paddleocr==3.3.0
+
+# Optional intimate-content detector. AGPL-3.0: fine for local personal use,
+# but enabling it inside a hosted service puts the AGPL source-offer obligation
+# on that service. Install only if you accept that.
+#   .venv\Scripts\python.exe -m pip install nudenet==3.4.2
+# nudenet==3.4.2

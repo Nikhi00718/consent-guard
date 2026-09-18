@@ -2,6 +2,7 @@
 from consentguard.stage_03_specialists.barcode_zxing import ZXingBarcodeProvider
 from consentguard.stage_03_specialists.box_detector import BoxDetectorEvidenceProvider
 from consentguard.stage_03_specialists.face_yunet import YuNetFaceProvider
+from consentguard.stage_03_specialists.nudity_nudenet import NudeNetIntimateContentProvider
 from consentguard.stage_03_specialists.plate_yunet import LPDYuNetPlateProvider
 from consentguard.stage_03_specialists.ppocr_onnx import PPOCRTextGeometryProvider
 from consentguard.stage_03_specialists.text_paddleocr import PaddleOCRTextProvider
@@ -9,6 +10,7 @@ from consentguard.stage_03_specialists.text_paddleocr import PaddleOCRTextProvid
 __all__ = [
     "BoxDetectorEvidenceProvider",
     "LPDYuNetPlateProvider",
+    "NudeNetIntimateContentProvider",
     "PPOCRTextGeometryProvider",
     "PaddleOCRTextProvider",
     "YuNetFaceProvider",
