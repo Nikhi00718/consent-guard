@@ -136,6 +136,38 @@ def measure(
     }
 
 
+def measure_clean(base: str, records: list[dict[str, Any]], provider_keys: list[str] | None) -> dict[str, Any]:
+    """On photos with nothing private in them, how much gets erased anyway?
+
+    Coverage alone rewards erasing everything. This is the counterweight: a
+    configuration that finds more plates by blacking out ordinary photos is
+    not an improvement.
+    """
+
+    erased: list[float] = []
+    failures: list[str] = []
+    for record in records:
+        image_path = Path(record["image_path"])
+        if not image_path.is_absolute():
+            image_path = Path("C:/consentGuard") / image_path
+        if not image_path.is_file():
+            continue
+        try:
+            erased.append(float(_union_mask(base, image_path, provider_keys).mean()))
+        except Exception as error:  # noqa: BLE001 - measurement harness
+            failures.append(f"{image_path.name}: {error!r}")
+    touched = [fraction for fraction in erased if fraction > 0.0]
+    return {
+        "providers": "all (includes tiled second pass)" if provider_keys is None else "single pass only",
+        "clean_images_measured": len(erased),
+        "clean_images_with_any_erasure": len(touched),
+        "false_alarm_rate": round(len(touched) / len(erased), 4) if erased else None,
+        "mean_erased_fraction": round(float(np.mean(erased)), 4) if erased else None,
+        "median_erased_fraction_when_touched": round(statistics.median(touched), 4) if touched else 0.0,
+        "failures": failures,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--records", required=True, type=Path)
@@ -143,10 +175,17 @@ def main() -> None:
     parser.add_argument("--max-images", type=int, default=20)
     parser.add_argument("--coverage-threshold", type=float, default=0.5)
     parser.add_argument("--compare-single-pass", action="store_true")
+    parser.add_argument(
+        "--clean-records",
+        type=Path,
+        help="Also measure false alarms on records marked negative_for_profile (nothing private).",
+    )
+    parser.add_argument("--max-clean-images", type=int, default=30)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if "test" in args.records.name:
-        parser.error("Refusing to measure a locked test split")
+    for path in (args.records, args.clean_records):
+        if path is not None and "test" in path.name:
+            parser.error("Refusing to measure a locked test split")
 
     rows = [json.loads(line) for line in args.records.read_text(encoding="utf-8").splitlines() if line.strip()]
     rows = [row for row in rows if row.get("instances")][: args.max_images]
@@ -160,6 +199,15 @@ def main() -> None:
         report["runs"].append(
             measure(args.base_url, rows, SINGLE_PASS_KEYS, coverage_threshold=args.coverage_threshold)
         )
+    if args.clean_records is not None:
+        clean = [
+            json.loads(line)
+            for line in args.clean_records.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        clean = [row for row in clean if row.get("negative_for_profile") and not row.get("instances")]
+        report["clean_records"] = str(args.clean_records)
+        report["clean"] = measure_clean(args.base_url, clean[: args.max_clean_images], None)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
