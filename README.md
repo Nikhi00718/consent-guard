@@ -56,10 +56,9 @@ photos** get anything erased by mistake. Full report:
 | Number plates | 95.4% | 56% | Catches many; small and distant ones are missed |
 | Nudity | 93.4% | 33% | Check manually |
 | Signatures | 65.8% | 23% | Weak |
-| Disability evidence | 56.2% | 67% | Weak |
 | Medicine and documents | 52.1% | 7% | Weak |
 | Handwriting | 48.5% | 50% | Weak |
-| Fingerprints | 95.4% | 0% | No working detector — those pixels were only covered incidentally |
+| Other details (fingerprints, visible disability) | — | — | **Best effort only.** No working detector for either; whatever the broad model flags is still erased, but they are not offered as protected categories |
 | QR codes and barcodes | — | — | Reliable: a decoder, not a model |
 | GPS/camera metadata | — | — | Always removed; the file is written from scratch |
 

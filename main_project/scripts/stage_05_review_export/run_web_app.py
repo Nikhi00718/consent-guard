@@ -33,9 +33,8 @@ GROUP_RELIABILITY = {
     "License plate": "check_manually",
     "Text / handwriting": "check_manually",
     "Nudity": "check_manually",
-    "Physical disability": "check_manually",
     "Medicine": "check_manually",
-    "Fingerprint": "check_manually",
+    "Other sensitive details": "check_manually",
     "Signature": "check_manually",
 }
 
@@ -45,7 +44,7 @@ DEFAULT_OFF_GROUPS = ("Person / body",)
 
 #: Providers worth re-running over tiles. Faces, plates and text are the classes
 #: whose failures are concentrated in small regions.
-TILED_PROVIDER_KEYS = ("global", "face-trained", "plate-trained", "ppocr-text")
+TILED_PROVIDER_KEYS = ("global", "face-trained", "plate-trained", "india-plate", "ppocr-text")
 
 #: The v4 full-scene plate checkpoint stays outside ordinary Git (346 MB). It
 #: beats the previous website default on every measured number, so it is the
@@ -82,6 +81,14 @@ def build_parser() -> argparse.ArgumentParser:
         default=plate_checkpoint,
         help="Plate detector checkpoint (defaults to the full-scene v4 candidate when present).",
     )
+    parser.add_argument(
+        "--second-plate",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Also run the CCPD-to-India fine-tuned plate model and fuse both.",
+    )
+    parser.add_argument("--second-plate-config", default=PLATE_FALLBACK_CONFIG)
+    parser.add_argument("--second-plate-checkpoint", default=PLATE_FALLBACK_CHECKPOINT)
     parser.add_argument("--handwriting-config", default="main_project/configs/stage_03_specialists/train_handwriting_maskrcnn_5ep.yaml")
     parser.add_argument("--handwriting-checkpoint", default="artifacts/checkpoints/specialist_handwriting_maskrcnn_5ep/last.pt")
     parser.add_argument(

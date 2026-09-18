@@ -40,6 +40,7 @@ PROVIDER_LABELS = {
     "lpd-yunet": "LPD-YuNet plate safety net",
     "ppocr-text": "PP-OCR text geometry",
     "zxing-barcode": "ZXing barcode / QR",
+    "india-plate": "Indian plate specialist (second model)",
     "nudenet-intimate": "NudeNet intimate content",
 }
 
@@ -49,9 +50,12 @@ PRIVACY_GROUPS = {
     "Person / body": {"a109_person_body"},
     "Nudity": {"a110_nudity_all", "nudity"},
     "Text / handwriting": {"a26_handwriting", "handwriting", "printed_text"},
-    "Physical disability": {"a39_disability_physical"},
     "Medicine": {"a43_medicine"},
-    "Fingerprint": {"a7_fingerprint"},
+    # No working detector for either class (fingerprint instance recall 0%;
+    # disability has 15 validation instances). Kept as one best-effort group
+    # so whatever the broad model does flag is still erased, without the
+    # interface advertising them as protected categories.
+    "Other sensitive details": {"a7_fingerprint", "a39_disability_physical"},
     "Signature": {"a8_signature"},
     "Barcode / QR": {"barcode"},
 }
@@ -242,6 +246,19 @@ def build_runtime(args: argparse.Namespace) -> DemoRuntime:
             path = project_path(path_value)
             if path.is_file():
                 providers[key] = factory(path)
+    second_plate = getattr(args, "second_plate_checkpoint", None)
+    if getattr(args, "second_plate", False) and second_plate:
+        # A second plate model trained on different data, fused alongside the
+        # first. The key deliberately avoids the "plate" prefix so the loader
+        # keeps the distinct provider name the orchestrator requires.
+        _add_checkpoint_provider(
+            providers,
+            key="india-plate",
+            config_path=project_path(args.second_plate_config),
+            checkpoint_path=project_path(second_plate),
+            provider_name="plate_fasterrcnn_india",
+            device=device,
+        )
     if args.with_barcode:
         providers["zxing-barcode"] = ZXingBarcodeProvider()
     if getattr(args, "nudenet", False):
