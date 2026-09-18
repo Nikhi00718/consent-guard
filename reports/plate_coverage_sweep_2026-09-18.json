@@ -1,0 +1,23 @@
+{
+  "tile512": {
+    "regions_covered": 35,
+    "annotated_regions": 40,
+    "coverage_rate": 0.875,
+    "mean_image_erased_fraction": 0.1371,
+    "failures": []
+  },
+  "second_plate": {
+    "regions_covered": 35,
+    "annotated_regions": 40,
+    "coverage_rate": 0.875,
+    "mean_image_erased_fraction": 0.1667,
+    "failures": []
+  },
+  "tile512_second_plate": {
+    "regions_covered": 38,
+    "annotated_regions": 40,
+    "coverage_rate": 0.95,
+    "mean_image_erased_fraction": 0.2184,
+    "failures": []
+  }
+}

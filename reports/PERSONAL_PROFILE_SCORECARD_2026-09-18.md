@@ -21,13 +21,12 @@ regions is better than the numbers below — measured separately with
 | Metric | Value | 95% bootstrap CI |
 |---|---:|---|
 | Sensitive-pixel recall (fraction of labelled private pixels covered) | **0.830** | 0.784 – 0.873 |
-| Negative-image false-positive rate (clean photos with something erased) | **0.058** | 0.017 – 0.100 |
+| ~~Negative-image false-positive rate~~ — **withdrawn**, see correction below | ~~0.058~~ | — |
 | Mean review candidates per image | 7.2 | — |
 
 For reference, the frozen broad-model comparator (`baseline-v0.1`, single global
 threshold 0.5) reached sensitive-pixel recall 0.764. Fusing the specialists
-under the personal profile raises that to 0.830 while keeping false alarms on
-clean photos under 6%.
+under the personal profile raises that to 0.830.
 
 ## Per class
 
@@ -60,8 +59,7 @@ least half of the instance. The gap between them is the interesting part.
   do not rely on it.
 - **Handwriting, medicine, signature and disability leak 34–52% of their
   pixels.** The interface labels these "check manually" for this reason.
-- **False alarms are low.** Under 6% of images with no annotated private content
-  got anything erased, well inside the 15% the release gates ask for.
+- **False alarms are not low.** See the correction below.
 
 ## What this does not establish
 
@@ -106,3 +104,38 @@ erasure, on the failure mode the single pass is worst at. It costs seconds per
 photo, which is the trade this tool was configured to take.
 
 Source: `reports/plate_mask_coverage_2026-09-18.json`.
+
+## Correction — false-alarm rate (added the same day)
+
+The 0.058 "negative-image false-positive rate" above was wrong, and it was
+repeated in the README and the status page as "only 5.8% of clean photos get
+anything erased".
+
+**Cause.** `evaluate_fused_validation.py` appended a flag for *every* image but
+only ever set it for negatives, so the rate was divided by all 120 images
+instead of by the negatives. The report's own numbers show the true value:
+0.058 × 120 = 7 negative images in the sample, and `images_with_candidates` was
+120 of 120, so **all 7 negatives produced candidates — 7/7, not 7/120.** The
+evaluator is fixed (`negative_false_positive_rate`, with a regression test), and
+a sample containing no negatives now reports the rate as unknown, not zero.
+
+**What false alarms actually look like.** Measured through the running app on
+30 validation photos with no private *visual* content (tiled pass on): all 30
+had something erased, averaging 45% of the photo. A six-photo diagnostic
+attributed the erased area as follows (shares overlap, so they do not sum):
+
+| Provider / class | Mean share of photo |
+|---|---:|
+| PP-OCR printed text, tiled | 42.0% |
+| PP-OCR printed text, single pass | 39.4% |
+| LPD-YuNet plate | 6.5% |
+| Plate Faster R-CNN v4 (tiled / single) | 6.4% / 6.3% |
+| Handwriting specialist | 3.8% |
+| Everything else | < 1.2% each |
+
+The text detections were inspected and are **real text**, precisely boxed, with
+scores of 0.92–0.998: cartridge labels, a printed advertisement. "Negative" in
+Visual Redactions means no private *visual* attribute, and many such photos are
+text-heavy. So the dominant cost is the chosen policy — erase all text — not a
+misfiring detector. The plate share, on photos that contain no plates, is a
+genuine false alarm, partly on labels that resemble plates.

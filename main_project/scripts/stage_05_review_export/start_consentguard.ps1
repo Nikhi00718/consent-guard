@@ -13,6 +13,10 @@ param(
     [ValidateSet('auto', 'cuda', 'cpu')][string]$Device = 'auto',
     [ValidateSet('personal', 'research')][string]$PolicyMode = 'personal',
     [switch]$NoTiledPass,
+    # Smaller tiles plus a second plate model: 38/40 plates covered instead of
+    # 33/40, at roughly twice the erased area on road photos. See
+    # reports/PLATE_COVERAGE_SWEEP_2026-09-18.md.
+    [switch]$MaxPlateCoverage,
     [switch]$NoBrowser
 )
 
@@ -45,6 +49,7 @@ $arguments = @(
     '--policy-mode', $PolicyMode
 )
 if ($NoTiledPass) { $arguments += '--no-tiled-pass' }
+if ($MaxPlateCoverage) { $arguments += @('--tile-size', '512', '--max-tiles', '24', '--second-plate') }
 
 Write-Host ''
 Write-Host '  ConsentGuard' -ForegroundColor Green

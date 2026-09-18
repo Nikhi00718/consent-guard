@@ -44,9 +44,17 @@ copies are deleted when you close the page; your original is never modified.
 
 ## What it catches
 
-Measured on 120 validation photos the models never trained on. **83% of all
-labelled private pixels get covered** (95% CI 78–87%), and only **5.8% of clean
-photos** get anything erased by mistake. Full report:
+Measured on 120 validation photos the models never trained on: **83% of all
+labelled private pixels get covered** (95% CI 78–87%).
+
+**Expect erasure even on photos with nothing private in them.** The tool erases
+*all* text by design, and on text-heavy photos — labels, adverts, documents,
+signs — that is most of the picture. On 30 validation photos with no private
+visual content, every one had something erased, 45% of each photo on average.
+A diagnostic on six of them traced ~40 points of that to text (the detector was
+right: it was real text) and ~6 points to stray plate boxes on photos with no
+plates. Switch text off under **What to erase** when you only want faces and
+plates gone. Full report:
 [`reports/PERSONAL_PROFILE_SCORECARD_2026-09-18.md`](reports/PERSONAL_PROFILE_SCORECARD_2026-09-18.md).
 
 | Content | Private pixels covered | Whole regions caught | Verdict |

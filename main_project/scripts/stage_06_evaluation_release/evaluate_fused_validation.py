@@ -138,6 +138,18 @@ def _bootstrap_interval(values: list[float], *, seed: int, draws: int = 1000) ->
     }
 
 
+def negative_false_positive_rate(negative_flags: list[float]) -> float | None:
+    """Share of annotation-free images that still produced a review candidate.
+
+    ``negative_flags`` must hold one entry per annotation-free image only. With
+    no such image in the sample the rate is unknown, not zero.
+    """
+
+    if not negative_flags:
+        return None
+    return float(np.mean(negative_flags))
+
+
 def _build_providers(args: argparse.Namespace, device: torch.device) -> tuple[object, ...]:
     base_config = load_training_config(args.config, require_validation_data=False)
     providers: list[object] = [
@@ -248,7 +260,11 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         gt_pixels = int(target_union.sum())
         covered_pixels = int((target_union & union).sum())
         image_pixel_recall.append(covered_pixels / gt_pixels if gt_pixels else 1.0)
-        negative_flags.append(1.0 if not instances and len(fused.candidates) else 0.0)
+        if not instances:
+            # Only images with nothing annotated belong in the false-alarm
+            # denominator; appending a 0 for every positive image diluted the
+            # rate by the share of positives in the sample.
+            negative_flags.append(1.0 if fused.candidates else 0.0)
         processed += 1
         if processed == 1 or processed % 25 == 0 or processed == len(records):
             print(f"[fused] processed {processed}/{len(records)}", flush=True)
@@ -291,7 +307,8 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "overall": {
             "pixel_recall": float(np.mean(image_pixel_recall)),
             "pixel_recall_bootstrap_95": _bootstrap_interval(image_pixel_recall, seed=args.seed),
-            "negative_image_false_positive_rate": float(np.mean(negative_flags)),
+            "negative_images": len(negative_flags),
+            "negative_image_false_positive_rate": negative_false_positive_rate(negative_flags),
             "negative_fpr_bootstrap_95": _bootstrap_interval(negative_flags, seed=args.seed + 1),
             "mean_candidates_per_image": float(np.mean(candidate_counts)),
             "images_with_candidates": int(sum(count > 0 for count in candidate_counts)),
