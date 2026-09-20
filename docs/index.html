@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0c0b0a" />
+<title>ConsentGuard — erase the private parts, keep the photo</title>
+<meta name="description" content="A local tool that covers faces, number plates, text and codes in a photo, strips the GPS and camera data, and gives you a clean copy. Runs on your own computer." />
+<meta property="og:title" content="ConsentGuard" />
+<meta property="og:description" content="Erase the private parts. Keep the photo. A local photo redaction tool that never uploads anything." />
+<meta property="og:image" content="https://nikhi00718.github.io/consent-guard/assets/screen-cover.webp" />
+<meta property="og:type" content="website" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<style>
+  /* Archivo, self-hosted: this page makes no third-party requests. */
+  @font-face {
+    font-family: "Archivo Variable";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
+    src: url("fonts/archivo-latin-variable.woff2") format("woff2-variations");
+  }
+
+  :root {
+    color-scheme: dark;
+    accent-color: #ff6a3d;
+    --table: #141312;
+    --rebate: #0c0b0a;
+    --light-box: #0e0d0c;
+    --tray: #1c1a18;
+    --tray-raised: #25221f;
+    --tray-hover: #2f2c28;
+    --line: #3a3631;
+    --line-soft: #292623;
+    --text: #eee8de;
+    --text-2: #b5ada1;
+    --text-3: #8f887d;
+    --paper: #f1ebe0;
+    --marker: #ff6a3d;
+    --marker-hover: #ff8360;
+    --marker-ink: #1d0b04;
+    --marker-soft: rgb(255 106 61 / 0.14);
+    --safelight: #e9b851;
+    --safelight-text: #f0dcaa;
+    --safelight-soft: rgb(233 184 81 / 0.09);
+    --safelight-line: rgb(233 184 81 / 0.3);
+    --fixer: #8fca9c;
+    --font-ui: "Archivo Variable", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    --font-data: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --radius-s: 4px;
+    --radius-m: 6px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --shadow-print: 0 2px 3px rgb(0 0 0 / 0.4), 0 22px 44px -18px rgb(0 0 0 / 0.85);
+    font-family: var(--font-ui);
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--table);
+    -webkit-font-smoothing: antialiased;
+  }
+  * { box-sizing: border-box; }
+  html { scrollbar-color: var(--line) var(--table); scroll-behavior: smooth; }
+  body { margin: 0; min-width: 320px; background: var(--table); }
+  ::selection { color: var(--text); background: rgb(255 106 61 / 0.38); }
+  img { max-width: 100%; display: block; }
+  a { color: var(--text); }
+  h1, h2, h3 { text-wrap: balance; margin: 0; color: var(--paper); }
+  p { text-wrap: pretty; }
+  :focus-visible { outline: 2px solid var(--marker); outline-offset: 2px; }
+  .data { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.92em; }
+
+  /* Film rebate header */
+  header.rebate {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 3.5rem;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--rebate);
+  }
+  .brand { display: flex; align-items: center; gap: 0.625rem; color: var(--paper); font-weight: 700; font-stretch: 90%; font-size: 1.0625rem; text-decoration: none; }
+  .brand svg { width: 1.5rem; height: 1.5rem; }
+  nav.rebate-nav { display: flex; gap: 1.5rem; margin-left: auto; }
+  nav.rebate-nav a {
+    color: var(--text-3);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-stretch: 78%;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 160ms var(--ease-out);
+  }
+  nav.rebate-nav a:hover { color: var(--marker); }
+
+  main { width: min(1200px, 100%); margin: 0 auto; padding: 0 1.5rem 4rem; }
+  section { padding-top: 5rem; }
+  .section-head { max-width: 46rem; margin-bottom: 2rem; }
+  .section-head h2 { font-size: 2rem; font-weight: 700; font-stretch: 88%; letter-spacing: -0.02em; line-height: 1.15; }
+  .section-head p { margin: 0.75rem 0 0; color: var(--text-2); font-size: 1.0625rem; }
+
+  /* Hero */
+  .hero { padding-top: 4.5rem; }
+  .hero h1 {
+    max-width: 18ch;
+    font-size: clamp(2.5rem, 6.2vw, 4rem);
+    font-weight: 720;
+    font-stretch: 86%;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
+  .hero h1 span { display: block; color: var(--text-2); font-weight: 480; }
+  .hero .lede { max-width: 44ch; margin: 1.5rem 0 0; color: var(--text-2); font-size: 1.125rem; line-height: 1.6; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+  .button {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.375rem;
+    border-radius: var(--radius-s);
+    font-size: 1rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), transform 120ms var(--ease-out);
+  }
+  .button.primary { border: 0; color: var(--marker-ink); background: var(--marker); }
+  .button.primary:hover { background: var(--marker-hover); }
+  .button.secondary { border: 1px solid var(--line); color: var(--text); background: var(--tray-raised); }
+  .button.secondary:hover { border-color: #4d4842; background: var(--tray-hover); }
+  .button:active { transform: translateY(1px); }
+  .local-note { display: flex; align-items: center; gap: 0.5rem; margin: 1.25rem 0 0; color: var(--text-3); font-size: 0.875rem; }
+
+  /* Before / after prints */
+  .prints { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 4rem; }
+  figure { margin: 0; }
+  figure img { border: 0.5rem solid var(--paper); background: var(--paper); box-shadow: var(--shadow-print); }
+  figcaption { margin-top: 1rem; color: var(--text-2); font-size: 0.875rem; }
+  .frame-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--marker);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-stretch: 78%;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .frame-label.quiet { color: var(--text-3); }
+
+  /* Steps */
+  .steps { display: grid; gap: 3.5rem; }
+  .step { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: center; gap: 3rem; }
+  /* Alternating rows: the screenshot keeps the wide column, the text the narrow one. */
+  .step:nth-child(even) { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+  .step:nth-child(even) .step-shot { order: 2; }
+  .step-shot img { border: 1px solid var(--line-soft); border-radius: var(--radius-m); }
+  .step h3 { font-size: 1.375rem; font-weight: 680; font-stretch: 92%; letter-spacing: -0.01em; }
+  .step p { margin: 0.625rem 0 0; color: var(--text-2); }
+  .step-number {
+    margin-right: 0.75rem;
+    color: var(--marker);
+    font-family: var(--font-data);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .keys { margin: 0.875rem 0 0; padding: 0; list-style: none; color: var(--text-2); font-size: 0.875rem; }
+  .keys li { margin-top: 0.375rem; }
+  kbd {
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    color: var(--text);
+    background: var(--tray-raised);
+    font-family: var(--font-data);
+    font-size: 0.75rem;
+  }
+
+  /* Honest limits */
+  .limits { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+  caption { margin-bottom: 0.75rem; color: var(--text-3); font-size: 0.8125rem; text-align: left; }
+  th, td { padding: 0.625rem 0.5rem; border-bottom: 1px solid var(--line-soft); text-align: left; }
+  th { color: var(--text-2); font-size: 0.8125rem; font-weight: 600; font-stretch: 82%; letter-spacing: 0.06em; text-transform: uppercase; }
+  td:not(:first-child) { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.875rem; }
+  td[colspan] { font-family: var(--font-ui); font-size: 0.875rem; color: var(--text-2); text-align: left; }
+  td .verdict-good { color: var(--fixer); }
+  td .verdict-weak { color: var(--safelight); }
+  .note {
+    display: flex;
+    gap: 0.625rem;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--safelight-line);
+    border-radius: var(--radius-m);
+    color: var(--safelight-text);
+    background: var(--safelight-soft);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+  .note svg { width: 1.125rem; height: 1.125rem; flex: none; margin-top: 0.2rem; color: var(--safelight); }
+  .note + .note { margin-top: 1rem; }
+  .note strong { color: var(--paper); }
+
+  .panel { padding: 1.25rem 1.375rem 1.5rem; border: 1px solid var(--line-soft); border-radius: var(--radius-m); background: var(--tray); }
+  .panel h3 { font-size: 1rem; font-weight: 650; }
+  .check-list { margin: 1rem 0 0; padding: 0; list-style: none; }
+  .check-list li { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem; padding: 0.625rem 0; border-top: 1px solid var(--line-soft); font-size: 0.9375rem; }
+  .check-list li:first-child { border-top: 0; }
+  .check-list svg { width: 1.125rem; height: 1.125rem; margin-top: 0.15rem; color: var(--fixer); }
+  .check-list small { display: block; margin-top: 0.125rem; color: var(--text-2); font-size: 0.8125rem; }
+
+  /* Install */
+  .install { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+  ol.setup { margin: 0; padding-left: 1.25rem; color: var(--text-2); }
+  ol.setup li { margin-bottom: 1.25rem; }
+  ol.setup strong { color: var(--text); }
+  pre {
+    margin: 0.625rem 0 0;
+    padding: 0.875rem 1rem;
+    overflow-x: auto;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-s);
+    background: var(--light-box);
+    color: var(--text);
+    font-family: var(--font-data);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+  .phone-shot { justify-self: center; }
+  .phone-shot img { width: min(320px, 100%); border: 1px solid var(--line-soft); border-radius: var(--radius-m); }
+
+  footer {
+    margin-top: 5rem;
+    padding: 2rem 1.5rem;
+    border-top: 1px solid var(--line-soft);
+    color: var(--text-3);
+    font-size: 0.875rem;
+  }
+  footer .inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; width: min(1200px, 100%); margin: 0 auto; }
+  footer a { color: var(--text-2); }
+
+  @media (max-width: 62em) {
+    .step, .step:nth-child(even), .limits, .install { grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+    .step:nth-child(even) .step-shot { order: 0; }
+    .prints { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+    section { padding-top: 3.5rem; }
+    nav.rebate-nav { gap: 1rem; }
+  }
+  @media (max-width: 40em) {
+    main { padding-inline: 1rem; }
+    header.rebate { padding-inline: 1rem; }
+    nav.rebate-nav a:not(.last) { display: none; }
+    .hero { padding-top: 3rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="rebate">
+  <a class="brand" href="#top">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5" fill="none" stroke="currentColor" stroke-width="1.8" />
+      <rect x="6.5" y="9.5" width="11" height="5" fill="#ff6a3d" />
+    </svg>
+    ConsentGuard
+  </a>
+  <nav class="rebate-nav">
+    <a href="#how">How it works</a>
+    <a href="#limits">What it catches</a>
+    <a href="#run">Run it</a>
+    <a class="last" href="https://github.com/Nikhi00718/consent-guard">GitHub</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <h1>Erase the private parts. <span>Keep the photo.</span></h1>
+    <p class="lede">
+      ConsentGuard finds faces, number plates, text, handwriting, QR codes and barcodes in a photo,
+      covers them with solid black, strips the GPS and camera data, and writes you a clean copy.
+      It runs on your own computer. Nothing is uploaded.
+    </p>
+    <div class="actions">
+      <a class="button primary" href="https://github.com/Nikhi00718/consent-guard/releases/latest">Get the latest release</a>
+      <a class="button secondary" href="https://github.com/Nikhi00718/consent-guard">View the source</a>
+    </div>
+    <p class="local-note">
+      <svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M208 80h-28V52a52 52 0 0 0-104 0v28H48a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16ZM92 52a36 36 0 0 1 72 0v28H92Z"/></svg>
+      Windows laptop · Python environment · no account, no network calls
+    </p>
+
+    <div class="prints">
+      <figure>
+        <span class="frame-label quiet">Before</span>
+        <img src="assets/sample-before.webp" width="1200" height="825" alt="A photo of a parcel with a printed label showing a name, address and phone number." />
+        <figcaption>A made-up parcel label. The name, address, phone number and order code are invented.</figcaption>
+      </figure>
+      <figure>
+        <span class="frame-label">After</span>
+        <img src="assets/sample-after.webp" width="1200" height="825" alt="The same photo with the name, address, phone number, courier name and order code covered by solid black blocks." loading="lazy" />
+        <figcaption>The file ConsentGuard saved: every line of text covered in solid black, written fresh with the camera data removed.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="section-head">
+      <h2>Four steps, and you look at the result</h2>
+      <p>These are real screens from the app, running the real detectors on the parcel photo above.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-shot"><img src="assets/screen-upload.webp" width="1440" height="900" alt="The upload screen: a large drop area with marker crop corners, and a list of the things the app looks for." loading="lazy" /></div>
+        <div>
+          <h3><span class="step-number">01</span>Add a photo</h3>
+          <p>Drop it, paste it with <kbd>Ctrl</kbd> <kbd>V</kbd>, or pick a file. The list of things to look for sits in plain sight, so you can switch off anything you don't want covered.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-shot"><img src="assets/screen-scanning.webp" width="1200" height="750" alt="The scanning screen: the photo with a marker-coloured scan line crossing it." loading="lazy" /></div>
+        <div>
+          <h3><span class="step-number">02</span>It looks through the photo</h3>
+          <p>Detectors run over the whole picture, then a second, closer pass over small areas. Big photos take longer. The photo never leaves the machine.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-shot"><img src="assets/screen-cover.webp" width="1440" height="900" alt="The check screen: the parcel photo with hatched black blocks over the label text, and a list of the five areas found." loading="lazy" /></div>
+        <div>
+          <h3><span class="step-number">03</span>Check what gets covered</h3>
+          <p>Hatched areas become solid black in the saved file, so the preview is the result. Paint over anything it missed, or erase anything that doesn't need hiding.</p>
+          <ul class="keys">
+            <li><kbd>B</kbd> brush · <kbd>E</kbd> eraser · <kbd>L</kbd> loupe · <kbd>H</kbd> move</li>
+            <li><kbd>Ctrl</kbd> <kbd>Z</kbd> undo · <kbd>[</kbd> <kbd>]</kbd> brush size · scroll to zoom</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-shot"><img src="assets/screen-result.webp" width="1440" height="900" alt="The result screen: the saved photo shown as a print, a Ready to download panel, and the list of checks run on the saved file." loading="lazy" /></div>
+        <div>
+          <h3><span class="step-number">04</span>Save, then look before you share</h3>
+          <p>The file is written from scratch, re-opened, and scanned again for anything left readable. Every check is listed in plain words, and the reminder to look at the photo sits right next to the download button.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="limits">
+    <div class="section-head">
+      <h2>It will miss things</h2>
+      <p>Detection is automatic and never complete. The app says which content types it is bad at instead of pretending otherwise, and you are the last check.</p>
+    </div>
+
+    <div class="limits">
+      <div>
+        <table>
+          <caption>Measured on 120 validation photos the models never trained on. Full report in the repository.</caption>
+          <thead>
+            <tr><th>Content</th><th>Private pixels covered</th><th>Whole regions caught</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Faces</td><td><span class="verdict-good">99.8%</span></td><td><span class="verdict-good">95%</span></td></tr>
+            <tr><td>Number plates</td><td>95.4%</td><td><span class="verdict-weak">56%</span></td></tr>
+            <tr><td>Whole people</td><td>94.8%</td><td>83%</td></tr>
+            <tr><td>Nudity</td><td>93.4%</td><td><span class="verdict-weak">33%</span></td></tr>
+            <tr><td>Signatures</td><td><span class="verdict-weak">65.8%</span></td><td><span class="verdict-weak">23%</span></td></tr>
+            <tr><td>Medicine, documents</td><td><span class="verdict-weak">52.1%</span></td><td><span class="verdict-weak">7%</span></td></tr>
+            <tr><td>Handwriting</td><td><span class="verdict-weak">48.5%</span></td><td><span class="verdict-weak">50%</span></td></tr>
+            <tr><td>QR codes, barcodes</td><td colspan="2">A decoder, not a model: reliable</td></tr>
+            <tr><td>GPS, camera data</td><td colspan="2">Always removed; the file is written from scratch</td></tr>
+          </tbody>
+        </table>
+        <p style="color: var(--text-3); font-size: 0.8125rem; margin-top: 0.875rem;">
+          Across everything labelled private, 83% of those pixels get covered (95% confidence interval 78–87%).
+          "Whole regions caught" counts regions where at least half the region ended up covered.
+        </p>
+      </div>
+
+      <div>
+        <div class="note">
+          <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M236.8 188.09 149.35 36.22a24.76 24.76 0 0 0-42.7 0L19.2 188.09a23.51 23.51 0 0 0 0 23.72A24.35 24.35 0 0 0 40.55 224h174.9a24.35 24.35 0 0 0 21.33-12.19 23.51 23.51 0 0 0 .02-23.72ZM120 104a8 8 0 0 1 16 0v40a8 8 0 0 1-16 0Zm8 88a12 12 0 1 1 12-12 12 12 0 0 1-12 12Z"/></svg>
+          <span><strong>Expect erasure on photos with nothing private in them.</strong> The tool erases all text by design. On 30 validation photos with no private visual content, every one had something erased, 45% of each photo on average. Switch text off under "What to erase" when you only want faces and plates gone.</span>
+        </div>
+        <div class="note">
+          <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M236.8 188.09 149.35 36.22a24.76 24.76 0 0 0-42.7 0L19.2 188.09a23.51 23.51 0 0 0 0 23.72A24.35 24.35 0 0 0 40.55 224h174.9a24.35 24.35 0 0 0 21.33-12.19 23.51 23.51 0 0 0 .02-23.72ZM120 104a8 8 0 0 1 16 0v40a8 8 0 0 1-16 0Zm8 88a12 12 0 1 1 12-12 12 12 0 0 1-12 12Z"/></svg>
+          <span><strong>False alarms are shown, not hidden.</strong> On the parcel photo above, the re-check reported a possible number plate in the saved file. There is no plate in the picture: the white label is plate-shaped. The app tells you rather than quietly passing.</span>
+        </div>
+
+        <div class="panel" style="margin-top: 1.75rem;">
+          <h3>What it checks on the saved file</h3>
+          <ul class="check-list">
+            <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm45.66 85.66-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32Z"/></svg><span><strong>Opens as a normal image</strong><small>Re-opened at full size without errors</small></span></li>
+            <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm45.66 85.66-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32Z"/></svg><span><strong>Written as a new file</strong><small>Encoded from scratch and unchanged since</small></span></li>
+            <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm45.66 85.66-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32Z"/></svg><span><strong>Location and camera data</strong><small>None left in the file</small></span></li>
+            <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm45.66 85.66-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32Z"/></svg><span><strong>Readable text, QR codes, faces, plates</strong><small>The saved file is scanned again for each of them</small></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="run">
+    <div class="section-head">
+      <h2>Run it on your machine</h2>
+      <p>Windows with PowerShell. The first run sets up the Python environment; after that, one command starts it.</p>
+    </div>
+
+    <div class="install">
+      <ol class="setup">
+        <li>
+          <strong>Get the code</strong>
+          <pre tabindex="0">git clone https://github.com/Nikhi00718/consent-guard.git
+cd consent-guard</pre>
+        </li>
+        <li>
+          <strong>First-time setup</strong>, if the Python environment does not exist yet
+          <pre tabindex="0">powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1</pre>
+        </li>
+        <li>
+          <strong>Start it</strong>. The detectors load in about a minute, then it opens at <span class="data">http://127.0.0.1:7860</span>
+          <pre tabindex="0">powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_05_review_export\start_consentguard.ps1</pre>
+        </li>
+        <li>
+          <strong>Optional:</strong> make a desktop shortcut, once
+          <pre tabindex="0">main_project\scripts\stage_05_review_export\create_desktop_shortcut.ps1</pre>
+        </li>
+      </ol>
+
+      <figure class="phone-shot">
+        <img src="assets/screen-phone.webp" width="420" height="909" alt="The upload screen at phone width, with the steps collapsed into numbers." loading="lazy" />
+        <figcaption style="text-align: center;">It works at phone width too, though the app itself still runs on your computer.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="inner">
+    <span>ConsentGuard · built by Nikhil</span>
+    <span>
+      <a href="https://github.com/Nikhi00718/consent-guard">Source</a> ·
+      <a href="https://github.com/Nikhi00718/consent-guard/releases/latest">Releases</a> ·
+      Runs locally · no tracking · nothing uploaded
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

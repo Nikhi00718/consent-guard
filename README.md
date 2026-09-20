@@ -2,6 +2,8 @@
 
 A local tool that erases private content from a photo before you share it.
 
+**[consent-guard project page](https://nikhi00718.github.io/consent-guard/)** · screenshots, what it catches, and how to run it.
+
 Drop in a photo or screenshot. It finds faces, number plates, text, handwriting,
 QR codes and barcodes, covers them with solid black, strips the GPS/camera data,
 and gives you a clean copy. Nothing leaves your machine.
