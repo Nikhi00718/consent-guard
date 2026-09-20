@@ -24,7 +24,6 @@
 
   :root {
     color-scheme: dark;
-    accent-color: #ff6a3d;
     --table: #141312;
     --rebate: #0c0b0a;
     --light-box: #0e0d0c;
@@ -42,16 +41,17 @@
     --marker-hover: #ff8360;
     --marker-press: #ef5a2d;
     --marker-ink: #1d0b04;
-    --marker-soft: rgb(255 106 61 / 0.14);
     --safelight: #e9b851;
-    --safelight-text: #f0dcaa;
     --fixer: #8fca9c;
+    --ink: #000;
+    --loupe: rgb(12 11 10 / 0.55);
+    --select: rgb(255 106 61 / 0.38);
     --font-ui: "Archivo Variable", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
     --font-data: ui-monospace, "Cascadia Mono", Consolas, monospace;
     --radius-s: 4px;
     --radius-m: 6px;
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --shadow-print: 0 2px 3px rgb(0 0 0 / 0.4), 0 22px 44px -18px rgb(0 0 0 / 0.85);
+    accent-color: var(--marker);
     font-family: var(--font-ui);
     line-height: 1.5;
     color: var(--text);
@@ -61,8 +61,9 @@
   * { box-sizing: border-box; }
   html { scrollbar-color: var(--line) var(--table); }
   body { margin: 0; min-width: 320px; background: var(--table); }
-  ::selection { color: var(--text); background: rgb(255 106 61 / 0.38); }
-  img { display: block; max-width: 100%; }
+  ::selection { color: var(--text); background: var(--select); }
+  img { display: block; max-width: 100%; height: auto; }
+  figure { margin: 0; }
   a { color: var(--text); text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
   a:hover { text-decoration-color: var(--marker); }
   h1, h2, h3 { margin: 0; color: var(--paper); text-wrap: balance; }
@@ -70,18 +71,24 @@
   :focus-visible { outline: 2px solid var(--marker); outline-offset: 3px; }
   .data { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.92em; }
   p .data { overflow-wrap: anywhere; }
+  /* Film-edge labels: Archivo condensed caps, as DESIGN.md specifies. */
+  .edge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-stretch: 78%;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .edge.marked { color: var(--marker); }
+  /* The film-edge arrow, drawn: the shape the app prints beside the current step. */
+  .tri { display: inline-block; width: 0.4375rem; height: 0.5625rem; background: currentColor; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+  .tri.back { clip-path: polygon(100% 0, 0 50%, 100% 100%); }
   .wrap { width: min(1240px, 100%); margin: 0 auto; padding-inline: clamp(1rem, 3vw, 2.5rem); }
 
-  /* ---- Rebate strip: the page's only chrome ---- */
-  header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    min-height: 3.5rem;
-    border-bottom: 1px solid var(--line-soft);
-    background: var(--rebate);
-  }
-  header .wrap { display: flex; align-items: center; gap: 1.5rem; }
+  header { border-bottom: 1px solid var(--line-soft); background: var(--rebate); }
+  header .wrap { display: flex; align-items: center; gap: 1.5rem; min-height: 3.5rem; }
   .brand { display: flex; align-items: center; gap: 0.625rem; color: var(--paper); font-weight: 700; font-stretch: 90%; font-size: 1.0625rem; text-decoration: none; }
   .brand svg { width: 1.5rem; height: 1.5rem; }
   header nav { display: flex; gap: 1.25rem; margin-left: auto; font-size: 0.9375rem; }
@@ -89,53 +96,27 @@
   header nav a:hover { color: var(--marker); }
 
   /* ---- The opening: the tool doing its job, in the visitor's hands ---- */
-  .opening { padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(3rem, 7vw, 5rem); }
+  .opening { padding: clamp(2.25rem, 5vw, 3.5rem) 0 clamp(3rem, 7vw, 5rem); }
   .opening h1 {
     max-width: 15ch;
-    font-size: clamp(2.5rem, 7vw, 4.75rem);
+    font-size: clamp(2.5rem, 6.4vw, 4.25rem);
     font-weight: 720;
     font-stretch: 84%;
     line-height: 0.98;
     letter-spacing: -0.032em;
   }
-  .opening h1 em {
-    font-style: normal;
-    color: var(--paper);
-    background: #000;
-    box-shadow: 0 0 0 0.12em #000;
-    /* The headline redacts itself: the product's own mark, used as type. */
-  }
+  /* The headline covers its own words: the mark the product exists to apply. */
+  .opening h1 em { font-style: normal; color: var(--paper); background: var(--ink); box-shadow: 0 0 0 0.12em var(--ink); }
   .opening h1 .kept { display: block; color: var(--text-2); font-weight: 480; }
-  .opening .say { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); align-items: end; gap: 1.5rem 3rem; }
-  .opening p { max-width: 42ch; margin: 0; color: var(--text-2); font-size: 1.0625rem; line-height: 1.6; }
+  .opening .say { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 21rem); align-items: end; gap: 1.25rem 3rem; }
+  .opening .say p { max-width: 42ch; margin: 0; color: var(--text-2); font-size: 1.0625rem; line-height: 1.6; }
 
   /* Drag-to-reveal: one photo, both files, the visitor moves the boundary. */
-  .reveal {
-    --split: 50%;
-    position: relative;
-    margin-top: clamp(2rem, 4vw, 3rem);
-    background: var(--light-box);
-    border-radius: var(--radius-m);
-    overflow: hidden;
-    isolation: isolate;
-  }
-  .reveal img { width: 100%; }
-  .reveal .after {
-    position: absolute;
-    inset: 0;
-    clip-path: inset(0 0 0 var(--split));
-  }
-  .reveal .seam {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: var(--split);
-    width: 2px;
-    margin-left: -1px;
-    background: var(--marker);
-    pointer-events: none;
-  }
-  .reveal .seam::after {
+  .reveal { --split: 50%; margin-top: clamp(1.75rem, 3.5vw, 2.5rem); overflow: hidden; border-radius: var(--radius-m); background: var(--light-box); }
+  .plate { position: relative; line-height: 0; }
+  .plate .after { position: absolute; inset: 0; clip-path: inset(0 0 0 var(--split)); }
+  .plate .seam { position: absolute; top: 0; bottom: 0; left: var(--split); width: 2px; margin-left: -1px; background: var(--marker); pointer-events: none; }
+  .plate .seam::after {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -145,52 +126,28 @@
     transform: translate(-50%, -50%);
     border: 2px solid var(--marker);
     border-radius: 50%;
-    background: rgb(12 11 10 / 0.55);
+    background: var(--loupe);
   }
-  .reveal input[type="range"] {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    opacity: 0;
-    cursor: ew-resize;
-  }
-  /* The control is invisible; the figure takes the focus ring. */
+  /* The control covers the photo only, never the caption under it. */
+  .plate input[type="range"] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
   .reveal:has(input[type="range"]:focus-visible) { outline: 2px solid var(--marker); outline-offset: 3px; }
-  .reveal input[type="range"]:focus-visible { outline: none; }
   .reveal figcaption {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
     gap: 0.5rem 1.5rem;
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--line-soft);
     color: var(--text-3);
     font-size: 0.8125rem;
   }
-  .edge {
-    font-family: var(--font-data);
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    color: var(--text-2);
-  }
-  .edge.marked { color: var(--marker); }
-  /* The film-edge arrow, drawn: the same shape the app prints beside the current step. */
-  .tri {
-    display: inline-block;
-    width: 0.4375rem;
-    height: 0.5625rem;
-    background: currentColor;
-    clip-path: polygon(0 0, 100% 50%, 0 100%);
-  }
-  .tri.back { clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+  .reveal figcaption .note { text-align: center; }
 
   .terms { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; margin: 1.5rem 0 0; color: var(--text-3); font-size: 0.875rem; }
   .terms span { display: flex; align-items: center; gap: 0.5rem; }
-  .terms svg { width: 1rem; height: 1rem; color: var(--text-2); }
-  .do { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+  .terms svg { width: 1rem; height: 1rem; flex: none; color: var(--text-2); }
+  .do { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin-top: 2rem; }
+  .do .aside { color: var(--text-3); font-size: 0.875rem; }
   .button {
     display: inline-flex;
     min-height: 3rem;
@@ -204,27 +161,29 @@
   }
   .button.primary { border: 0; color: var(--marker-ink); background: var(--marker); }
   .button.primary:hover { background: var(--marker-hover); }
+  .button.primary:active { background: var(--marker-press); }
   .button.secondary { border: 1px solid var(--line); color: var(--text); background: var(--tray-raised); }
   .button.secondary:hover { border-color: var(--line-strong); background: var(--tray-hover); }
   .button:active { transform: translateY(1px); }
 
-  /* ---- Contact sheet: four frames on one strip, the way the app numbers them ---- */
-  .sheet { padding: clamp(3rem, 6vw, 5rem) 0; border-top: 1px solid var(--line-soft); background: var(--rebate); }
+  /* ---- Contact sheet ---- */
+  .sheet { padding: clamp(3rem, 6vw, 4.5rem) 0; border-top: 1px solid var(--line-soft); background: var(--rebate); }
   .sheet h2, .measured h2, .running h2 {
-    max-width: 24ch;
-    font-size: clamp(1.75rem, 3.2vw, 2.375rem);
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
     font-weight: 700;
     font-stretch: 88%;
     line-height: 1.1;
     letter-spacing: -0.022em;
   }
-  .sheet > .wrap > p, .measured .intro { max-width: 58ch; margin: 0.875rem 0 0; color: var(--text-2); font-size: 1.0625rem; }
+  .sheet-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.75rem 2rem; }
+  .sheet-head h2 { max-width: 20ch; }
+  .sheet-head p { max-width: 44ch; margin: 0; color: var(--text-2); }
   .strip {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(28rem, 46%);
+    grid-auto-columns: minmax(26rem, 44%);
     gap: 1px;
-    margin-top: 0;
+    margin-top: 1.75rem;
     padding: 1px;
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -232,14 +191,13 @@
     background: var(--line-soft);
     border-block: 1px solid var(--line-soft);
   }
-  .sheet-hint { margin: 2.25rem 0 0.5rem; text-align: right; }
   .frame { scroll-snap-align: start; padding: 1.25rem 1.25rem 1.5rem; background: var(--rebate); }
   .frame-head { display: flex; align-items: baseline; gap: 0.625rem; margin-bottom: 0.875rem; }
-  .frame-head .no { color: var(--marker); font-family: var(--font-data); font-size: 0.8125rem; }
+  .frame-head .no { color: var(--marker); font-size: 0.9375rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .frame-head h3 { font-size: 1.0625rem; font-weight: 650; font-stretch: 94%; }
   .frame img { border: 1px solid var(--line-soft); border-radius: 3px; }
   .frame p { margin: 0.875rem 0 0; color: var(--text-2); font-size: 0.9375rem; }
-  .frame kbd {
+  kbd {
     padding: 0.0625rem 0.375rem;
     border: 1px solid var(--line);
     border-bottom-width: 2px;
@@ -250,41 +208,46 @@
     font-size: 0.75rem;
   }
 
-  /* ---- The scorecard: the page's loudest claim is a list of failures ---- */
-  .measured { padding: clamp(3.5rem, 7vw, 6rem) 0; }
-  .score { margin-top: 2.5rem; border-top: 1px solid var(--line); }
+  /* ---- The scorecard ---- */
+  .measured { padding: clamp(3.5rem, 7vw, 5.5rem) 0; }
+  .measured-head { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: end; gap: 1.5rem 3.5rem; }
+  .measured-head > div > p { margin: 0.875rem 0 0; color: var(--text-2); font-size: 1.0625rem; }
+  .key { padding: 1rem 1.125rem; border: 1px solid var(--line-soft); border-radius: var(--radius-m); background: var(--tray); }
+  .key p { margin: 0; color: var(--text-2); font-size: 0.875rem; line-height: 1.55; }
+  .key p + p { margin-top: 0.5rem; }
+  .key b { color: var(--text); font-weight: 600; }
+  .score { margin-top: 2.25rem; border-top: 1px solid var(--line); }
   .row {
     display: grid;
-    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) 4.5rem;
+    grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr) 4rem;
     align-items: center;
-    gap: 1rem 1.5rem;
+    gap: 0.25rem 1.5rem;
     padding: 0.875rem 0;
     border-bottom: 1px solid var(--line-soft);
   }
-  .row > span:first-child { font-size: 1rem; font-weight: 550; }
+  .row .what { font-size: 1rem; font-weight: 550; }
   .bar { position: relative; height: 0.625rem; background: var(--tray); }
-  .bar i { position: absolute; inset: 0 auto 0 0; display: block; background: var(--fixer); }
-  .row.weak .bar i { background: var(--safelight); }
-  .row .pct { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.9375rem; text-align: right; color: var(--text-2); }
-  .row small { grid-column: 1 / -1; margin-top: -0.25rem; color: var(--text-3); font-size: 0.8125rem; }
-  .row.plain { grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr); color: var(--text-2); }
+  .bar i { position: absolute; inset: 0 auto 0 0; background: var(--safelight); }
+  .row.good .bar i { background: var(--fixer); }
+  .row .pct { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: 0.9375rem; text-align: right; }
+  .row small { grid-column: 2 / -1; color: var(--text-3); font-size: 0.8125rem; }
+  .row.plain { grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr); color: var(--text-2); }
   .row.plain span:last-child { font-size: 0.9375rem; }
-  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 1.25rem 0 0; color: var(--text-3); font-size: 0.8125rem; }
 
   .admits { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 2rem 3rem; margin-top: 3rem; }
-  .admits h3 { margin-bottom: 0.5rem; color: var(--safelight-text); font-size: 1.0625rem; font-weight: 650; font-stretch: 94%; }
+  .admits h3 { margin-bottom: 0.5rem; font-size: 1.0625rem; font-weight: 650; font-stretch: 94%; }
   .admits p { margin: 0; color: var(--text-2); font-size: 0.9375rem; line-height: 1.6; }
   .admits strong { color: var(--text); font-weight: 600; }
 
   /* ---- Running it ---- */
-  .running { padding: clamp(3rem, 6vw, 5rem) 0 clamp(4rem, 7vw, 6rem); border-top: 1px solid var(--line-soft); background: var(--rebate); }
-  .run-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 2.5rem 3.5rem; margin-top: 2.5rem; align-items: start; }
+  .running { padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(3.5rem, 6vw, 5rem); border-top: 1px solid var(--line-soft); background: var(--rebate); }
+  .run-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 2.5rem 3.5rem; margin-top: 2rem; align-items: start; }
   .command { margin-bottom: 1.5rem; }
-  .command p { margin: 0 0 0.5rem; color: var(--text-2); font-size: 0.9375rem; }
+  .command > p { margin: 0 0 0.5rem; color: var(--text-2); font-size: 0.9375rem; }
+  .code { position: relative; }
   pre {
     margin: 0;
-    padding: 0.875rem 1rem;
-    overflow-x: auto;
+    padding: 0.875rem 5.25rem 0.875rem 1rem;
     border: 1px solid var(--line-soft);
     border-radius: var(--radius-s);
     background: var(--light-box);
@@ -292,7 +255,27 @@
     font-family: var(--font-data);
     font-size: 0.8125rem;
     line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
+  .copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.625rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    color: var(--text-2);
+    background: var(--tray-raised);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: color 160ms var(--ease-out), border-color 160ms var(--ease-out);
+  }
+  .copy:hover { color: var(--text); border-color: var(--line-strong); }
+  .copy[data-copied="yes"] { color: var(--fixer); border-color: var(--fixer); }
+  .fine { margin: 0; color: var(--text-3); font-size: 0.875rem; }
   .checks { padding: 1.25rem 1.375rem 1.5rem; border: 1px solid var(--line-soft); border-radius: var(--radius-m); background: var(--tray); }
   .checks h3 { font-size: 1rem; font-weight: 650; }
   .checks ul { margin: 1rem 0 0; padding: 0; list-style: none; }
@@ -300,24 +283,28 @@
   .checks li:first-child { border-top: 0; }
   .checks svg { width: 1.0625rem; height: 1.0625rem; margin-top: 0.15rem; color: var(--fixer); }
   .checks small { display: block; margin-top: 0.125rem; color: var(--text-2); font-size: 0.8125rem; }
+  .close { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--line-soft); }
+  .close p { margin: 0; color: var(--text-2); font-size: 0.9375rem; }
 
   footer { padding: 2rem 0; border-top: 1px solid var(--line-soft); color: var(--text-3); font-size: 0.875rem; }
   footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
   footer a { color: var(--text-2); }
 
   @media (max-width: 60em) {
-    .opening .say { grid-template-columns: minmax(0, 1fr); align-items: start; }
-    .run-grid { grid-template-columns: minmax(0, 1fr); }
+    .opening .say, .measured-head, .run-grid { grid-template-columns: minmax(0, 1fr); align-items: start; }
     .strip { grid-auto-columns: minmax(17rem, 88%); }
   }
   @media (max-width: 40em) {
     header nav a.hide-sm { display: none; }
-    .row { grid-template-columns: minmax(6.5rem, 1fr) minmax(0, 1.2fr) 3.5rem; gap: 0.75rem; }
+    .reveal figcaption { grid-template-columns: 1fr auto; }
+    .reveal figcaption .note { grid-column: 1 / -1; text-align: left; }
+    .row { grid-template-columns: minmax(6.5rem, 1fr) minmax(0, 1.2fr) 3rem; gap: 0.25rem 0.75rem; }
     .row.plain { grid-template-columns: minmax(0, 1fr); }
-    .reveal .seam::after { width: 2.25rem; height: 2.25rem; }
+    .plate .seam::after { width: 2.25rem; height: 2.25rem; }
   }
   @media (prefers-reduced-motion: reduce) {
     * { transition-duration: 0.01ms !important; animation: none !important; }
+    .strip { scroll-snap-type: none; }
   }
 </style>
 </head>
@@ -328,15 +315,15 @@
     <a class="brand" href="#top">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5" fill="none" stroke="currentColor" stroke-width="1.8" />
-        <rect x="6.5" y="9.5" width="11" height="5" fill="#ff6a3d" />
+        <rect x="6.5" y="9.5" width="11" height="5" style="fill: var(--marker)" />
       </svg>
       ConsentGuard
     </a>
     <nav>
-      <a class="hide-sm" href="#steps">How it works</a>
+      <a href="#steps">How it works</a>
       <a href="#measured">What it misses</a>
-      <a class="hide-sm" href="#run">Run it</a>
-      <a href="https://github.com/Nikhi00718/consent-guard">GitHub</a>
+      <a href="#run">Run it</a>
+      <a class="hide-sm" href="https://github.com/Nikhi00718/consent-guard">GitHub</a>
     </nav>
   </div>
 </header>
@@ -355,61 +342,65 @@
       </div>
 
       <figure class="reveal" id="reveal">
-        <img src="assets/sample-before.webp" width="1200" height="825" alt="A parcel with a printed label showing a name, a street address and a phone number." />
-        <div class="after">
-          <img src="assets/sample-after.webp" width="1200" height="825" alt="The same parcel after ConsentGuard ran: the name, address, phone number, courier and order code are covered by solid black blocks." />
+        <div class="plate">
+          <img src="assets/sample-before.webp" width="1200" height="760" alt="A parcel label showing a name, a street address and a phone number." />
+          <div class="after">
+            <img src="assets/sample-after.webp" width="1200" height="760" alt="The same label after ConsentGuard ran: the name, address, phone number, courier and order code are covered by solid black blocks." />
+          </div>
+          <span class="seam" aria-hidden="true"></span>
+          <input type="range" min="0" max="100" value="50" step="1" id="split"
+                 aria-label="Drag to move the line between the original photo and the file ConsentGuard saved" />
         </div>
-        <span class="seam" aria-hidden="true"></span>
-        <input type="range" min="0" max="100" value="50" step="0.1" id="split"
-               aria-label="Drag to move the line between the original photo and the file ConsentGuard saved" />
         <figcaption>
           <span class="edge"><span class="tri back"></span> the photo as it was</span>
-          <span>Drag the line. Made-up label: the name, address and phone number are invented.</span>
+          <span class="note">Drag the line. Invented name, address and phone number; the stripes are drawn, not a real barcode, so there was nothing for the decoder to read.</span>
           <span class="edge marked">the file it saved <span class="tri"></span></span>
         </figcaption>
       </figure>
 
       <div class="do">
-        <a class="button primary" href="https://github.com/Nikhi00718/consent-guard/releases/latest">Get the latest release</a>
-        <a class="button secondary" href="https://github.com/Nikhi00718/consent-guard">Read the source</a>
+        <a class="button primary" href="https://github.com/Nikhi00718/consent-guard/releases/latest">Get ConsentGuard 1.0</a>
+        <a class="button secondary" href="#run">See how to run it</a>
+        <span class="aside">Free and open source, and it stays on your machine.</span>
       </div>
       <p class="terms">
         <span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 80h-28V52a52 52 0 0 0-104 0v28H48a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16ZM92 52a36 36 0 0 1 72 0v28H92Z"/></svg> Windows, PowerShell, a Python environment</span>
         <span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm12-88a12 12 0 1 1-12-12 12 12 0 0 1 12 12Z"/></svg> No account, no network calls, no telemetry</span>
-        <span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 48H40a16 16 0 0 0-16 16v128a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V64a16 16 0 0 0-16-16Zm0 144H40V64h176Z"/></svg> Your copy is deleted when you close the tab</span>
+        <span><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216 48h-40v-8a24 24 0 0 0-24-24h-48a24 24 0 0 0-24 24v8H40a8 8 0 0 0 0 16h8v144a16 16 0 0 0 16 16h128a16 16 0 0 0 16-16V64h8a8 8 0 0 0 0-16ZM96 40a8 8 0 0 1 8-8h48a8 8 0 0 1 8 8v8H96Zm16 144a8 8 0 0 1-16 0v-64a8 8 0 0 1 16 0Zm48 0a8 8 0 0 1-16 0v-64a8 8 0 0 1 16 0Z"/></svg> Your working copy is deleted when you close the tab</span>
       </p>
     </div>
   </section>
 
   <section class="sheet" id="steps">
     <div class="wrap">
-      <h2>Four frames, and the last one is yours to check</h2>
-      <p>Real screens, running the real detectors on the parcel above.</p>
+      <div class="sheet-head">
+        <h2>Four frames, and the last one is yours to check</h2>
+        <p>Real screens, running the real detectors on the parcel above. <span class="edge marked">scroll the sheet <span class="tri"></span></span></p>
+      </div>
 
-      <p class="sheet-hint"><span class="edge marked">scroll the sheet <span class="tri"></span></span></p>
       <div class="strip" tabindex="0" role="group" aria-label="Contact sheet: the four screens, scrollable sideways">
         <article class="frame">
           <div class="frame-head"><span class="no">1</span><h3>Add a photo</h3></div>
-          <img src="assets/screen-upload.webp" width="1440" height="900" alt="The upload screen: a wide drop area held by marker crop corners, with the list of things to look for beside it." loading="lazy" />
+          <img src="assets/screen-upload.webp" width="1000" height="779" alt="The upload area: a wide drop zone held by marker crop corners, with the two actions beneath it." loading="lazy" />
           <p>Drop it, paste it with <kbd>Ctrl</kbd> <kbd>V</kbd>, or pick a file. What it looks for is listed in the open, so you can switch any of it off.</p>
         </article>
 
         <article class="frame">
           <div class="frame-head"><span class="no">2</span><h3>It reads the photo</h3></div>
-          <img src="assets/screen-scanning.webp" width="1200" height="750" alt="The scanning screen: the parcel photo with a marker-coloured line sweeping down it." loading="lazy" />
+          <img src="assets/screen-scanning.webp" width="1000" height="483" alt="The scanning screen: the parcel photo with a marker-coloured line sweeping down it, beside the list of things being looked for." loading="lazy" />
           <p>Detectors cross the whole picture, then make a second, closer pass over small areas. Nothing leaves the machine while they run.</p>
         </article>
 
         <article class="frame">
           <div class="frame-head"><span class="no">3</span><h3>Check the cover</h3></div>
-          <img src="assets/screen-cover.webp" width="1440" height="900" alt="The check screen: the parcel photo with hatched black blocks over every line of the label, and the list of areas found beside it." loading="lazy" />
+          <img src="assets/screen-cover.webp" width="1000" height="706" alt="The editor: the parcel photo with hatched black blocks over every line of the label, and the tools above it." loading="lazy" />
           <p>Hatched black is exactly what gets saved. Paint over a miss, erase an over-reach, and use the loupe on the edges: <kbd>B</kbd> <kbd>E</kbd> <kbd>L</kbd>.</p>
         </article>
 
         <article class="frame">
           <div class="frame-head"><span class="no">4</span><h3>Look, then download</h3></div>
-          <img src="assets/screen-result.webp" width="1440" height="900" alt="The result screen: the saved photo shown as a print, with the list of checks run on the saved file." loading="lazy" />
-          <p>The file is written fresh, re-opened and scanned again. Every check is listed in plain words, and you are the one who decides it is safe to share.</p>
+          <img src="assets/screen-result.webp" width="1000" height="634" alt="The result panel: ready to download, the reminder to look at the photo, and the checks run on the saved file." loading="lazy" />
+          <p>The file is written fresh, re-opened and scanned again. Every check is listed in plain words, and you decide it is safe to share.</p>
         </article>
       </div>
     </div>
@@ -417,66 +408,72 @@
 
   <section class="measured" id="measured">
     <div class="wrap">
-      <h2>What it misses, measured and published</h2>
-      <p class="intro">
-        Most tools tell you what they catch. Here is the whole scorecard from 120 validation photos
-        the models never trained on, including the rows that look bad. Bars show how much of the
-        private area ends up covered; the number beside them is how often a whole thing was caught.
-      </p>
+      <div class="measured-head">
+        <div>
+          <h2>What it misses, measured and published</h2>
+          <p>
+            Most tools tell you what they catch. This is the whole scorecard from 120 validation
+            photos the models never trained on, worst first, with the bad rows left in.
+          </p>
+        </div>
+        <div class="key">
+          <p><b>The bar and the number are the same measurement:</b> how often a whole face, plate or signature was caught at all.</p>
+          <p>The line under each row says how much of that thing's area ends up covered when it is caught, which is usually much higher.</p>
+        </div>
+      </div>
 
       <div class="score">
         <div class="row">
-          <span>Faces</span>
-          <span class="bar"><i style="width: 99.8%"></i></span>
-          <span class="pct">95%</span>
-        </div>
-        <div class="row weak">
-          <span>Number plates</span>
-          <span class="bar"><i style="width: 95.4%"></i></span>
-          <span class="pct">56%</span>
-          <small>Covers nearly all plate pixels, but catches only half the plates outright: small and distant ones are missed.</small>
+          <span class="what">Medicine, documents</span>
+          <span class="bar"><i style="width: 7%"></i></span>
+          <span class="pct">7%</span>
+          <small>Weak. 52% of the area covered when caught. Check these by eye, every time.</small>
         </div>
         <div class="row">
-          <span>Whole people</span>
-          <span class="bar"><i style="width: 94.8%"></i></span>
-          <span class="pct">83%</span>
-          <small>Off by default. Turning it on erases most of a photo.</small>
-        </div>
-        <div class="row weak">
-          <span>Nudity</span>
-          <span class="bar"><i style="width: 93.4%"></i></span>
-          <span class="pct">33%</span>
-        </div>
-        <div class="row weak">
-          <span>Signatures</span>
-          <span class="bar"><i style="width: 65.8%"></i></span>
+          <span class="what">Signatures</span>
+          <span class="bar"><i style="width: 23%"></i></span>
           <span class="pct">23%</span>
+          <small>66% of the area covered when caught.</small>
         </div>
-        <div class="row weak">
-          <span>Medicine, documents</span>
-          <span class="bar"><i style="width: 52.1%"></i></span>
-          <span class="pct">7%</span>
-          <small>Weak. Check these by eye, every time.</small>
+        <div class="row">
+          <span class="what">Nudity</span>
+          <span class="bar"><i style="width: 33%"></i></span>
+          <span class="pct">33%</span>
+          <small>93% of the area covered when caught.</small>
         </div>
-        <div class="row weak">
-          <span>Handwriting</span>
-          <span class="bar"><i style="width: 48.5%"></i></span>
+        <div class="row">
+          <span class="what">Handwriting</span>
+          <span class="bar"><i style="width: 50%"></i></span>
           <span class="pct">50%</span>
+          <small>49% of the area covered when caught.</small>
+        </div>
+        <div class="row">
+          <span class="what">Number plates</span>
+          <span class="bar"><i style="width: 56%"></i></span>
+          <span class="pct">56%</span>
+          <small>95% of the area covered when caught. The small and distant ones are what get missed.</small>
+        </div>
+        <div class="row good">
+          <span class="what">Whole people</span>
+          <span class="bar"><i style="width: 83%"></i></span>
+          <span class="pct">83%</span>
+          <small>95% of the area covered when caught. Off by default: turning it on erases most of a photo.</small>
+        </div>
+        <div class="row good">
+          <span class="what">Faces</span>
+          <span class="bar"><i style="width: 95%"></i></span>
+          <span class="pct">95%</span>
+          <small>99.8% of the area covered when caught.</small>
         </div>
         <div class="row plain">
-          <span>QR codes, barcodes</span>
+          <span class="what">QR codes, barcodes</span>
           <span>A decoder rather than a model, so it either reads the code or it does not.</span>
         </div>
         <div class="row plain">
-          <span>Location, camera data</span>
+          <span class="what">Location, camera data</span>
           <span>Always removed. The file is written from scratch, then re-opened and checked.</span>
         </div>
       </div>
-      <p class="legend">
-        <span>Bar: share of private pixels covered.</span>
-        <span>Number: share of whole regions caught.</span>
-        <span>Across everything labelled private, 83% of those pixels get covered (95% confidence interval 78–87%).</span>
-      </p>
 
       <div class="admits">
         <div>
@@ -513,20 +510,31 @@
       <div class="run-grid">
         <div>
           <div class="command">
-            <p>Get it:</p>
-            <pre tabindex="0">git clone https://github.com/Nikhi00718/consent-guard.git
+            <p>Download <a href="https://github.com/Nikhi00718/consent-guard/releases/latest">release 1.0</a> and unzip it, or clone the same code:</p>
+            <div class="code">
+              <pre id="cmd-clone">git clone https://github.com/Nikhi00718/consent-guard.git
 cd consent-guard</pre>
+              <button class="copy" type="button" data-copies="cmd-clone">Copy</button>
+            </div>
           </div>
           <div class="command">
-            <p>First time only, if the Python environment does not exist yet:</p>
-            <pre tabindex="0">powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1</pre>
+            <p>First time only, to build the Python environment and load the detectors:</p>
+            <div class="code">
+              <pre id="cmd-setup">powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1</pre>
+              <button class="copy" type="button" data-copies="cmd-setup">Copy</button>
+            </div>
           </div>
           <div class="command">
             <p>Every time after that. The detectors load in about a minute, then it opens at <span class="data">http://127.0.0.1:7860</span>:</p>
-            <pre tabindex="0">powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_05_review_export\start_consentguard.ps1</pre>
+            <div class="code">
+              <pre id="cmd-start">powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_05_review_export\start_consentguard.ps1</pre>
+              <button class="copy" type="button" data-copies="cmd-start">Copy</button>
+            </div>
           </div>
-          <p style="margin: 0; color: var(--text-3); font-size: 0.875rem;">
-            A desktop shortcut, once: <span class="data">main_project\scripts\stage_05_review_export\create_desktop_shortcut.ps1</span>
+          <p class="fine">
+            <span class="data">-ExecutionPolicy Bypass</span> lets Windows run these two scripts from the folder you
+            unzipped, without changing that setting for anything else. Both scripts are in the repository, and you can
+            read them before you run them.
           </p>
         </div>
 
@@ -539,6 +547,11 @@ cd consent-guard</pre>
             <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm45.66 85.66-56 56a8 8 0 0 1-11.32 0l-24-24a8 8 0 0 1 11.32-11.32L112 148.69l50.34-50.35a8 8 0 0 1 11.32 11.32Z"/></svg><span>Text, codes, faces, plates<small>The saved file is scanned again for each of them</small></span></li>
           </ul>
         </div>
+      </div>
+
+      <div class="close">
+        <a class="button primary" href="https://github.com/Nikhi00718/consent-guard/releases/latest">Get ConsentGuard 1.0</a>
+        <p>Then look at every photo before you share it. That part is still yours.</p>
       </div>
     </div>
   </section>
@@ -557,14 +570,34 @@ cd consent-guard</pre>
 </footer>
 
 <script>
-  // The only script on the page: move the boundary between the two files.
   (function () {
+    // Move the boundary between the two files, and say where it is out loud.
     var reveal = document.getElementById("reveal");
     var slider = document.getElementById("split");
-    if (!reveal || !slider) return;
-    function set(value) { reveal.style.setProperty("--split", value + "%"); }
-    slider.addEventListener("input", function () { set(slider.value); });
-    set(slider.value);
+    if (reveal && slider) {
+      var set = function (value) {
+        reveal.style.setProperty("--split", value + "%");
+        slider.setAttribute("aria-valuetext", value + "% of the saved file shown, counting from the right");
+      };
+      slider.addEventListener("input", function () { set(slider.value); });
+      set(slider.value);
+    }
+
+    // Copy a command without selecting it by hand.
+    Array.prototype.forEach.call(document.querySelectorAll(".copy"), function (button) {
+      button.addEventListener("click", function () {
+        var source = document.getElementById(button.getAttribute("data-copies"));
+        if (!source || !navigator.clipboard) return;
+        navigator.clipboard.writeText(source.textContent.trim()).then(function () {
+          button.textContent = "Copied";
+          button.setAttribute("data-copied", "yes");
+          setTimeout(function () {
+            button.textContent = "Copy";
+            button.removeAttribute("data-copied");
+          }, 2000);
+        });
+      });
+    });
   })();
 </script>
 
