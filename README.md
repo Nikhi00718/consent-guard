@@ -28,6 +28,58 @@ First-time setup, if the Python environment does not exist yet:
 powershell -ExecutionPolicy Bypass -File main_project\scripts\stage_02_baseline_model\setup_environment.ps1
 ```
 
+The trained weights are not in this repository. Download them into the repo
+root before the first run (see [Models](#models)):
+
+```powershell
+hf auth login
+hf download Nikhil00718/consentguard-weights --local-dir .
+```
+
+## Models
+
+The app's trained checkpoints live in a private Hugging Face repository:
+**[Nikhil00718/consentguard-weights](https://huggingface.co/Nikhil00718/consentguard-weights)**.
+Files keep the same `artifacts/checkpoints/...` paths the app expects, so the
+download command above puts them in place.
+
+| Checkpoint | Role in the app | Architecture | Trained on | Training | SHA-256 |
+|---|---|---|---|---|---|
+| `maskrcnn_moderate_v2_negatives_10ep/last.pt` | Main 9-class detector | Mask R-CNN ResNet-50 FPN v2 (torchvision, COCO-pretrained) | Visual Redactions masks on VISPR images, verified visual classes plus clean negatives | 10 epochs, SGD lr 0.0025, class-balanced sampling, small-object anchors, seed 1337; best val mAP 0.187 | `f3a47cd3bcbc52bcbaddd9094fb0fae8171d0753d70220ddc83dfa515f5411d8` |
+| `specialist_face_maskrcnn_5ep/last.pt` | Face specialist | Mask R-CNN ResNet-50 FPN v2, one class | Face regions from the same Visual Redactions train split (3,785 records, 3,992 faces) | 5 epochs, SGD lr 0.0025, 512 px crops; best val mAP 0.561 | `0b4084480cee3efd6034ab03a4bc0b15c94cbb83cbfa60d6ecf61ab29d92a929` |
+| `specialist_handwriting_maskrcnn_5ep/last.pt` | Handwriting specialist | Mask R-CNN ResNet-50 FPN v2, one class | Handwriting regions from the same Visual Redactions train split (750 records, 1,040 regions) | 5 epochs, SGD lr 0.0025, 512 px crops, no flips | `1614534292bdc7fe2771defba4fe9e1994bbb0a3d40b509402f42ef1447d2f0b` |
+| `specialist_plate_ccpd2020_india_finetune_5ep/best.pt` | Number-plate specialist | Faster R-CNN ResNet-50 FPN v2, one class | Pre-trained on CCPD2020 ([Zenodo 15647076](https://zenodo.org/records/15647076)), then fine-tuned on Kaggle `kedarsai/indian-license-plates-with-labels` (1,617 train images) | 5 epochs on Kaggle GPU, SGD lr 0.0005; val bbox mAP 0.774, mAP@50 0.974 | `d8a7a551fe3a9f264bb1ad34066f583d92ae9344503112a582554e29975a81b8` |
+
+The 9 classes of the main detector: face, license plate, whole person, nudity,
+handwriting, physical disability, medicine, fingerprint, signature
+(`a105`, `a108`, `a109`, `a110`, `a26`, `a39`, `a43`, `a7`, `a8` in the
+Visual Redactions attribute set).
+
+Also used, and already in this repository:
+
+- `artifacts/checkpoints/maskrcnn_verified_class_balanced_5ep/best.pt` (Git LFS).
+- OpenCV Zoo ONNX models in `artifacts/specialists/opencv_zoo/`: YuNet face
+  detection, YuNet license-plate detection, PP-OCRv3 English text detection.
+- QR codes and barcodes are found by a decoder, not a trained model.
+- NudeNet, optional, only if installed (AGPL-3.0, see `THIRD_PARTY.md`).
+
+Sizes and the per-run configs are recorded in each run's
+`resolved_config.json` and `training_result.json`, and in the reports under
+`reports/`. The weights are kept private because the training datasets do not
+allow redistribution; see `THIRD_PARTY.md` for their terms.
+
+### Datasets used
+
+None of these are in the repository; download them from their sources.
+
+| Dataset | Used for |
+|---|---|
+| [VISPR](https://tribhuvanesh.github.io/vpa/) images | Main detector and face/handwriting specialists |
+| [Visual Redactions](https://resources.mpi-inf.mpg.de/d2/orekondy/redactions/) masks | Main detector and face/handwriting specialists |
+| [CCPD / CCPD2020](https://zenodo.org/records/15647076) | Plate specialist pre-training |
+| Kaggle `kedarsai/indian-license-plates-with-labels` | Plate specialist fine-tune |
+| HierText, IIIT-INDIC-HW, Indo-ALPR, Roboflow `nivu` Indian plates, Kaggle `deepakat` Indian plates, HF `zenitsu09` Indian plates | Experiments and evaluation, not the shipped weights |
+
 ## How it works
 
 ```text
